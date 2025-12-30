@@ -1,0 +1,120 @@
+@import "../../../src/index.css";
+
+/* Tailwind v4: Define source paths for class scanning */
+@source "../../../src/**/*.{js,ts,jsx,tsx}";
+@source "./**/*.{js,ts,jsx,tsx}";
+
+@theme {
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* Explicit overrides to guarantee application */
+.rounded-lg {
+    border-radius: var(--radius) !important;
+}
+
+.rounded-md {
+    border-radius: calc(var(--radius) - 4px) !important;
+}
+
+.rounded-sm {
+    border-radius: calc(var(--radius) - 2px) !important;
+}
+
+/* Global variables */
+:root {
+    --app-font-size: 16px;
+    --ui-schedule-header-height: 4rem;
+
+    /* Missing standard variables */
+    --ui-component-height: 2.5rem;
+    --ui-list-row-height: 2.5rem;
+    --ui-component-padding-x: 0.75rem;
+    --ui-component-padding-y: 0.5rem;
+    --ui-button-padding-x: 1rem;
+    --ui-button-padding-y: 0.5rem;
+    --ui-font-size-base: 0.875rem;
+    --ui-modal-padding: 1.5rem;
+    --ui-table-cell-padding: 0.75rem;
+    --radius: 0.5rem;
+}
+
+:root[data-density="compact"] {
+    --ui-step-circle-size: 1.5rem;
+    --ui-card-padding: 1rem;
+    --ui-schedule-header-height: 3rem;
+
+    /* Missing compact variables */
+    --ui-component-height: 2rem;
+    --ui-list-row-height: 2rem;
+    --ui-component-padding-x: 0.5rem;
+    --ui-component-padding-y: 0.25rem;
+    --ui-button-padding-x: 0.5rem;
+    --ui-button-padding-y: 0.25rem;
+    --ui-font-size-base: 0.825rem;
+    --ui-modal-padding: 1rem;
+    --ui-table-cell-padding: 0.5rem;
+}
+
+:root[data-density="spacious"] {
+    /* Missing spacious variables */
+    --ui-component-height: 3rem;
+    --ui-list-row-height: 3.5rem;
+    --ui-component-padding-x: 1.25rem;
+    --ui-component-padding-y: 1rem;
+    --ui-button-padding-x: 1.5rem;
+    --ui-button-padding-y: 0.75rem;
+    --ui-font-size-base: 1rem;
+    --ui-modal-padding: 2rem;
+    --ui-table-cell-padding: 1rem;
+}
+
+@layer base {
+    body {
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        font-family: "メイリオ", Helvetica, sans-serif;
+    }
+
+    /* Scrollbar styles from main project */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: hsl(var(--muted-foreground) / 0.3);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: hsl(var(--muted-foreground) / 0.5);
+    }
+}
+
+/* Polyfill for potentially missing Tailwind utilities */
+/* Hardcoded values to prevent variable resolution failure */
+.text-ui {
+    font-size: 0.875rem !important;
+    /* 14px */
+    line-height: 1.5 !important;
+}
+
+.h-ui {
+    height: 2.5rem !important;
+    /* 40px */
+}
+
+.w-ui {
+    width: 2.5rem !important;
+    /* 40px */
+}
+
+/* Ensure we use the config file */
+@config "../tailwind.config.js";

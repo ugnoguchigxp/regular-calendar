@@ -1,0 +1,4 @@
+@import "./styles/index.css";
+
+/* Tailwind v4: include regular-calendar sources so utilities are generated. */
+@source "./**/*.{js,ts,jsx,tsx}";
