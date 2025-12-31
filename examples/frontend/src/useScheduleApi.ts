@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 // Import types directly from source to avoid type resolution issues during dev
 // In a real app, these would come from the package d.ts
 import type {
@@ -7,14 +7,17 @@ import type {
     ResourceGroup,
     ScheduleEvent
 } from '../../../src/FacilitySchedule/FacilitySchedule.schema';
+import type { Personnel } from '../../../src/PersonnelPanel/PersonnelPanel.schema';
 
 const API_URL = '/api';
 
 export function useScheduleApi() {
     const [events, setEvents] = useState<ScheduleEvent[]>([]);
+    const [personnelEvents, setPersonnelEvents] = useState<ScheduleEvent[]>([]);
     const [resources, setResources] = useState<Resource[]>([]);
     const [groups, setGroups] = useState<ResourceGroup[]>([]);
     const [settings, setSettings] = useState<FacilityScheduleSettings | null>(null);
+    const [personnel, setPersonnel] = useState<Personnel[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +40,12 @@ export function useScheduleApi() {
                     endDate: new Date(e.endDate),
                 }));
                 setEvents(parsedEvents);
+
+                // Load personnel
+                const personnelRes = await fetch(`${API_URL}/personnel`);
+                const personnelData = await personnelRes.json();
+                console.log('Personnel loaded:', personnelData.length, 'people');
+                setPersonnel(personnelData);
             } catch (err) {
                 console.error('Failed to load schedule data', err);
                 setError(err instanceof Error ? err.message : 'Unknown error');
@@ -180,10 +189,69 @@ export function useScheduleApi() {
         }
     };
 
+    // --- Personnel ---
+
+    const updatePersonnelPriority = async (id: string, priority: number) => {
+        try {
+            const res = await fetch(`${API_URL}/personnel/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ priority }),
+            });
+            const updated = await res.json();
+            setPersonnel(prev => {
+                const newList = prev.map(p => p.id === id ? updated : p);
+                // Re-sort by priority
+                newList.sort((a, b) => {
+                    if (b.priority !== a.priority) return b.priority - a.priority;
+                    return a.name.localeCompare(b.name, 'ja');
+                });
+                return newList;
+            });
+        } catch (err) {
+            console.error('Failed to update personnel priority', err);
+        }
+    };
+
+    // Fetch events for selected personnel
+    // append = true: add to existing events, false: replace all events
+    const fetchPersonnelEvents = useCallback(async (personnelIds: string[], append = false) => {
+        if (personnelIds.length === 0) {
+            if (!append) {
+                setPersonnelEvents([]);
+            }
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/events?personnelIds=${personnelIds.join(',')}`);
+            const eventsData = await res.json();
+            const parsedEvents = eventsData.map((e: any) => ({
+                ...e,
+                startDate: new Date(e.startDate),
+                endDate: new Date(e.endDate),
+            }));
+
+            if (append) {
+                // Append new events, avoiding duplicates by ID
+                setPersonnelEvents(prev => {
+                    const existingIds = new Set(prev.map(e => e.id));
+                    const newEvents = parsedEvents.filter((e: any) => !existingIds.has(e.id));
+                    return [...prev, ...newEvents];
+                });
+            } else {
+                setPersonnelEvents(parsedEvents);
+            }
+        } catch (err) {
+            console.error('Failed to fetch personnel events', err);
+        }
+    }, []);
+
     return {
-        events, resources, groups, settings, loading, error,
+        events, personnelEvents, resources, groups, settings, personnel, loading, error,
         createEvent, updateEvent, deleteEvent,
         createGroup, updateGroup, deleteGroup,
-        createResource, updateResource, deleteResource
+        createResource, updateResource, deleteResource,
+        updatePersonnelPriority, fetchPersonnelEvents,
     };
 }

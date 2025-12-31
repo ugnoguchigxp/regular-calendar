@@ -30,3 +30,14 @@ export const events = sqliteTable('events', {
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(new Date()),
 });
+
+export const personnel = sqliteTable('personnel', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    department: text('department').notNull(),
+    email: text('email').notNull(),
+    priority: integer('priority').notNull().default(0), // -1=低, 0=通常, 1=高
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(new Date()),
+});
+

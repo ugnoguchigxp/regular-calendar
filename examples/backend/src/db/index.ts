@@ -56,6 +56,18 @@ if (dbType === 'postgres') {
         updated_at INTEGER NOT NULL
       );
     `);
+
+    sqlite.run(`
+      CREATE TABLE IF NOT EXISTS personnel (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        department TEXT NOT NULL,
+        email TEXT NOT NULL,
+        priority INTEGER DEFAULT 0 NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+    `);
   };
 }
 

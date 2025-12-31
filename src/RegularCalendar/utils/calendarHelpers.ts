@@ -176,3 +176,92 @@ export const getDayNameClasses = (dayOfWeek: number): string => {
     if (dayOfWeek === 6) return 'text-blue-600';
     return 'text-muted-foreground';
 };
+
+/**
+ * Calculate overlap columns for events
+ * Returns events with column position and total columns info
+ */
+export interface EventWithLayout {
+    event: ScheduleEvent;
+    position: { top: number; height: number };
+    column: number;      // 0-indexed column this event is in
+    totalColumns: number; // total columns in this overlap group
+}
+
+/**
+ * Check if two events overlap in time
+ */
+const eventsOverlap = (a: ScheduleEvent, b: ScheduleEvent): boolean => {
+    const aStart = a.startDate.getTime();
+    const aEnd = a.endDate.getTime();
+    const bStart = b.startDate.getTime();
+    const bEnd = b.endDate.getTime();
+    return aStart < bEnd && aEnd > bStart;
+};
+
+/**
+ * Calculate event layout with overlap handling
+ */
+export const calculateEventsWithLayout = (
+    events: ScheduleEvent[],
+    timeInterval: number,
+    startHour: number
+): EventWithLayout[] => {
+    if (events.length === 0) return [];
+
+    // Sort events by start time, then by duration (longer first)
+    const sorted = [...events].sort((a, b) => {
+        const startDiff = a.startDate.getTime() - b.startDate.getTime();
+        if (startDiff !== 0) return startDiff;
+        // Longer events first
+        const aDuration = a.endDate.getTime() - a.startDate.getTime();
+        const bDuration = b.endDate.getTime() - b.startDate.getTime();
+        return bDuration - aDuration;
+    });
+
+    // Build overlap groups using a greedy column assignment
+    const result: EventWithLayout[] = [];
+    const columns: ScheduleEvent[][] = []; // columns[i] = events in column i
+
+    for (const event of sorted) {
+        // Find the first column where this event doesn't overlap with ANY existing event in that column
+        let assignedColumn = -1;
+
+        for (let col = 0; col < columns.length; col++) {
+            // Check against ALL events in this column, not just the last one
+            const hasOverlap = columns[col].some(existingEvent => eventsOverlap(existingEvent, event));
+            if (!hasOverlap) {
+                assignedColumn = col;
+                columns[col].push(event);
+                break;
+            }
+        }
+
+        // If no column found, create a new one
+        if (assignedColumn === -1) {
+            assignedColumn = columns.length;
+            columns.push([event]);
+        }
+
+        result.push({
+            event,
+            position: calculateEventPosition(event, timeInterval, startHour),
+            column: assignedColumn,
+            totalColumns: 0, // Will be updated after all events are processed
+        });
+    }
+
+    // Calculate totalColumns for each event based on overlapping events
+    for (const item of result) {
+        // Find all events that overlap with this one
+        const overlappingEvents = result.filter(other =>
+            eventsOverlap(item.event, other.event)
+        );
+        // The max column among overlapping events + 1 = total columns
+        const maxColumn = Math.max(...overlappingEvents.map(e => e.column));
+        item.totalColumns = maxColumn + 1;
+    }
+
+    return result;
+};
+

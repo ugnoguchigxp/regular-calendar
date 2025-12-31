@@ -18,3 +18,5 @@ if (dbType === 'postgres') {
 export const groups = schemaExport.groups;
 export const resources = schemaExport.resources;
 export const events = schemaExport.events;
+export const personnel = schemaExport.personnel;
+

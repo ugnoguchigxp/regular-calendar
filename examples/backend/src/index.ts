@@ -2,9 +2,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { nanoid } from 'nanoid';
 import { db, ensureTables } from './db';
-import { events, groups, resources } from './db/schema';
+import { events, groups, resources, personnel } from './db/schema';
 import { eq } from 'drizzle-orm';
-import { settings, groups as seedGroups, resources as seedResources, events as seedEvents } from './data';
+import { settings, groups as seedGroups, resources as seedResources, allEvents as seedEvents, personnel as seedPersonnel } from './data';
 
 const app = new Hono();
 
@@ -20,6 +20,7 @@ if (groupCount.length === 0) {
     await db.insert(groups).values(seedGroups);
     await db.insert(resources).values(seedResources);
     await db.insert(events).values(seedEvents);
+    await db.insert(personnel).values(seedPersonnel);
     console.log('Seeding complete.');
 }
 
@@ -39,7 +40,29 @@ app.get('/api/config', async (c) => {
 // --- Events CRUD ---
 
 app.get('/api/events', async (c) => {
+    const personnelIdsParam = c.req.query('personnelIds');
     const allEvents = await db.select().from(events).all();
+
+    // If personnelIds is provided, filter events by personnel
+    if (personnelIdsParam) {
+        const personnelIds = personnelIdsParam.split(',');
+        const filteredEvents = allEvents.filter((event: any) => {
+            const extProps = event.extendedProps;
+            if (typeof extProps === 'string') {
+                try {
+                    const parsed = JSON.parse(extProps);
+                    return personnelIds.includes(parsed.personnelId);
+                } catch {
+                    return false;
+                }
+            } else if (extProps && typeof extProps === 'object') {
+                return personnelIds.includes(extProps.personnelId);
+            }
+            return false;
+        });
+        return c.json(filteredEvents);
+    }
+
     return c.json(allEvents);
 });
 
@@ -200,9 +223,35 @@ app.delete('/api/resources/:id', async (c) => {
     return c.json({ success: true });
 });
 
+// --- Personnel ---
+
+app.get('/api/personnel', async (c) => {
+    const allPersonnel = await db.select().from(personnel).all();
+    // Sort by priority (desc) then name (asc)
+    allPersonnel.sort((a: { priority: number; name: string }, b: { priority: number; name: string }) => {
+        if (b.priority !== a.priority) return b.priority - a.priority;
+        return a.name.localeCompare(b.name, 'ja');
+    });
+    return c.json(allPersonnel);
+});
+
+app.put('/api/personnel/:id', async (c) => {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+
+    const cleanUpdate: any = {};
+    if (body.priority !== undefined) cleanUpdate.priority = body.priority;
+    cleanUpdate.updatedAt = new Date();
+
+    await db.update(personnel).set(cleanUpdate).where(eq(personnel.id, id));
+    const updated = await db.select().from(personnel).where(eq(personnel.id, id)).get();
+    return c.json(updated);
+});
+
 export default {
     port: 3006,
     fetch: app.fetch,
 };
 
 console.log('Server running on http://localhost:3006 (SQLite)');
+

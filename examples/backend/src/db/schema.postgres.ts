@@ -30,3 +30,14 @@ export const events = pgTable('events', {
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
+
+export const personnel = pgTable('personnel', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    department: text('department').notNull(),
+    email: text('email').notNull(),
+    priority: integer('priority').notNull().default(0), // -1=低, 0=通常, 1=高
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+

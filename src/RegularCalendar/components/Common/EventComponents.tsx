@@ -31,10 +31,18 @@ const getEventIsAllDay = (event: ScheduleEvent): boolean => {
 interface EventItemProps {
     event: ScheduleEvent;
     position: { top: number; height: number };
+    column?: number;      // 0-indexed column position for overlapping events
+    totalColumns?: number; // Total columns in overlap group
     onEventClick?: (event: ScheduleEvent) => void;
 }
 
-export const EventItem: React.FC<EventItemProps> = ({ event, position, onEventClick }) => {
+export const EventItem: React.FC<EventItemProps> = ({
+    event,
+    position,
+    column = 0,
+    totalColumns = 1,
+    onEventClick
+}) => {
     // Note: Drag functionality depends on DndContext being present in parent
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id: event.id,
@@ -50,6 +58,10 @@ export const EventItem: React.FC<EventItemProps> = ({ event, position, onEventCl
     const title = event.title;
     const locationText = getEventLocation(event);
     const attendee = event.attendee;
+
+    // Calculate width and left position for overlapping events
+    const widthPercent = 100 / totalColumns;
+    const leftPercent = column * widthPercent;
 
     return (
         <div
@@ -67,7 +79,7 @@ export const EventItem: React.FC<EventItemProps> = ({ event, position, onEventCl
                 }
             }}
             className={`
-        absolute left-1 right-1 rounded px-2 py-1 text-sm cursor-pointer
+        absolute rounded px-1 py-1 text-sm cursor-pointer
         transition-all select-none
         active:scale-95
         ${isDragging ? 'opacity-50 z-50' : 'hover:shadow-md z-10'}
@@ -76,18 +88,21 @@ export const EventItem: React.FC<EventItemProps> = ({ event, position, onEventCl
                 top: `${position.top}px`,
                 height: `${position.height}px`,
                 minHeight: '44px',
+                left: `calc(${leftPercent}% + 2px)`,
+                width: `calc(${widthPercent}% - 4px)`,
                 backgroundColor: event.color || '#3b82f6',
                 color: 'white',
             }}
         >
-            <div className="font-medium truncate">{title}</div>
-            {attendee && <div className="text-xs opacity-90 truncate flex items-center gap-1"><span className="text-[10px] opacity-70">with</span> {attendee}</div>}
+            <div className="font-medium truncate text-xs">{title}</div>
+            {attendee && <div className="text-[10px] opacity-90 truncate">{attendee}</div>}
             {position.height > 60 && locationText && (
-                <div className="text-sm opacity-90 truncate">{locationText}</div>
+                <div className="text-[10px] opacity-90 truncate">{locationText}</div>
             )}
         </div>
     );
 };
+
 
 /**
  * Event Item for Month View

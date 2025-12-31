@@ -81,36 +81,49 @@ export function DayView({
         <div className="flex flex-col h-full bg-background text-foreground">
             {/* Date Header */}
             <div
-                className={`border-b border-border p-4 sticky top-0 z-10 flex items-center justify-center ${isToday ? 'bg-muted/50' : 'bg-background'
+                className={`border-b border-border p-2 sticky top-0 z-10 text-center ${isToday ? 'bg-muted/50' : 'bg-muted/40'
                     }`}
                 style={{ paddingRight: scrollbarPadding || undefined }}
             >
-                <div>
-                    <span className="text-2xl font-bold">
-                        <DateDisplay date={currentDate} format="date" />
-                    </span>
-                    <span className="ml-2 text-muted-foreground">
-                        <DateDisplay date={currentDate} format="weekday" />
-                    </span>
+                <div className="text-xs font-medium text-muted-foreground">
+                    <DateDisplay date={currentDate} format="weekday" />
+                </div>
+                <div className={`text-xl font-bold mt-1 ${isToday ? 'text-primary' : ''}`}>
+                    {currentDate.getDate()}
                 </div>
             </div>
 
-            {/* All Day Events Area */}
+            {/* All Day Events Row - Only shown if there are allDay events */}
             {allDayEvents.length > 0 && (
-                <div className="border-b border-border bg-muted/20 p-2 flex flex-col gap-1 sticky top-[73px] z-10"
-                    style={{ paddingRight: scrollbarPadding ? scrollbarPadding + 8 : 8, paddingLeft: 64 }}>
-                    <div className="absolute left-2 top-2 text-xs font-semibold text-muted-foreground w-12 text-right">
-                        All Day
+                <div
+                    className="flex border-b border-border bg-muted/20 sticky top-[52px] z-10"
+                    style={{ paddingRight: scrollbarPadding || undefined }}
+                >
+                    <div className="w-16 flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-1">
+                        <span className="text-[9px] text-muted-foreground">終日</span>
                     </div>
-                    {allDayEvents.map(event => (
-                        <div
-                            key={event.id}
-                            className="text-xs bg-primary/10 border-l-4 border-primary p-1 rounded cursor-pointer hover:bg-primary/20 truncate"
-                            onClick={() => onEventClick?.(event)}
-                        >
-                            {event.title}
+                    <div className="flex-1 p-0.5 min-w-0">
+                        <div className="flex flex-col gap-0.5">
+                            {allDayEvents.map(event => (
+                                <button
+                                    key={event.id}
+                                    type="button"
+                                    className={`
+                                        text-[9px] px-1 py-0.5 rounded w-full text-left truncate leading-tight
+                                        bg-primary text-primary-foreground
+                                        hover:brightness-110 transition-colors
+                                    `}
+                                    style={event.color ? { backgroundColor: event.color } : {}}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEventClick?.(event);
+                                    }}
+                                >
+                                    {event.title}
+                                </button>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             )}
 

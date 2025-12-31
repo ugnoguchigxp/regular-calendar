@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import type { FacilityScheduleSettings, ScheduleEvent } from '../../RegularCalendar.schema';
 import { DEFAULT_VIEW_HOURS, TIME_SLOT_HEIGHT } from '../../constants/calendarConstants';
 import {
-    calculateEventPosition,
+    calculateEventsWithLayout,
     generateTimeSlots,
     getEventsForDate,
     getWeekDates,
@@ -111,17 +111,14 @@ export function WeekView({
             const dayEvents = getEventsForDate(timedEvents, date);
             return {
                 date: date.toISOString(),
-                events: dayEvents.map((event) => ({
-                    event,
-                    position: calculateEventPosition(event, timeInterval, startHour),
-                })),
+                events: calculateEventsWithLayout(dayEvents, timeInterval, startHour),
             };
         });
     }, [weekDates, timedEvents, timeInterval, startHour]);
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
-            {/* Header */}
+            {/* Header - Date Row */}
             <div
                 className="flex border-b border-border bg-muted/40 sticky top-0 z-30"
                 style={{ paddingRight: scrollbarPadding || undefined }}
@@ -132,47 +129,66 @@ export function WeekView({
                     const isSelected = date.toDateString() === currentDate.toDateString();
                     const dayOfWeek = date.getDay();
 
-                    const dayAllDayEvents = getEventsForDate(allDayEvents, date);
-
                     return (
                         <div
                             key={date.toISOString()}
-                            className={`flex-1 p-2 text-center border-r border-border last:border-r-0 transition-colors
+                            className={`flex-1 p-1 text-center border-r border-border last:border-r-0 transition-colors min-w-0
                             ${isSelected ? 'bg-primary/5' : ''}
                         `}
                         >
-                            <div className={`text-xs font-medium ${dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-muted-foreground'}`}>
+                            <div className={`text-[10px] font-medium ${dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-muted-foreground'}`}>
                                 {dayNames[dayOfWeek]}
                             </div>
-                            <div className={`text-xl font-bold mt-1 ${isToday ? 'text-primary' : ''}`}>
+                            <div className={`text-base font-bold ${isToday ? 'text-primary' : ''}`}>
                                 {date.getDate()}
-                            </div>
-
-                            {/* All Day Events in Header */}
-                            <div className="mt-1 flex flex-col gap-0.5">
-                                {dayAllDayEvents.map(event => (
-                                    <button
-                                        key={event.id}
-                                        type="button"
-                                        className={`
-                                            text-[10px] px-1.5 py-0.5 rounded w-full text-left truncate leading-tight
-                                            bg-primary text-primary-foreground
-                                            hover:brightness-110 transition-colors
-                                        `}
-                                        style={event.color ? { backgroundColor: event.color } : {}}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEventClick?.(event);
-                                        }}
-                                    >
-                                        {event.title}
-                                    </button>
-                                ))}
                             </div>
                         </div>
                     );
                 })}
             </div>
+
+            {/* All Day Events Row - Only shown if there are allDay events */}
+            {allDayEvents.length > 0 && (
+                <div
+                    className="flex border-b border-border bg-muted/20 sticky top-[52px] z-30"
+                    style={{ paddingRight: scrollbarPadding || undefined }}
+                >
+                    <div className="w-16 flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-1">
+                        <span className="text-[9px] text-muted-foreground">終日</span>
+                    </div>
+                    {weekDates.map((date) => {
+                        const dayAllDayEvents = getEventsForDate(allDayEvents, date);
+
+                        return (
+                            <div
+                                key={date.toISOString()}
+                                className="flex-1 p-0.5 border-r border-border last:border-r-0 min-w-0"
+                            >
+                                <div className="flex flex-col gap-0.5">
+                                    {dayAllDayEvents.map(event => (
+                                        <button
+                                            key={event.id}
+                                            type="button"
+                                            className={`
+                                                text-[9px] px-1 py-0.5 rounded w-full text-left truncate leading-tight
+                                                bg-primary text-primary-foreground
+                                                hover:brightness-110 transition-colors
+                                            `}
+                                            style={event.color ? { backgroundColor: event.color } : {}}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEventClick?.(event);
+                                            }}
+                                        >
+                                            {event.title}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* All Day Row */}
 
@@ -200,7 +216,7 @@ export function WeekView({
                             const dateEvents = weekEventsWithPosition[index];
 
                             return (
-                                <div key={date.toISOString()} className="flex-1 border-r border-border last:border-r-0 relative min-w-[100px]">
+                                <div key={date.toISOString()} className="flex-1 border-r border-border last:border-r-0 relative min-w-0">
                                     <CurrentTimeLine
                                         interval={timeInterval}
                                         isToday={isToday}
@@ -218,11 +234,13 @@ export function WeekView({
                                         />
                                     ))}
 
-                                    {dateEvents?.events.map(({ event, position }) => (
+                                    {dateEvents?.events.map(({ event, position, column, totalColumns }) => (
                                         <EventItem
                                             key={event.id}
                                             event={event}
                                             position={position}
+                                            column={column}
+                                            totalColumns={totalColumns}
                                             onEventClick={onEventClick}
                                         />
                                     ))}

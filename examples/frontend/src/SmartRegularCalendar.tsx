@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
     RegularCalendar,
     EventModal,
@@ -10,9 +10,10 @@ import type { AppSettings } from './useSettings';
 
 interface Props {
     settings: AppSettings;
+    additionalEvents?: ScheduleEvent[];
 }
 
-export function SmartRegularCalendar({ settings }: Props) {
+export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props) {
     const {
         events,
         resources,
@@ -28,6 +29,14 @@ export function SmartRegularCalendar({ settings }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | undefined>(undefined);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+    // Use only personnel events (additionalEvents) - don't mix with facility events
+    const allEvents = useMemo(() => {
+        return additionalEvents.map(e => ({
+            ...e,
+            isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false
+        }));
+    }, [additionalEvents]);
 
     if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
     if (!apiSettings || loading) return <div className="p-4">Loading schedule data...</div>;
@@ -86,11 +95,7 @@ export function SmartRegularCalendar({ settings }: Props) {
     return (
         <>
             <RegularCalendar
-                events={events.map(e => ({
-                    ...e,
-                    // Ensure isAllDay is propagated from extendedProps if missing at root
-                    isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false
-                }))}
+                events={allEvents}
                 settings={mergedSettings}
                 isLoading={loading}
                 onEventClick={handleEventClick}
@@ -116,3 +121,4 @@ export function SmartRegularCalendar({ settings }: Props) {
         </>
     );
 }
+

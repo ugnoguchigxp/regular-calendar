@@ -12,3 +12,5 @@ export * from './FacilitySchedule/components/EventModal/EventModal';
 export * from './FacilitySchedule/components/EventModal/EventForm';
 export * from './FacilitySchedule/utils/scheduleHelpers';
 export * from './FacilitySchedule/FacilitySchedule.schema';
+export * from './PersonnelPanel';
+
