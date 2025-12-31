@@ -36,13 +36,23 @@ export function DayView({
 
     const dayEvents = useMemo(() => getEventsForDate(events, currentDate), [events, currentDate]);
 
+    const { allDayEvents, timeEvents } = useMemo(() => {
+        const allDay: ScheduleEvent[] = [];
+        const time: ScheduleEvent[] = [];
+        dayEvents.forEach(e => {
+            if (e.isAllDay) allDay.push(e);
+            else time.push(e);
+        });
+        return { allDayEvents: allDay, timeEvents: time };
+    }, [dayEvents]);
+
     const eventsWithPosition = useMemo(
         () =>
-            dayEvents.map((event) => ({
+            timeEvents.map((event) => ({
                 event,
                 position: calculateEventPosition(event, timeInterval, startHour),
             })),
-        [dayEvents, timeInterval, startHour]
+        [timeEvents, timeInterval, startHour]
     );
 
     const today = new Date();
@@ -84,6 +94,25 @@ export function DayView({
                     </span>
                 </div>
             </div>
+
+            {/* All Day Events Area */}
+            {allDayEvents.length > 0 && (
+                <div className="border-b border-border bg-muted/20 p-2 flex flex-col gap-1 sticky top-[73px] z-10"
+                    style={{ paddingRight: scrollbarPadding ? scrollbarPadding + 8 : 8, paddingLeft: 64 }}>
+                    <div className="absolute left-2 top-2 text-xs font-semibold text-muted-foreground w-12 text-right">
+                        All Day
+                    </div>
+                    {allDayEvents.map(event => (
+                        <div
+                            key={event.id}
+                            className="text-xs bg-primary/10 border-l-4 border-primary p-1 rounded cursor-pointer hover:bg-primary/20 truncate"
+                            onClick={() => onEventClick?.(event)}
+                        >
+                            {event.title}
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Time Slots Area */}
             <div className="flex-1 overflow-y-auto relative" ref={scrollContainerRef}>

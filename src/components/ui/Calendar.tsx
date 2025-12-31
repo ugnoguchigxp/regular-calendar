@@ -1,9 +1,11 @@
 
 import { ja } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { format } from 'date-fns';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import type * as React from 'react';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, useNavigation } from 'react-day-picker';
 import { cn } from './utils';
+import { MonthYearPicker } from './MonthYearPicker';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -58,6 +60,27 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
                     const Icon = orientation === 'left' ? ChevronLeft : ChevronRight;
                     return <Icon className="h-6 w-6" {...props} />;
                 },
+                MonthCaption: ({ calendarMonth, ...props }) => {
+                    // v9: calendarMonth.date is the date
+                    const displayMonth = calendarMonth.date;
+                    const { goToMonth } = useNavigation();
+
+                    if (!displayMonth || isNaN(displayMonth.getTime())) {
+                        return <span {...props} />;
+                    }
+
+                    return (
+                        <MonthYearPicker
+                            date={displayMonth}
+                            onDateChange={(d) => goToMonth && goToMonth(d)}
+                        >
+                            <span className="text-sm font-medium cursor-pointer hover:bg-muted/50 rounded px-2 py-1 transition-colors flex items-center justify-center gap-1">
+                                {format(displayMonth, 'yyyy年M月', { locale: ja })}
+                                <ChevronDown className="h-4 w-4 opacity-50" />
+                            </span>
+                        </MonthYearPicker>
+                    );
+                }
             }}
             {...restProps}
         />

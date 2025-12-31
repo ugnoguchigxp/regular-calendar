@@ -49,6 +49,7 @@ export const EventItem: React.FC<EventItemProps> = ({ event, position, onEventCl
 
     const title = event.title;
     const locationText = getEventLocation(event);
+    const attendee = event.attendee;
 
     return (
         <div
@@ -80,7 +81,8 @@ export const EventItem: React.FC<EventItemProps> = ({ event, position, onEventCl
             }}
         >
             <div className="font-medium truncate">{title}</div>
-            {position.height > 44 && locationText && (
+            {attendee && <div className="text-xs opacity-90 truncate flex items-center gap-1"><span className="text-[10px] opacity-70">with</span> {attendee}</div>}
+            {position.height > 60 && locationText && (
                 <div className="text-sm opacity-90 truncate">{locationText}</div>
             )}
         </div>
@@ -144,6 +146,7 @@ export const EventDragOverlay: React.FC<EventDragOverlayProps> = ({ event }) => 
             }}
         >
             <div className="font-medium">{title}</div>
+            {event.attendee && <div className="text-xs opacity-90">with {event.attendee}</div>}
             {locationText && <div className="text-sm opacity-90">{locationText}</div>}
         </div>
     );

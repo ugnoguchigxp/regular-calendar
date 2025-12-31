@@ -81,7 +81,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             icon: Icon,
             asChild = false,
             disabled,
-            maxLabelLength = 14,
+            maxLabelLength = 100,
             ...props
         },
         ref

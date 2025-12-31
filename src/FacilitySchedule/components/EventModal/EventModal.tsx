@@ -72,8 +72,8 @@ export function EventModal({
 
     setConfirmModal({
       open: true,
-      title: t('eventModal.actions.confirmDelete'),
-      description: t('eventModal.actions.confirmDeleteMessage'),
+      title: t('confirm_delete_title'),
+      description: t('confirm_delete_message'),
       onConfirm: () => {
         onDelete(event.id);
         setConfirmModal((prev) => ({ ...prev, open: false }));
@@ -89,7 +89,7 @@ export function EventModal({
     <Modal
       open={isOpen}
       onOpenChange={(open) => !open && onClose()}
-      title={isEditMode ? t('eventModal.title.edit') : t('eventModal.title.create')}
+      title={isEditMode ? t('event_edit_title') : t('event_create_title')}
     >
       <div style={{ pointerEvents: isModalReady ? 'auto' : 'none' }}>
         {isEditMode && event && (

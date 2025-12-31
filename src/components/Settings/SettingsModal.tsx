@@ -10,7 +10,10 @@ export interface SettingsModalProps {
     onResetSettings?: () => void;
 }
 
-const HOURS = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+const HOURS = [
+    ...Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`),
+    '24:00', '25:00', '26:00', '27:00', '28:00', '29:00', '30:00'
+];
 
 export function SettingsModal({
     isOpen,
@@ -29,7 +32,15 @@ export function SettingsModal({
     };
 
     // Get localized days
-    const daysShort = t('settings.daysShort', { returnObjects: true }) as string[];
+    const daysShort = [
+        t('days_short_sun'),
+        t('days_short_mon'),
+        t('days_short_tue'),
+        t('days_short_wed'),
+        t('days_short_thu'),
+        t('days_short_fri'),
+        t('days_short_sat')
+    ];
 
     // Style constants
     const overlayStyle: React.CSSProperties = {
@@ -67,7 +78,7 @@ export function SettingsModal({
 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid hsl(var(--border))', paddingBottom: '16px' }}>
-                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>{t('settings.title')}</h2>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>{t('settings_title')}</h2>
                     <Button variant="ghost" size="icon" onClick={onClose}>
                         ✕
                     </Button>
@@ -75,7 +86,7 @@ export function SettingsModal({
 
                 {/* Language (New) */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.language')}</label>
+                    <label style={labelStyle}>{t('settings_language')}</label>
                     <div style={rowStyle}>
                         {(['ja', 'en'] as const).map(lang => (
                             <Button
@@ -91,7 +102,7 @@ export function SettingsModal({
 
                 {/* Theme */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.theme')}</label>
+                    <label style={labelStyle}>{t('settings_theme')}</label>
                     <div style={rowStyle}>
                         {(['light', 'dark'] as const).map(theme => (
                             <Button
@@ -99,7 +110,7 @@ export function SettingsModal({
                                 variant={settings.theme === theme ? 'default' : 'outline'}
                                 onClick={() => update({ theme })}
                             >
-                                {theme === 'light' ? t('settings.options.light') : t('settings.options.dark')}
+                                {theme === 'light' ? t('option_light') : t('option_dark')}
                             </Button>
                         ))}
                     </div>
@@ -107,7 +118,7 @@ export function SettingsModal({
 
                 {/* Density */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.density')}</label>
+                    <label style={labelStyle}>{t('settings_density')}</label>
                     <div style={rowStyle}>
                         {(['compact', 'normal', 'spacious'] as const).map(density => (
                             <Button
@@ -115,7 +126,7 @@ export function SettingsModal({
                                 variant={settings.density === density ? 'default' : 'outline'}
                                 onClick={() => update({ density })}
                             >
-                                {density === 'compact' ? t('settings.options.compact') : density === 'normal' ? t('settings.options.normal') : t('settings.options.spacious')}
+                                {density === 'compact' ? t('option_compact') : density === 'normal' ? t('option_normal') : t('option_spacious')}
                             </Button>
                         ))}
                     </div>
@@ -123,7 +134,7 @@ export function SettingsModal({
 
                 {/* Border Radius */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.radius')}: {settings.borderRadius}px</label>
+                    <label style={labelStyle}>{t('settings_radius')}: {settings.borderRadius}px</label>
                     <input
                         type="range"
                         min="0" max="16"
@@ -135,7 +146,7 @@ export function SettingsModal({
 
                 {/* Font Size */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.fontSize')}: {settings.fontSize}px</label>
+                    <label style={labelStyle}>{t('settings_font_size')}: {settings.fontSize}px</label>
                     <input
                         type="range"
                         min="12" max="20"
@@ -147,20 +158,20 @@ export function SettingsModal({
 
                 {/* Week Start */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.weekStart')}</label>
+                    <label style={labelStyle}>{t('settings_week_start')}</label>
                     <select
                         value={settings.weekStartsOn}
                         onChange={e => update({ weekStartsOn: Number(e.target.value) as 0 | 1 })}
                         style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
                     >
-                        <option value={0}>{t('settings.options.sunday')}</option>
-                        <option value={1}>{t('settings.options.monday')}</option>
+                        <option value={0}>{t('option_sunday')}</option>
+                        <option value={1}>{t('option_monday')}</option>
                     </select>
                 </div>
 
                 {/* Business Hours */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.businessHours')}</label>
+                    <label style={labelStyle}>{t('settings_business_hours')}</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <select
                             value={settings.businessHoursStart}
@@ -182,7 +193,7 @@ export function SettingsModal({
 
                 {/* Closed Days */}
                 <div style={sectionStyle}>
-                    <label style={labelStyle}>{t('settings.closedDays')}</label>
+                    <label style={labelStyle}>{t('settings_closed_days')}</label>
                     <div style={rowStyle}>
                         {daysShort.map((day, index) => (
                             <Button

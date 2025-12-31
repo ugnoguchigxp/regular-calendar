@@ -28,21 +28,30 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ControllerProps, FieldPath } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import type { Resource, ResourceGroup, ScheduleEvent } from '../../FacilitySchedule.schema';
 import { checkScheduleConflict } from '../../utils/scheduleHelpers';
+import { Checkbox } from '@/components/ui/Checkbox';
 
+// Helper for duration formatting
+const formatDuration = (hours: number) => {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+};
 
 // App specific sanitization removed, relying on basic React/Zod protection
 // or assuming input is safe or sanitized on server.
 
 const eventSchema = z.object({
   title: z.string().min(1, 'required'), // Was patientId -> mapped to title
+  attendee: z.string().min(1, 'required'),
   resourceId: z.string().min(1, 'required'),
   startDate: z.string().min(1, 'required'),
-  durationHours: z.number().min(0.5).max(24),
+  durationHours: z.number().min(0.25).max(24),
   status: z.string().optional(),
   note: z.string().optional(),
 
@@ -50,6 +59,7 @@ const eventSchema = z.object({
   isRecurring: z.boolean().optional(),
   scheduleType: z.string().optional(),
   endDate: z.string().optional(),
+  isAllDay: z.boolean().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventSchema>;
@@ -96,23 +106,25 @@ export function EventForm({
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event?.title || '',
+      attendee: event?.attendee || '',
       resourceId: event?.resourceId || defaultResourceId || '',
       startDate: format(
         event?.startDate || defaultStartTime || new Date(),
         "yyyy-MM-dd'T'HH:mm"
       ),
       durationHours: event
-        ? Math.round((event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60 * 60) * 10) / 10
+        ? Math.round((event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60 * 60) * 100) / 100
         : 1,
       status: event?.status || 'booked',
       note: event?.note || '',
       isRecurring: false,
+      isAllDay: event?.isAllDay || false,
     },
   });
 
-  const TypedFormField = <TName extends FieldPath<EventFormValues>>(
-    props: ControllerProps<EventFormValues, TName>
-  ) => <FormField {...props} />;
+  const isAllDay = form.watch('isAllDay');
+
+
 
   const startDateVal = form.watch('startDate');
   const durationVal = form.watch('durationHours');
@@ -120,11 +132,8 @@ export function EventForm({
 
   const endDateDisplay = new Date(startDateVal);
   if (!Number.isNaN(endDateDisplay.getTime())) {
-    endDateDisplay.setHours(endDateDisplay.getHours() + (Number(durationVal) || 0));
-    // Note: durationVal might be decimal
     const minutes = (Number(durationVal) || 0) * 60;
-    endDateDisplay.setHours(new Date(startDateVal).getHours());
-    endDateDisplay.setMinutes(new Date(startDateVal).getMinutes() + minutes);
+    endDateDisplay.setTime(new Date(startDateVal).getTime() + minutes * 60000);
   }
 
   const conflict = useMemo(() => {
@@ -145,6 +154,10 @@ export function EventForm({
 
   const handleSubmit = (data: EventFormValues) => {
     const start = new Date(data.startDate);
+    if (data.isAllDay) {
+      start.setHours(0, 0, 0, 0);
+    }
+
     const end = new Date(start);
     const minutes = (Number(data.durationHours) || 0) * 60;
     end.setMinutes(end.getMinutes() + minutes);
@@ -161,22 +174,39 @@ export function EventForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 text-foreground">
 
         {/* Title (Patient/User Name) */}
-        <TypedFormField
+        <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('eventModal.labels.userName')} <span className="text-red-500">*</span></FormLabel>
+              <FormLabel>{t('user_name_label') || 'User Name'} <span className="text-red-500">*</span></FormLabel>
               <FormControl>
-                <Input {...field} placeholder={t('eventModal.placeholders.enterName')} />
+                <Input {...field} placeholder={t('name_placeholder') || 'Enter name'} autoFocus />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Attendee - Hidden as requested */}
+        {/*
+        <FormField
+          control={form.control}
+          name="attendee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('attendee_label') || 'Attendee'} <span className="text-red-500">*</span></FormLabel>
+              <FormControl>
+                <Input {...field} placeholder={t('attendee_placeholder') || 'Enter attendee name'} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        */}
+
         {/* Resource Selection */}
-        <TypedFormField
+        <FormField
           control={form.control}
           name="resourceId"
           render={({ field }) => {
@@ -197,11 +227,11 @@ export function EventForm({
 
             return (
               <FormItem>
-                <FormLabel>{t('eventModal.labels.resource')} <span className="text-red-500">*</span></FormLabel>
+                <FormLabel>{t('resource_label')}</FormLabel>
                 {readOnlyResource ? (
                   <>
                     <div className="p-2 bg-muted rounded-md text-sm border border-input">
-                      {displayValue || t('eventModal.placeholders.selectResource')}
+                      {displayValue || t('resource_placeholder')}
                     </div>
                     {/* Hidden input to maintain form state */}
                     <input type="hidden" {...field} />
@@ -209,7 +239,7 @@ export function EventForm({
                 ) : (
                   <FormControl>
                     <EditableSelect
-                      value={displayValue}
+                      value={displayValue || ''}
                       onChange={(val) => {
                         // Reverse lookup: Display Name -> ID
                         const match = resources.find(r => {
@@ -220,7 +250,7 @@ export function EventForm({
                         field.onChange(match ? match.id : val);
                       }}
                       options={resourceNames}
-                      placeholder={t('eventModal.placeholders.selectResource')}
+                      placeholder={t('resource_placeholder')}
                     />
                   </FormControl>
                 )}
@@ -231,10 +261,33 @@ export function EventForm({
         />
 
         {/* Start Date & Time */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t('eventModal.labels.startTime')} <span className="text-red-500">*</span></label>
-          <div className="grid grid-cols-2 gap-2">
-            <TypedFormField
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <FormLabel>{t('start_time_label')} <span className="text-red-500">*</span></FormLabel>
+            <FormField
+              control={form.control}
+              name="isAllDay"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id="isAllDay-checkbox" // Add ID
+                    />
+                  </FormControl>
+                  <label
+                    htmlFor="isAllDay-checkbox"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    All Day
+                  </label>
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-2 items-center">
+            <FormField
               control={form.control}
               name="startDate"
               render={({ field }) => (
@@ -242,12 +295,16 @@ export function EventForm({
                   <FormControl>
                     <DatePicker
                       value={new Date(field.value)}
+                      disabled={isAllDay}
                       onChange={(date) => {
                         if (date) {
                           const cur = new Date(field.value);
-                          const next = new Date(date);
-                          next.setHours(cur.getHours(), cur.getMinutes());
-                          field.onChange(format(next, "yyyy-MM-dd'T'HH:mm"));
+                          if (!isAllDay) {
+                            date.setHours(cur.getHours(), cur.getMinutes());
+                          } else {
+                            date.setHours(0, 0, 0, 0);
+                          }
+                          field.onChange(format(date, "yyyy-MM-dd'T'HH:mm"));
                         }
                       }}
                     />
@@ -255,48 +312,53 @@ export function EventForm({
                 </FormItem>
               )}
             />
-            <TypedFormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      value={format(new Date(field.value), 'HH:mm')}
-                      readOnly
-                      className="cursor-pointer"
-                      onClick={() => setIsTimeModalOpen(true)}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            {!isAllDay && (
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        value={format(new Date(field.value), 'HH:mm')}
+                        readOnly
+                        className="cursor-pointer w-24"
+                        onClick={() => setIsTimeModalOpen(true)}
+                        tabIndex={-1}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
         </div>
 
         {/* Duration */}
-        <TypedFormField
+        <FormField
           control={form.control}
           name="durationHours"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('eventModal.labels.duration')}</FormLabel>
+              <FormLabel>{t('duration_label')}</FormLabel>
               <div className="flex items-center gap-2">
-                <Select onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
+                <Select onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)} disabled={isAllDay}>
                   <FormControl>
                     <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    {[0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8].map(h => (
-                      <SelectItem key={h} value={String(h)}>{h} h</SelectItem>
+                  <SelectContent className="max-h-[200px]">
+                    {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.5, 4, 4.5, 5, 6, 8].map(h => (
+                      <SelectItem key={h} value={String(h)}>{formatDuration(h)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <span className="text-sm text-muted-foreground">
-                  End: {!Number.isNaN(endDateDisplay.getTime()) ? format(endDateDisplay, 'HH:mm') : '--:--'}
-                </span>
+                {!isAllDay && (
+                  <span className="text-sm text-muted-foreground">
+                    End: {!Number.isNaN(endDateDisplay.getTime()) ? format(endDateDisplay, 'HH:mm') : '--:--'}
+                  </span>
+                )}
               </div>
             </FormItem>
           )}
@@ -316,12 +378,12 @@ export function EventForm({
         )}
 
         {/* Status */}
-        <TypedFormField
+        <FormField
           control={form.control}
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('eventModal.labels.status')}</FormLabel>
+              <FormLabel>{t('status_label')}</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -337,12 +399,12 @@ export function EventForm({
         />
 
         {/* Note */}
-        <TypedFormField
+        <FormField
           control={form.control}
           name="note"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('eventModal.labels.note')}</FormLabel>
+              <FormLabel>{t('note_label')}</FormLabel>
               <FormControl>
                 <Textarea {...field} placeholder="Add notes..." rows={2} />
               </FormControl>
@@ -354,14 +416,14 @@ export function EventForm({
         <div className="flex gap-3 pt-4 border-t border-border">
           {isEditMode && onDelete && (
             <Button type="button" variant="outline-delete" size="sm" onClick={onDelete} className="flex-1">
-              {t('eventModal.actions.delete')}
+              {t('delete_button')}
             </Button>
           )}
           <Button type="button" variant="outline" size="sm" onClick={onCancel} className="flex-1">
-            {t('eventModal.actions.cancel')}
+            {t('cancel_button')}
           </Button>
           <Button type="submit" variant="default" size="sm" className="flex-1">
-            {t('eventModal.actions.save')}
+            {t('save_button')}
           </Button>
         </div>
       </form>

@@ -12,8 +12,10 @@ import { ScheduleEventCard } from './ScheduleEventCard';
 interface ResourceColumnProps {
   resource: Resource;
   events: ScheduleEvent[];
+  allDayEvents?: ScheduleEvent[];
   startTime: string; // "HH:mm"
   endTime: string; // "HH:mm"
+  currentDate: Date;
   slotHeight: number; // pixels per hour
   onEventClick?: (event: ScheduleEvent) => void;
   onEmptySlotClick?: (resourceId: string, startTime: Date) => void;
@@ -27,8 +29,10 @@ interface EventWithLayout extends ScheduleEvent {
 export function ResourceColumn({
   resource,
   events,
+  allDayEvents = [],
   startTime,
   endTime,
+  currentDate,
   slotHeight,
   onEventClick,
   onEmptySlotClick,
@@ -47,9 +51,31 @@ export function ResourceColumn({
   }
 
   const eventsWithLayout = useMemo((): EventWithLayout[] => {
-    if (events.length === 0) return [];
+    // Merge allDayEvents as full-duration events for visualization
+    const gridEvents = [...events];
 
-    const sorted = [...events].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+    if (allDayEvents.length > 0) {
+      allDayEvents.forEach(ade => {
+        // Clone event and force time to cover the entire visible day
+        const syntheticEvent = { ...ade };
+
+        // Use the VIEW date (currentDate) as base, not event date (which might be yesterday if multi-day)
+        const s = new Date(currentDate);
+        s.setHours(startHour, 0, 0, 0);
+
+        const e = new Date(currentDate);
+        e.setHours(endHour, 0, 0, 0);
+
+        syntheticEvent.startDate = s;
+        syntheticEvent.endDate = e;
+
+        gridEvents.push(syntheticEvent);
+      });
+    }
+
+    if (gridEvents.length === 0) return [];
+
+    const sorted = [...gridEvents].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
     const groups: ScheduleEvent[][] = [];
 
     for (const event of sorted) {
@@ -98,21 +124,30 @@ export function ResourceColumn({
     }
 
     return result;
-  }, [events]);
+  }, [events, allDayEvents, currentDate, startHour, endHour]);
 
   function calculateCardPosition(eventWithLayout: EventWithLayout) {
     const event = eventWithLayout;
-    const startH = event.startDate.getHours();
-    const startM = event.startDate.getMinutes();
-    const endH = event.endDate.getHours();
-    const endM = event.endDate.getMinutes();
 
-    const hoursFromStart = startH - startHour + startM / 60;
+    // Normalize hours relative to current view date
+    // Need to reset currentDate hour cause I mutated it in getHoursWithDayOffset inline? 
+    // Wait, new Date(currentDate.setHours...) mutates currentDate!
+    // FIX: use new Date(currentDate) first.
 
-    let durationHours = endH - startH + (endM - startM) / 60;
-    if (durationHours < 0) durationHours += 24;
+    const viewBase = new Date(currentDate);
+    viewBase.setHours(0, 0, 0, 0);
 
-    // No offset needed as this is relative to content container
+    const getRelativeHour = (d: Date) => {
+      const diffMs = d.getTime() - viewBase.getTime();
+      return diffMs / (1000 * 60 * 60); // Float hours including days
+    };
+
+    const startTotalHours = getRelativeHour(event.startDate);
+    const endTotalHours = getRelativeHour(event.endDate);
+
+    const hoursFromStart = startTotalHours - startHour;
+    const durationHours = endTotalHours - startTotalHours;
+
     const top = hoursFromStart * slotHeight;
     const height = durationHours * slotHeight;
 
@@ -148,10 +183,14 @@ export function ResourceColumn({
   return (
     <div className="flex-1 min-w-[90px] border-r border-border hover:bg-muted/5 flex flex-col">
       {/* Header */}
-      <div className="h-[var(--ui-schedule-header-height)] border-b border-border bg-background flex items-center justify-center sticky top-0 z-20 shrink-0">
+      {/* Header - Auto height */}
+      <div className="h-14 border-b border-border bg-background flex items-center justify-center sticky top-0 z-20 shrink-0 py-2">
         <div className="text-center relative">
           <div className="font-semibold text-sm">{resource.name}</div>
-          <div className="text-xs text-muted-foreground">{events.length} events</div>
+          <div className="text-xs text-muted-foreground">{events.length + allDayEvents.length} events</div>
+
+          {/* All Day Events removed from header as requested */}
+
           <Button
             type="button"
             variant="ghost"

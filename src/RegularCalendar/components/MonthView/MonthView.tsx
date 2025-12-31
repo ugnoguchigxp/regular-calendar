@@ -3,6 +3,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FacilityScheduleSettings, ScheduleEvent } from '../../RegularCalendar.schema';
 import {
     getDateClasses,
@@ -26,6 +27,7 @@ export function MonthView({
     onDateClick,
     onEventClick,
 }: MonthViewProps) {
+    const { t } = useTranslation();
     const weekStart = settings.weekStartsOn ?? 1;
 
     const calendarGrid = useMemo(
@@ -33,7 +35,15 @@ export function MonthView({
         [currentDate, weekStart]
     );
 
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = [
+        t('days_short_sun'),
+        t('days_short_mon'),
+        t('days_short_tue'),
+        t('days_short_wed'),
+        t('days_short_thu'),
+        t('days_short_fri'),
+        t('days_short_sat')
+    ];
     // Rotate if starts on Monday
     const displayDayNames = weekStart === 1
         ? [...dayNames.slice(1), dayNames[0]]

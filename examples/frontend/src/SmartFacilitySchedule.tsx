@@ -23,7 +23,10 @@ export function SmartFacilitySchedule({ settings }: Props) {
 
     return (
         <FacilitySchedule
-            events={events}
+            events={events.map(e => ({
+                ...e,
+                isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false
+            }))}
             resources={resources}
             groups={groups}
             settings={mergedSettings}
@@ -34,6 +37,9 @@ export function SmartFacilitySchedule({ settings }: Props) {
             components={{
                 EventModal: CustomEventModal
             }}
+            enablePersistence={true}
+            storageKey="facility-schedule-demo-view"
         />
+
     );
 }

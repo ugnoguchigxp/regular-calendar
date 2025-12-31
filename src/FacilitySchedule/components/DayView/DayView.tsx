@@ -9,7 +9,7 @@ import type {
   ScheduleEvent,
 } from '../../FacilitySchedule.schema';
 import { DAY_VIEW } from '../../constants';
-import { filterEventsByDay, sortEventsByTime } from '../../utils/scheduleHelpers';
+import { sortEventsByTime } from '../../utils/scheduleHelpers';
 import { createEventIndexes, getEventsByResource } from '../../utils/scheduleIndexHelpers';
 import { ResourceColumn } from './ResourceColumn';
 import { TimeGrid } from './TimeGrid';
@@ -31,16 +31,43 @@ export function DayView({
   onEventClick,
   onEmptySlotClick,
 }: DayViewProps) {
-  // Filter events for the day
-  const dayEvents = useMemo(() => {
-    const filtered = filterEventsByDay(events, currentDate);
-    return sortEventsByTime(filtered);
-  }, [events, currentDate]);
+  // Calculate Grid Height and Hours
+  const startParts = settings.startTime.split(':');
+  const endParts = settings.endTime.split(':');
+  const startHour = Number(startParts[0] ?? 0);
+  const endHour = Number(endParts[0] ?? 23);
+  const gridHeight = (endHour - startHour + 1) * DAY_VIEW.SLOT_HEIGHT + DAY_VIEW.HEADER_HEIGHT;
+
+  // Filter events for the day with support for extended hours
+  const { allDayEvents, timedEvents } = useMemo(() => {
+    // Determine view range
+    const viewStart = new Date(currentDate);
+    viewStart.setHours(0, 0, 0, 0);
+
+    const viewEnd = new Date(currentDate);
+    // If endHour > 23, we extend to next day(s)
+    if (endHour > 23) {
+      viewEnd.setHours(endHour, 59, 59, 999);
+    } else {
+      viewEnd.setHours(23, 59, 59, 999);
+    }
+
+    const filtered = events.filter((e) => {
+      return e.startDate < viewEnd && e.endDate > viewStart;
+    });
+
+    const sorted = sortEventsByTime(filtered);
+
+    return {
+      allDayEvents: sorted.filter(e => e.isAllDay),
+      timedEvents: sorted.filter(e => !e.isAllDay)
+    };
+  }, [events, currentDate, startHour, endHour]);
 
   // Indexing for performance
   const eventIndexes = useMemo(() => {
-    return createEventIndexes(dayEvents);
-  }, [dayEvents]);
+    return createEventIndexes(timedEvents);
+  }, [timedEvents]);
 
   // Group by resource
   const eventsByResource = useMemo(() => {
@@ -54,15 +81,10 @@ export function DayView({
     return map;
   }, [resources, eventIndexes]);
 
-  // Calculate Grid Height
-  const startParts = settings.startTime.split(':');
-  const endParts = settings.endTime.split(':');
-  const startHour = Number(startParts[0] ?? 0);
-  const endHour = Number(endParts[0] ?? 23);
-  const gridHeight = (endHour - startHour + 1) * DAY_VIEW.SLOT_HEIGHT + DAY_VIEW.HEADER_HEIGHT;
-
   return (
     <div className="flex flex-col h-full">
+
+
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
         <div className="flex" style={{ minHeight: `${gridHeight}px` }}>
@@ -85,8 +107,12 @@ export function DayView({
                 key={resource.id}
                 resource={resource}
                 events={eventsByResource.get(resource.id) || []}
+                allDayEvents={
+                  allDayEvents.filter(e => e.resourceId === resource.id)
+                }
                 startTime={settings.startTime}
                 endTime={settings.endTime}
+                currentDate={currentDate}
                 slotHeight={DAY_VIEW.SLOT_HEIGHT}
                 onEventClick={onEventClick}
                 onEmptySlotClick={onEmptySlotClick}

@@ -1,7 +1,7 @@
 export const groups = [
     {
         id: 'group1',
-        name: '48F',
+        name: '48F Floor',
         displayMode: 'grid',
         dimension: 1,
         createdAt: new Date(),
@@ -9,7 +9,7 @@ export const groups = [
     },
     {
         id: 'group2',
-        name: 'ツーチカ',
+        name: 'Tsuchika Area',
         displayMode: 'grid',
         dimension: 1,
         createdAt: new Date(),
@@ -35,7 +35,10 @@ export const resources = [
 ];
 
 const today = new Date();
-const todayStr = today.toISOString().split('T')[0];
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, '0');
+const day = String(today.getDate()).padStart(2, '0');
+const todayStr = `${year}-${month}-${day}`;
 
 export const events = [
     {
@@ -43,15 +46,18 @@ export const events = [
         resourceId: 'r1',
         groupId: 'group1',
         title: 'Morning Session',
+        attendee: 'John Doe',
         startDate: `${todayStr}T09:00:00`,
         endDate: `${todayStr}T13:00:00`,
         status: 'booked',
+        isAllDay: true // Add explicit AllDay event
     },
     {
         id: 'e2',
         resourceId: 'r2',
         groupId: 'group1',
         title: 'Afternoon Checkup',
+        attendee: 'Jane Smith',
         startDate: `${todayStr}T14:00:00`,
         endDate: `${todayStr}T15:30:00`,
         status: 'booked',

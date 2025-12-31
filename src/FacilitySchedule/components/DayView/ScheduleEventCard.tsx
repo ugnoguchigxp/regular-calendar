@@ -44,6 +44,16 @@ export function ScheduleEventCard({
     ? 'bg-destructive border-destructive'
     : 'bg-primary border-primary/30';
 
+  // Helper for formatting time
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const displayDuration = `${durationHours}h`;
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -79,13 +89,32 @@ export function ScheduleEventCard({
                 {event.title}
               </div>
 
-              {/* Time */}
-              <div className="text-xs text-primary-foreground/90 mt-1">
-                {startTime} - {endTime}
-              </div>
+              {/* Attendee */}
+              {event.attendee && (
+                <div className="text-xs text-primary-foreground/90 truncate mt-0.5">
+                  👤 {event.attendee}
+                </div>
+              )}
 
-              {/* Duration */}
-              <div className="text-xs text-primary-foreground/80 mt-auto">{durationHours}h</div>
+              {/* Time/Duration - Hidden for AllDay */}
+              {!event.isAllDay && (
+                <div className="flex items-center gap-1 text-[10px] opacity-90 mt-1">
+                  <span className="font-mono tabular-nums tracking-tight">
+                    {formatTime(event.startDate)}
+                  </span>
+                  {durationHours >= 0.5 && (
+                    <>
+                      <span>-</span>
+                      <span className="font-mono tabular-nums tracking-tight">
+                        {formatTime(event.endDate)}
+                      </span>
+                      <span className="ml-0.5 opacity-75">
+                        ({displayDuration})
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </button>
         </TooltipTrigger>
@@ -95,6 +124,7 @@ export function ScheduleEventCard({
               <p className="font-bold text-xs text-red-600">⚠️ Double Booking</p>
             )}
             <p className="font-semibold text-xs">{event.title}</p>
+            {event.attendee && <p className="text-xs">With: {event.attendee}</p>}
             <p className="text-xs">
               {startTime} - {endTime} ({durationHours}h)
             </p>

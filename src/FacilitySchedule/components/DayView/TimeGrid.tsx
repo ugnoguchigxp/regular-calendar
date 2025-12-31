@@ -14,7 +14,7 @@ export function TimeGrid({ startTime, endTime, slotHeight = 60 }: TimeGridProps)
   return (
     <div className="flex flex-col border-r border-border h-full bg-background">
       {/* Header Placeholder (sticky) */}
-      <div className="h-[var(--ui-schedule-header-height)] border-b border-border bg-background sticky top-0 z-30" />
+      <div className="h-14 border-b border-border bg-background sticky top-0 z-30" />
 
       {/* Time Slots */}
       {hours.map((hour) => (

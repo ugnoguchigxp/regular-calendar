@@ -15,6 +15,7 @@ export const ScheduleEventSchema = z.object({
   resourceId: z.string(), // Was positionId
   groupId: z.string(), // Was roomId
   title: z.string(), // Was patientName
+  attendee: z.string(),
   startDate: z.date(),
   endDate: z.date(),
   status: z.string(), // Generic status
@@ -26,6 +27,7 @@ export const ScheduleEventSchema = z.object({
   extendedProps: z.record(z.string(), z.any()).optional(),
 
   // Legacy support or specific UI flags
+  isAllDay: z.boolean().optional(),
   hasConflict: z.boolean().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),

@@ -25,6 +25,7 @@ interface SelectContextValue {
     setOpen: (open: boolean) => void;
     label?: React.ReactNode;
     setLabel: (label: React.ReactNode) => void;
+    disabled?: boolean;
 }
 
 const SelectContext = React.createContext<SelectContextValue | null>(null);
@@ -34,11 +35,13 @@ export const Select = ({
     value,
     onValueChange,
     defaultValue,
+    disabled
 }: {
     children: React.ReactNode;
     value?: string;
     onValueChange?: (value: string) => void;
     defaultValue?: string;
+    disabled?: boolean;
 }) => {
     const [internalValue, setInternalValue] = React.useState(defaultValue || "");
     const [open, setOpen] = React.useState(false);
@@ -61,6 +64,7 @@ export const Select = ({
                 setOpen,
                 label: selectedLabel,
                 setLabel: setSelectedLabel,
+                disabled
             }}
         >
             <div className="relative">{children}</div>
@@ -79,7 +83,8 @@ export const SelectTrigger = React.forwardRef<
         <button
             ref={ref}
             type="button"
-            onClick={() => ctx.setOpen(!ctx.open)}
+            disabled={ctx.disabled || props.disabled}
+            onClick={() => !ctx.disabled && ctx.setOpen(!ctx.open)}
             className={cn(
                 "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                 className
@@ -102,7 +107,9 @@ export const SelectValue = React.forwardRef<
 
     return (
         <span ref={ref} className={cn("block truncate", className)} {...props}>
-            {ctx.label || ctx.value || placeholder}
+            <span ref={ref} className={cn("block truncate", className)} {...props}>
+                {props.children || ctx.label || ctx.value || placeholder}
+            </span>
         </span>
     );
 });

@@ -52,14 +52,14 @@ export function FacilityStructureSettings({
     };
 
     const handleCreateGroup = async () => {
-        const name = prompt(t('facilitySettings.labels.enterGroupName') || 'Enter Group Name');
+        const name = prompt(t('facility_prompt_group_name') || 'Enter Group Name');
         if (name) {
             await onCreateGroup({ name });
         }
     };
 
     const handleDeleteGroupConfirm = async (id: string) => {
-        if (confirm(t('facilitySettings.confirm.deleteGroupMessage'))) {
+        if (confirm(t('facility_confirm_delete_group_message'))) {
             await onDeleteGroup(id);
         }
     };
@@ -79,7 +79,7 @@ export function FacilityStructureSettings({
     };
 
     const handleCreateResource = async (groupId: string) => {
-        const name = prompt(t('facilitySettings.labels.enterResourceName') || 'Enter Resource Name');
+        const name = prompt(t('facility_prompt_resource_name') || 'Enter Resource Name');
         if (name) {
             // Find max order
             const groupResources = resources.filter(r => r.groupId === groupId);
@@ -95,7 +95,7 @@ export function FacilityStructureSettings({
     };
 
     const handleDeleteResourceConfirm = async (id: string) => {
-        if (confirm(t('facilitySettings.confirm.deleteResourceMessage'))) {
+        if (confirm(t('facility_confirm_delete_resource_message'))) {
             await onDeleteResource(id);
         }
     };
@@ -148,7 +148,7 @@ export function FacilityStructureSettings({
 
                 {/* Header matching SettingsModal */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', paddingBottom: '16px', borderBottom: '1px solid hsl(var(--border))' }}>
-                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>{t('facilitySettings.title')}</h2>
+                    <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>{t('facility_settings_title')}</h2>
                     <Button variant="ghost" size="icon" onClick={onClose}>
                         <Icons.X className="h-4 w-4" />
                     </Button>
@@ -157,10 +157,10 @@ export function FacilityStructureSettings({
                 <div className="flex-1 overflow-y-auto p-6">
                     {/* Add Room Section Header */}
                     <div style={{ ...sectionStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid hsl(var(--border))', paddingBottom: '16px' }}>
-                        <h3 className="text-md font-medium text-muted-foreground m-0">{t('facilitySettings.labels.groupName')}s & {t('facilitySettings.labels.resourceName')}s</h3>
+                        <h3 className="text-md font-medium text-muted-foreground m-0">{t('facility_label_group_name')}s & {t('facility_label_resource_name')}s</h3>
                         <Button onClick={handleCreateGroup}>
                             <Icons.Plus className="h-4 w-4 mr-2" />
-                            {t('facilitySettings.actions.addGroup')}
+                            {t('facility_action_add_group')}
                         </Button>
                     </div>
 
@@ -176,8 +176,9 @@ export function FacilityStructureSettings({
                                             onChange={(e) => setEditValue(e.target.value)}
                                             autoFocus
                                         />
-                                        <Button onClick={() => handleSaveGroup(group.id)}>{t('eventModal.actions.save')}</Button>
-                                        <Button variant="ghost" onClick={() => setEditingGroupId(null)}>{t('eventModal.actions.cancel')}</Button>
+
+                                        <Button onClick={() => handleSaveGroup(group.id)}>{t('save_button')}</Button>
+                                        <Button variant="ghost" onClick={() => setEditingGroupId(null)}>{t('cancel_button')}</Button>
                                     </div>
                                 ) : (
                                     <>
@@ -206,7 +207,7 @@ export function FacilityStructureSettings({
                                                     onChange={(e) => setEditValue(e.target.value)}
                                                     autoFocus
                                                 />
-                                                <Button size="sm" onClick={() => handleSaveResource(resource.id)}>{t('eventModal.actions.save')}</Button>
+                                                <Button size="sm" onClick={() => handleSaveResource(resource.id)}>{t('save_button')}</Button>
                                                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditingResourceId(null)}><Icons.X className="h-3 w-3" /></Button>
                                             </div>
                                         ) : (
@@ -224,7 +225,7 @@ export function FacilityStructureSettings({
                                 ))}
                                 <Button variant="outline" size="sm" onClick={() => handleCreateResource(group.id)}>
                                     <Icons.Plus className="h-3 w-3 mr-1" />
-                                    {t('facilitySettings.actions.addResource')}
+                                    {t('facility_action_add_resource')}
                                 </Button>
                             </div>
                         </div>
@@ -232,14 +233,14 @@ export function FacilityStructureSettings({
 
                     {groups.length === 0 && (
                         <div style={{ textAlign: 'center', padding: '32px', color: 'hsl(var(--muted-foreground))' }}>
-                            {t('facilitySettings.labels.noGroups')}
+                            {t('facility_label_no_groups')}
                         </div>
                     )}
                 </div>
 
                 {/* Footer matching SettingsModal padding/border */}
                 <div style={{ padding: '24px', borderTop: '1px solid hsl(var(--border))', display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button onClick={onClose}>{t('facilitySettings.actions.done')}</Button>
+                    <Button onClick={onClose}>{t('facility_action_done')}</Button>
                 </div>
             </div>
         </div>

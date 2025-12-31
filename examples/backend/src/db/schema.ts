@@ -1,29 +1,20 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+const dbType = process.env.DB_TYPE || 'sqlite';
 
-export const groups = sqliteTable('groups', {
-    id: text('id').primaryKey(),
-    name: text('name').notNull(),
-    displayMode: text('display_mode').notNull().default('grid'),
-    dimension: integer('dimension').notNull().default(1),
-});
+// Dynamic export based on DB_TYPE
+// Note: In a real Typescript project, you might need stronger typing or separate builds,
+// but for this example, we rely on the runtime switch.
 
-export const resources = sqliteTable('resources', {
-    id: text('id').primaryKey(),
-    name: text('name').notNull(),
-    order: integer('order_index').notNull(),
-    isAvailable: integer('is_available', { mode: 'boolean' }).notNull().default(true),
-    groupId: text('group_id').references(() => groups.id),
-});
+// We use require instead of import to allow conditional loading
+// which prevents errors if dependencies for the unused DB are missing.
 
-export const events = sqliteTable('events', {
-    id: text('id').primaryKey(),
-    resourceId: text('resource_id').notNull().references(() => resources.id),
-    groupId: text('group_id'), // Optional denormalization or just link via resource
-    title: text('title').notNull(),
-    startDate: text('start_date').notNull(), // ISO string
-    endDate: text('end_date').notNull(), // ISO string
-    status: text('status').notNull().default('booked'),
-    note: text('note'),
-    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
-    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(new Date()),
-});
+let schemaExport;
+
+if (dbType === 'postgres') {
+    schemaExport = require('./schema.postgres');
+} else {
+    schemaExport = require('./schema.sqlite');
+}
+
+export const groups = schemaExport.groups;
+export const resources = schemaExport.resources;
+export const events = schemaExport.events;

@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FacilityScheduleSettings, ScheduleEvent } from '../../RegularCalendar.schema';
 import { DEFAULT_VIEW_HOURS, TIME_SLOT_HEIGHT } from '../../constants/calendarConstants';
 import {
@@ -30,6 +31,7 @@ export function WeekView({
     onTimeSlotClick,
     onEventClick,
 }: WeekViewProps) {
+    const { t } = useTranslation();
     const timeInterval = settings.defaultDuration || 30;
     const startHour = Number(settings.startTime?.split(':')[0] || DEFAULT_VIEW_HOURS.start);
     const endHour = Number(settings.endTime?.split(':')[0] || DEFAULT_VIEW_HOURS.end);
@@ -46,7 +48,15 @@ export function WeekView({
     );
 
     // Simple day names - could come from i18n
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = [
+        t('days_short_sun'),
+        t('days_short_mon'),
+        t('days_short_tue'),
+        t('days_short_wed'),
+        t('days_short_thu'),
+        t('days_short_fri'),
+        t('days_short_sat')
+    ];
 
     const today = new Date();
     const todayString = today.toDateString();
@@ -70,9 +80,35 @@ export function WeekView({
         return () => resizeObserver.disconnect();
     }, []);
 
+    // Filter All Day Events
+    const { allDayEvents, timedEvents } = useMemo(() => {
+        const allDay: ScheduleEvent[] = [];
+        const timed: ScheduleEvent[] = [];
+
+        console.log('WeekView events total:', events.length);
+
+        events.forEach(e => {
+            // Check both root and extendedProps for isAllDay
+            const isAllDay = e.isAllDay || e.extendedProps?.isAllDay;
+            // console.log('Event:', e.title, 'isAllDay:', isAllDay, e);
+
+            if (isAllDay) {
+                allDay.push(e);
+            } else {
+                timed.push(e);
+            }
+        });
+
+        console.log('AllDay events count:', allDay.length);
+        console.log('Timed events count:', timed.length);
+
+        return { allDayEvents: allDay, timedEvents: timed };
+    }, [events]);
+
     const weekEventsWithPosition = useMemo(() => {
         return weekDates.map((date) => {
-            const dayEvents = getEventsForDate(events, date);
+            // Use TIMED events only
+            const dayEvents = getEventsForDate(timedEvents, date);
             return {
                 date: date.toISOString(),
                 events: dayEvents.map((event) => ({
@@ -81,7 +117,7 @@ export function WeekView({
                 })),
             };
         });
-    }, [weekDates, events, timeInterval, startHour]);
+    }, [weekDates, timedEvents, timeInterval, startHour]);
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
@@ -96,6 +132,8 @@ export function WeekView({
                     const isSelected = date.toDateString() === currentDate.toDateString();
                     const dayOfWeek = date.getDay();
 
+                    const dayAllDayEvents = getEventsForDate(allDayEvents, date);
+
                     return (
                         <div
                             key={date.toISOString()}
@@ -109,10 +147,35 @@ export function WeekView({
                             <div className={`text-xl font-bold mt-1 ${isToday ? 'text-primary' : ''}`}>
                                 {date.getDate()}
                             </div>
+
+                            {/* All Day Events in Header */}
+                            <div className="mt-1 flex flex-col gap-0.5">
+                                {dayAllDayEvents.map(event => (
+                                    <button
+                                        key={event.id}
+                                        type="button"
+                                        className={`
+                                            text-[10px] px-1.5 py-0.5 rounded w-full text-left truncate leading-tight
+                                            bg-primary text-primary-foreground
+                                            hover:brightness-110 transition-colors
+                                        `}
+                                        style={event.color ? { backgroundColor: event.color } : {}}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEventClick?.(event);
+                                        }}
+                                    >
+                                        {event.title}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     );
                 })}
             </div>
+
+            {/* All Day Row */}
+
 
             {/* Grid */}
             <div className="flex-1 overflow-y-auto relative" ref={scrollContainerRef}>

@@ -78,7 +78,7 @@ const KeypadModalLayout: React.FC<KeypadLayoutProps> = React.memo(
                     {displayContent}
                 </div>
                 {errorMessage && (
-                    <div className="text-destructive-foreground text-sm text-center p-2 bg-red-50 dark:bg-red-950 rounded-md border-l-[3px] border-theme-danger">
+                    <div className="text-destructive text-sm text-center p-2 bg-destructive/10 rounded-md border-l-[3px] border-destructive">
                         {errorMessage}
                     </div>
                 )}
@@ -171,6 +171,8 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
         );
         const [value, setValue] = useState(sanitizedInitialValue);
         const [error, setError] = useState('');
+        // Track if the value is "pristine" (untouched since open)
+        const [isPristine, setIsPristine] = useState(true);
 
         const config = useMemo(() => variantDefaults[variant], [variant]);
         const resolvedTitle = title ?? config.title;
@@ -185,75 +187,91 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
             if (open) {
                 setValue(sanitizedInitialValue);
                 setError('');
+                setIsPristine(true);
             }
         }, [open, sanitizedInitialValue]);
 
         const handleNumberClick = useCallback(
             (digit: string) => {
+                // If pristine, we treat previous value as empty for the sake of input
+                setIsPristine(false);
+
                 if (isTimeVariant) {
                     setValue((prev) => {
-                        if (prev.length >= TIME_MAX_DIGITS) {
+                        const effectivePrev = isPristine ? '' : prev;
+
+                        if (effectivePrev.length >= TIME_MAX_DIGITS) {
                             setError(`最大${TIME_MAX_DIGITS}文字まで入力できます`);
-                            return prev;
+                            return effectivePrev;
                         }
                         setError('');
-                        if (prev.length === 0) {
+                        if (effectivePrev.length === 0) {
                             const num = Number.parseInt(digit, 10);
                             if (num >= 3) {
                                 return `0${digit}`;
                             }
                         }
-                        return (prev + digit).slice(0, TIME_MAX_DIGITS);
+                        return (effectivePrev + digit).slice(0, TIME_MAX_DIGITS);
                     });
                     return;
                 }
 
                 setValue((prev) => {
-                    if (prev.length >= resolvedMaxLength) {
+                    const effectivePrev = isPristine ? '' : prev;
+
+                    if (effectivePrev.length >= resolvedMaxLength) {
                         setError(`最大${resolvedMaxLength}文字まで入力できます`);
-                        return prev;
+                        return effectivePrev;
                     }
                     setError('');
-                    return `${prev}${digit}`;
+                    return `${effectivePrev}${digit}`;
                 });
             },
-            [resolvedMaxLength, isTimeVariant]
+            [resolvedMaxLength, isTimeVariant, isPristine]
         );
 
         const handleHyphenClick = useCallback(() => {
             if (!canUseHyphen) return;
+            setIsPristine(false);
             setValue((prev) => {
-                if (prev.length >= resolvedMaxLength) {
+                const effectivePrev = isPristine ? '' : prev;
+
+                if (effectivePrev.length >= resolvedMaxLength) {
                     setError(`最大${resolvedMaxLength}文字まで入力できます`);
-                    return prev;
+                    return effectivePrev;
                 }
-                if (prev.endsWith('-')) {
+                if (effectivePrev.endsWith('-')) {
                     setError('ハイフンを連続して入力することはできません');
-                    return prev;
+                    return effectivePrev;
                 }
                 setError('');
-                return `${prev}-`;
+                return `${effectivePrev}-`;
             });
-        }, [canUseHyphen, resolvedMaxLength]);
+        }, [canUseHyphen, resolvedMaxLength, isPristine]);
 
         const handleDecimalClick = useCallback(() => {
             if (!canUseDecimal) return;
+            setIsPristine(false);
             setValue((prev) => {
-                if (prev.includes('.')) {
+                const effectivePrev = isPristine ? '' : prev;
+
+                if (effectivePrev.includes('.')) {
                     setError('小数点は1つまでです');
-                    return prev;
+                    return effectivePrev;
                 }
                 setError('');
-                return `${prev}.`;
+                return `${effectivePrev}.`;
             });
-        }, [canUseDecimal]);
+        }, [canUseDecimal, isPristine]);
 
         const handleBackspace = useCallback(() => {
+            setIsPristine(false);
             setValue((prev) => prev.slice(0, -1));
             setError('');
         }, []);
 
         const handleClear = useCallback(() => {
+            setIsPristine(false);
             setValue('');
             setError('');
         }, []);

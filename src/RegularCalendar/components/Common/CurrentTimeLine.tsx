@@ -2,7 +2,7 @@
  * Current Time Line Component
  */
 
-import type React from 'react';
+import React from 'react';
 import { getCurrentTimePosition, isCurrentTimeInRange } from '../../utils/calendarHelpers';
 
 interface CurrentTimeLineProps {
@@ -28,6 +28,18 @@ export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
     endHour,
     relative = false,
 }) => {
+    // State to force re-render/update position
+    const [now, setNow] = React.useState(new Date());
+
+    React.useEffect(() => {
+        // Update every minute
+        const timer = setInterval(() => {
+            setNow(new Date());
+        }, 60000);
+
+        return () => clearInterval(timer);
+    }, []);
+
     if (!isToday || !isCurrentTimeInRange(startHour, endHour)) {
         return null;
     }
@@ -41,6 +53,7 @@ export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
                 className={`${relative ? 'absolute' : 'fixed'} left-0 w-2 h-2 bg-red-500 rounded-full -translate-x-1`}
                 style={{ top: `${position}px`, zIndex: 20 }}
                 aria-hidden="true"
+                title={`Current time: ${now.toLocaleTimeString()}`}
             />
             {/* Current Time Line */}
             <div

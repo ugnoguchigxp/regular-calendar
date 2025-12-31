@@ -6,6 +6,7 @@
 import { DateDisplay } from '@/components/ui/DateDisplay';
 import { PercentFormat } from '@/components/ui/PercentFormat';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FacilityScheduleSettings, Resource, ScheduleEvent } from '../../FacilitySchedule.schema';
 import {
   createEventIndexes,
@@ -32,6 +33,7 @@ export function MonthView({
   selectedGroupId,
   onDayClick,
 }: MonthViewProps) {
+  const { t } = useTranslation();
 
   const { filteredResources, filteredEvents } = useMemo(() => {
     if (!selectedGroupId) {
@@ -111,7 +113,15 @@ export function MonthView({
   const weekdayHeaders = useMemo(() => {
     const headers: string[] = [];
     const startDay = settings.weekStartsOn === 0 ? 0 : 1;
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdays = [
+      t('days_short_sun'),
+      t('days_short_mon'),
+      t('days_short_tue'),
+      t('days_short_wed'),
+      t('days_short_thu'),
+      t('days_short_fri'),
+      t('days_short_sat')
+    ];
 
     for (let i = 0; i < 7; i++) {
       const index = (startDay + i) % 7;

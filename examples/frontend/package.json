@@ -14,7 +14,10 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-i18next": "^16.5.0",
-        "regular-calendar": "file:../.."
+        "regular-calendar": "file:../..",
+        "react-hook-form": "^7.51.3",
+        "zod": "^3.22.4",
+        "@hookform/resolvers": "^3.3.4"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.18",

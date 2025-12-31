@@ -14,7 +14,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { DateDisplay as DateFormat } from '@/components/ui/DateDisplay';
 import { Icons } from '@/components/ui/Icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   FacilityScheduleSettings,
   Resource,
@@ -29,6 +30,7 @@ import { DayView } from './components/DayView/DayView';
 import { MonthView } from './components/MonthView/MonthView';
 import { ViewSelector } from '@/components/ui/ViewSelector';
 import { WeekView } from './components/WeekView/WeekView';
+
 
 export interface FacilityScheduleProps {
   // Data
@@ -67,6 +69,11 @@ export interface FacilityScheduleProps {
   // Custom header slots
   headerLeft?: React.ReactNode;
   headerRight?: React.ReactNode;
+
+  // Persistence & Defaults
+  defaultView?: ViewMode;
+  enablePersistence?: boolean;
+  storageKey?: string;
 }
 
 export function FacilitySchedule({
@@ -89,17 +96,47 @@ export function FacilitySchedule({
   components,
   headerLeft,
   headerRight,
+  defaultView = 'day',
+  enablePersistence = false,
+  storageKey = 'facility-schedule-view',
 }: FacilityScheduleProps) {
+  const { t } = useTranslation();
 
   // Internal State
   const [internalDate, setInternalDate] = useState(new Date());
-  const [internalViewMode, setInternalViewMode] = useState<ViewMode>('day');
+
+  // Initialize view state with persistence logic
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>(() => {
+    if (enablePersistence && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved && ['day', 'week', 'month'].includes(saved)) {
+          return saved as ViewMode;
+        }
+      } catch (e) {
+        console.warn('Failed to load schedule view from localStorage', e);
+      }
+    }
+    return defaultView;
+  });
+
   const [internalSelectedGroupId, setInternalSelectedGroupId] = useState<string | null>(null);
 
   // Derived State
   const currentDate = propCurrentDate ?? internalDate;
   const viewMode = propViewMode ?? internalViewMode;
   const selectedGroupId = propSelectedGroupId !== undefined ? propSelectedGroupId : internalSelectedGroupId;
+
+  // Persist view changes
+  useEffect(() => {
+    if (enablePersistence && !propViewMode && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(storageKey, internalViewMode);
+      } catch (e) {
+        console.warn('Failed to save schedule view to localStorage', e);
+      }
+    }
+  }, [internalViewMode, enablePersistence, storageKey, propViewMode]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -187,9 +224,10 @@ export function FacilitySchedule({
   }, [resources, effectiveGroupId]);
 
   const filteredEvents = useMemo(() => {
-    return effectiveGroupId
+    const result = effectiveGroupId
       ? events.filter((e) => e.groupId === effectiveGroupId)
       : events;
+    return result;
   }, [events, effectiveGroupId]);
 
   return (
@@ -201,7 +239,7 @@ export function FacilitySchedule({
             <Icons.ChevronLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" onClick={handleToday}>
-            Today
+            {t('today_button')}
           </Button>
           <Button variant="outline" size="icon" onClick={() => handleDateNavigate('next')}>
             <Icons.ChevronRight className="h-4 w-4" />
@@ -218,9 +256,12 @@ export function FacilitySchedule({
             <Select
               value={effectiveGroupId ?? undefined}
               onValueChange={handleGroupChange}
+              disabled={isLoading || groups.length === 0}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select Group" />
+                <SelectValue placeholder="Select Group">
+                  {groups.find(g => g.id === effectiveGroupId)?.name || ''}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {groups.map(g => (
@@ -233,9 +274,9 @@ export function FacilitySchedule({
             currentView={viewMode}
             onViewChange={handleViewChange}
             options={[
-              { value: 'day', label: 'Day' },
-              { value: 'week', label: 'Week' },
-              { value: 'month', label: 'Month' },
+              { value: 'day', label: t('view_day') },
+              { value: 'week', label: t('view_week') },
+              { value: 'month', label: t('view_month') },
             ]}
           />
           {headerRight}

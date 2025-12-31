@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { DateDisplay as DateFormat } from '@/components/ui/DateDisplay';
 import { Icons } from '@/components/ui/Icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DayView } from './components/DayView/DayView';
 import { MonthView } from './components/MonthView/MonthView';
@@ -34,6 +34,11 @@ export interface RegularCalendarProps {
     // Custom header slots
     headerLeft?: React.ReactNode;
     headerRight?: React.ReactNode;
+
+    // Persistence & Defaults
+    defaultView?: ViewMode;
+    enablePersistence?: boolean;
+    storageKey?: string;
 }
 
 export function RegularCalendar({
@@ -50,16 +55,44 @@ export function RegularCalendar({
     className,
     headerLeft,
     headerRight,
+    defaultView = 'week',
+    enablePersistence = false,
+    storageKey = 'regular-calendar-view'
 }: RegularCalendarProps) {
     const { t } = useTranslation();
 
     // Internal State
     const [internalDate, setInternalDate] = useState(new Date());
-    const [internalViewMode, setInternalViewMode] = useState<ViewMode>('month');
+
+    // Initialize view state with persistence logic
+    const [internalViewMode, setInternalViewMode] = useState<ViewMode>(() => {
+        if (enablePersistence && typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (saved && ['day', 'week', 'month'].includes(saved)) {
+                    return saved as ViewMode;
+                }
+            } catch (e) {
+                console.warn('Failed to load calendar view from localStorage', e);
+            }
+        }
+        return defaultView;
+    });
 
     // Derived State
     const currentDate = propCurrentDate ?? internalDate;
     const viewMode = propViewMode ?? internalViewMode;
+
+    // Persist view changes
+    useEffect(() => {
+        if (enablePersistence && !propViewMode && typeof window !== 'undefined') {
+            try {
+                localStorage.setItem(storageKey, internalViewMode);
+            } catch (e) {
+                console.warn('Failed to save calendar view to localStorage', e);
+            }
+        }
+    }, [internalViewMode, enablePersistence, storageKey, propViewMode]);
 
     // Helpers
     const handleDateNavigate = (direction: 'prev' | 'next') => {
@@ -83,8 +116,11 @@ export function RegularCalendar({
     };
 
     const handleViewChange = (mode: ViewMode) => {
-        if (onViewChange) onViewChange(mode);
-        else setInternalViewMode(mode);
+        if (onViewChange) {
+            onViewChange(mode);
+        } else {
+            setInternalViewMode(mode);
+        }
     };
 
     // Event Handlers Wrapper
@@ -119,7 +155,7 @@ export function RegularCalendar({
                         <Icons.ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" onClick={handleToday}>
-                        Today
+                        {t('today_button')}
                     </Button>
                     <Button variant="outline" size="icon" onClick={() => handleDateNavigate('next')}>
                         <Icons.ChevronRight className="h-4 w-4" />
@@ -136,9 +172,9 @@ export function RegularCalendar({
                         currentView={viewMode}
                         onViewChange={handleViewChange}
                         options={[
-                            { value: 'day', label: t('views.day') },
-                            { value: 'week', label: t('views.week') },
-                            { value: 'month', label: t('views.month') },
+                            { value: 'day', label: t('view_day') },
+                            { value: 'week', label: t('view_week') },
+                            { value: 'month', label: t('view_month') },
                         ]}
                     />
                     {headerRight}

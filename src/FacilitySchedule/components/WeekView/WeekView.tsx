@@ -93,7 +93,12 @@ export function WeekView({
   const eventsByDay = useMemo(() => {
     const map = new Map<string, ScheduleEvent[]>();
     for (const day of weekDays) {
-      const dayEvents = sortEventsByTime(getEventsByDay(day, eventIndexes));
+      // Sort: AllDay first, then by time
+      const dayEvents = getEventsByDay(day, eventIndexes).sort((a, b) => {
+        if (a.isAllDay && !b.isAllDay) return -1;
+        if (!a.isAllDay && b.isAllDay) return 1;
+        return a.startDate.getTime() - b.startDate.getTime();
+      });
       const key = getDayKey(day);
       map.set(key, dayEvents);
     }
@@ -246,7 +251,8 @@ export function WeekView({
                             >
                               <span className="font-medium">
                                 {event.hasConflict && '⚠️ '}
-                                {startTime} {event.title}
+                                {!event.isAllDay && startTime + ' '}
+                                {event.title}
                               </span>
                             </button>
                           );

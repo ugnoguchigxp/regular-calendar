@@ -15,12 +15,14 @@ export const ScheduleEventSchema = z.object({
   resourceId: z.string(), // Was positionId
   groupId: z.string(), // Was roomId
   title: z.string(), // Was patientName
+  attendee: z.string(),
   startDate: z.date(),
   endDate: z.date(),
   status: z.string(), // Generic status
   description: z.string().optional(),
   note: z.string().optional(),
   color: z.string().optional(),
+  isAllDay: z.boolean().optional(),
 
   // Extension for app-specific data
   extendedProps: z.record(z.string(), z.any()).optional(),

@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { nanoid } from 'nanoid';
 import { db, ensureTables } from './db';
 import { events, groups, resources } from './db/schema';
 import { eq } from 'drizzle-orm';
@@ -46,7 +47,7 @@ app.post('/api/events', async (c) => {
     const body = await c.req.json();
     const newEventId = crypto.randomUUID();
 
-    // Infer groupId from resource if not provided
+    // Infer groupId from resource if not provided and resourceId exists
     let groupId = body.groupId;
     if (!groupId && body.resourceId) {
         const resource = await db.select().from(resources).where(eq(resources.id, body.resourceId)).get();
@@ -55,25 +56,25 @@ app.post('/api/events', async (c) => {
         }
     }
 
-    const toInsert = {
-        id: newEventId,
-        title: body.title,
+    const newEvent = {
+        id: nanoid(),
         resourceId: body.resourceId,
-        groupId: groupId,
+        groupId: groupId, // Added groupId here
+        title: body.title,
         startDate: body.startDate,
         endDate: body.endDate,
-        status: body.status || 'booked',
+        attendee: body.attendee,
+        status: body.status || 'booked', // Default status if not provided
         note: body.note,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        isAllDay: body.isAllDay ?? body.extendedProps?.isAllDay ?? false, // Handle both root and props during transition
+        extendedProps: body.extendedProps, // Drizzle handles JSON stringification
+        createdAt: new Date(), // Added createdAt
+        updatedAt: new Date(), // Added updatedAt
     };
 
-    await db.insert(events).values(toInsert);
-
-    // Return the created object
-    // Drizzle with SQLite returns result object, not the row by default unless used with returning()
-    // But bun-sqlite returning() support might vary, so let's just return what we inserted.
-    return c.json(toInsert, 201);
+    const result = await db.insert(events).values(newEvent).returning();
+    console.log('Created event:', result[0]);
+    return c.json(result[0], 201); // Return the created object with 201 status
 });
 
 app.put('/api/events/:id', async (c) => {
@@ -85,15 +86,17 @@ app.put('/api/events/:id', async (c) => {
         updatedAt: new Date(),
     };
 
-    // Remove undefined fields if any, generic clean up might be needed but for example we assume full body or partials handled by valid keys
-    // For safety, let's explicitly map allowed fields to avoid error if body has extras
+    // Explicitly allow extendedProps update
     const cleanUpdate: any = {};
     if (body.title !== undefined) cleanUpdate.title = body.title;
+    if (body.attendee !== undefined) cleanUpdate.attendee = body.attendee;
     if (body.resourceId !== undefined) cleanUpdate.resourceId = body.resourceId;
     if (body.startDate !== undefined) cleanUpdate.startDate = body.startDate;
     if (body.endDate !== undefined) cleanUpdate.endDate = body.endDate;
     if (body.status !== undefined) cleanUpdate.status = body.status;
     if (body.note !== undefined) cleanUpdate.note = body.note;
+    if (body.isAllDay !== undefined) cleanUpdate.isAllDay = body.isAllDay;
+    if (body.extendedProps !== undefined) cleanUpdate.extendedProps = body.extendedProps;
     cleanUpdate.updatedAt = new Date();
 
     await db.update(events)

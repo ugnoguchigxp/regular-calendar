@@ -86,13 +86,21 @@ export function SmartRegularCalendar({ settings }: Props) {
     return (
         <>
             <RegularCalendar
-                events={events}
+                events={events.map(e => ({
+                    ...e,
+                    // Ensure isAllDay is propagated from extendedProps if missing at root
+                    isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false
+                }))}
                 settings={mergedSettings}
                 isLoading={loading}
                 onEventClick={handleEventClick}
                 onTimeSlotClick={handleTimeSlotClick}
                 onDateClick={handleTimeSlotClick}
+                enablePersistence={true}
+                defaultView="week"
+                storageKey="regular-calendar-demo-view"
             />
+
 
             <EventModal
                 isOpen={isModalOpen}
