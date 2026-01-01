@@ -100,6 +100,22 @@ export function SettingsModal({
                     </div>
                 </div>
 
+                {/* TimeZone (New) */}
+                <div style={sectionStyle}>
+                    <label style={labelStyle}>TimeZone</label>
+                    <select
+                        value={settings.timeZone || 'Asia/Tokyo'}
+                        onChange={e => update({ timeZone: e.target.value })}
+                        style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
+                    >
+                        <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                        <option value="UTC">UTC</option>
+                        <option value="America/New_York">America/New_York (ET)</option>
+                        <option value="Europe/London">Europe/London (GMT/BST)</option>
+                        <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                    </select>
+                </div>
+
                 {/* Theme */}
                 <div style={sectionStyle}>
                     <label style={labelStyle}>{t('settings_theme')}</label>

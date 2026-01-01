@@ -111,10 +111,10 @@ export function WeekView({
             const dayEvents = getEventsForDate(timedEvents, date);
             return {
                 date: date.toISOString(),
-                events: calculateEventsWithLayout(dayEvents, timeInterval, startHour),
+                events: calculateEventsWithLayout(dayEvents, timeInterval, startHour, settings.timeZone),
             };
         });
-    }, [weekDates, timedEvents, timeInterval, startHour]);
+    }, [weekDates, timedEvents, timeInterval, startHour, settings.timeZone]);
 
     return (
         <div className="flex flex-col h-full bg-background text-foreground">
@@ -223,6 +223,7 @@ export function WeekView({
                                         startHour={startHour}
                                         endHour={endHour}
                                         relative={true}
+                                        timeZone={settings.timeZone}
                                     />
 
                                     {timeSlots.map((timeSlot) => (

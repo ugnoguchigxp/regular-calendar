@@ -8,6 +8,7 @@ export interface AppSettings {
     businessHoursEnd: string; // "HH:mm"
     closedDays: number[]; // 0-6 (Sunday=0)
     language: 'ja' | 'en';
+    timeZone: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -20,4 +21,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
     businessHoursEnd: '18:00',
     closedDays: [0, 6], // Sunday and Saturday
     language: 'ja',
+    timeZone: 'Asia/Tokyo',
 };

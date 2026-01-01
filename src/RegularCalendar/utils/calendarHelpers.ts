@@ -57,11 +57,11 @@ export const generateTimeSlots = (
 /**
  * Get current time position in pixels
  */
-export const getCurrentTimePosition = (interval = 30, startHour = 8): number => {
+export const getCurrentTimePosition = (interval = 30, startHour = 8, timeZone = 'Asia/Tokyo'): number => {
     const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const totalMinutes = hours * 60 + minutes;
+    const { hour, minute } = getTimeInTimeZone(now, timeZone);
+
+    const totalMinutes = hour * 60 + minute;
     const startMinutes = startHour * 60;
     const relativeMinutes = totalMinutes - startMinutes;
 
@@ -71,10 +71,10 @@ export const getCurrentTimePosition = (interval = 30, startHour = 8): number => 
     return (relativeMinutes / 60) * hourHeight;
 };
 
-export const isCurrentTimeInRange = (startHour = 8, endHour = 20): boolean => {
+export const isCurrentTimeInRange = (startHour = 8, endHour = 20, timeZone = 'Asia/Tokyo'): boolean => {
     const now = new Date();
-    const hours = now.getHours();
-    return hours >= startHour && hours < endHour;
+    const { hour } = getTimeInTimeZone(now, timeZone);
+    return hour >= startHour && hour < endHour;
 };
 
 export const getEventsForDate = (
@@ -119,23 +119,53 @@ export const getMonthCalendarGrid = (date: Date, weekStartsOn: 0 | 1): Date[][] 
 };
 
 /**
+ * Get hour and minute in specific timezone
+ */
+export const getTimeInTimeZone = (date: Date, timeZone: string = 'Asia/Tokyo'): { hour: number; minute: number } => {
+    try {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone
+        });
+        const parts = formatter.formatToParts(date);
+        const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+        const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+
+        // Handle 24:00 edge case if any (Intl usually returns 00:00 for midnight)
+        return { hour: hour === 24 ? 0 : hour, minute };
+    } catch (e) {
+        // Fallback to local time if timezone is invalid
+        console.error(`Invalid timezone: ${timeZone}`, e);
+        return { hour: date.getHours(), minute: date.getMinutes() };
+    }
+};
+
+/**
  * Calculate event position and height
  */
 export const calculateEventPosition = (
     event: ScheduleEvent,
     timeInterval = 30,
-    startHour = 8
+    startHour = 8,
+    timeZone = 'Asia/Tokyo'
 ): { top: number; height: number } => {
     const startTime = event.startDate;
     const endTime = event.endDate;
 
-    const startHourVal = startTime.getHours();
-    const startMinute = startTime.getMinutes();
-    const endHour = endTime.getHours();
-    const endMinute = endTime.getMinutes();
+    const start = getTimeInTimeZone(startTime, timeZone);
+    const end = getTimeInTimeZone(endTime, timeZone);
 
-    const startTotalMinutes = startHourVal * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
+    const startTotalMinutes = start.hour * 60 + start.minute;
+    let endTotalMinutes = end.hour * 60 + end.minute;
+
+    // Handle day crossing (if end time is smaller than start time, add 24 hours)
+    // Note: This is a simple handling. For multi-day events, more complex logic is needed at View component level.
+    if (endTotalMinutes < startTotalMinutes) {
+        endTotalMinutes += 24 * 60;
+    }
+
     const durationMinutes = endTotalMinutes - startTotalMinutes;
 
     const slotsPerHour = 60 / timeInterval;
@@ -188,79 +218,125 @@ export interface EventWithLayout {
     totalColumns: number; // total columns in this overlap group
 }
 
-/**
- * Check if two events overlap in time
- */
-const eventsOverlap = (a: ScheduleEvent, b: ScheduleEvent): boolean => {
-    const aStart = a.startDate.getTime();
-    const aEnd = a.endDate.getTime();
-    const bStart = b.startDate.getTime();
-    const bEnd = b.endDate.getTime();
-    return aStart < bEnd && aEnd > bStart;
-};
+
 
 /**
  * Calculate event layout with overlap handling
+ * Uses a cluster-based approach to ensure consistent widths for connected events
  */
 export const calculateEventsWithLayout = (
     events: ScheduleEvent[],
     timeInterval: number,
-    startHour: number
+    startHour: number,
+    timeZone: string = 'Asia/Tokyo'
 ): EventWithLayout[] => {
     if (events.length === 0) return [];
 
-    // Sort events by start time, then by duration (longer first)
-    const sorted = [...events].sort((a, b) => {
-        const startDiff = a.startDate.getTime() - b.startDate.getTime();
+    // Ensure all dates are valid Date objects for comparison
+    type NormalizedEvent = ScheduleEvent & { _start: number; _end: number };
+    const normalizedEvents: NormalizedEvent[] = events.map(e => ({
+        ...e,
+        _start: new Date(e.startDate).getTime(),
+        _end: new Date(e.endDate).getTime()
+    }));
+
+    // Local overlap check using timestamps
+    const checkOverlap = (a: NormalizedEvent, b: NormalizedEvent) => {
+        return a._start < b._end && a._end > b._start;
+    };
+
+    // 1. Sort events: Start time asc, then duration desc
+    const sorted = [...normalizedEvents].sort((a, b) => {
+        const startDiff = a._start - b._start;
         if (startDiff !== 0) return startDiff;
-        // Longer events first
-        const aDuration = a.endDate.getTime() - a.startDate.getTime();
-        const bDuration = b.endDate.getTime() - b.startDate.getTime();
-        return bDuration - aDuration;
+        return (b._end - b._start) - (a._end - a._start);
     });
 
-    // Build overlap groups using a greedy column assignment
-    const result: EventWithLayout[] = [];
-    const columns: ScheduleEvent[][] = []; // columns[i] = events in column i
-
-    for (const event of sorted) {
-        // Find the first column where this event doesn't overlap with ANY existing event in that column
-        let assignedColumn = -1;
-
-        for (let col = 0; col < columns.length; col++) {
-            // Check against ALL events in this column, not just the last one
-            const hasOverlap = columns[col].some(existingEvent => eventsOverlap(existingEvent, event));
-            if (!hasOverlap) {
-                assignedColumn = col;
-                columns[col].push(event);
-                break;
+    // 2. Build adjacency list (graph) for overlaps
+    const adjacency: number[][] = Array.from({ length: sorted.length }, () => []);
+    for (let i = 0; i < sorted.length; i++) {
+        for (let j = i + 1; j < sorted.length; j++) {
+            if (checkOverlap(sorted[i], sorted[j])) {
+                adjacency[i].push(j);
+                adjacency[j].push(i);
             }
         }
+    }
 
-        // If no column found, create a new one
-        if (assignedColumn === -1) {
-            assignedColumn = columns.length;
-            columns.push([event]);
+    // 3. Find connected components (clusters)
+    const visited = new Set<number>();
+    const clusters: number[][] = [];
+
+    for (let i = 0; i < sorted.length; i++) {
+        if (visited.has(i)) continue;
+
+        const cluster: number[] = [];
+        const queue = [i];
+        visited.add(i);
+
+        while (queue.length > 0) {
+            const current = queue.shift()!;
+            cluster.push(current);
+            for (const neighbor of adjacency[current]) {
+                if (!visited.has(neighbor)) {
+                    visited.add(neighbor);
+                    queue.push(neighbor);
+                }
+            }
         }
+        clusters.push(cluster);
+    }
 
-        result.push({
-            event,
-            position: calculateEventPosition(event, timeInterval, startHour),
-            column: assignedColumn,
-            totalColumns: 0, // Will be updated after all events are processed
+    // 4. Assign columns within each cluster
+    const result: EventWithLayout[] = [];
+
+    clusters.forEach(clusterIndices => {
+        // Sort indices by startTime again just to be safe (though logic works on sorted array)
+        clusterIndices.sort((a, b) => sorted[a]._start - sorted[b]._start);
+
+        const columns: number[][] = []; // columns[colIndex] = [eventIndex, eventIndex, ...]
+        const eventColumns = new Map<number, number>(); // eventIndex -> colIndex
+
+        clusterIndices.forEach(eventIdx => {
+            const event = sorted[eventIdx];
+            let assignedCol = -1;
+
+            // Try to find first column where this event fits
+            for (let c = 0; c < columns.length; c++) {
+                const lastEventIdxInCol = columns[c][columns[c].length - 1];
+                const lastEvent = sorted[lastEventIdxInCol];
+                // Check if fits after the last event in this column
+                // Strict check: start >= end
+                if (event._start >= lastEvent._end) {
+                    assignedCol = c;
+                    break;
+                }
+            }
+
+            if (assignedCol === -1) {
+                assignedCol = columns.length;
+                columns.push([]);
+            }
+
+            columns[assignedCol].push(eventIdx);
+            eventColumns.set(eventIdx, assignedCol);
         });
-    }
 
-    // Calculate totalColumns for each event based on overlapping events
-    for (const item of result) {
-        // Find all events that overlap with this one
-        const overlappingEvents = result.filter(other =>
-            eventsOverlap(item.event, other.event)
-        );
-        // The max column among overlapping events + 1 = total columns
-        const maxColumn = Math.max(...overlappingEvents.map(e => e.column));
-        item.totalColumns = maxColumn + 1;
-    }
+        // 5. Calculate position and finalize
+        const maxColumns = columns.length;
+        clusterIndices.forEach(eventIdx => {
+            const event = sorted[eventIdx];
+            const col = eventColumns.get(eventIdx)!;
+            const position = calculateEventPosition(event, timeInterval, startHour, timeZone);
+
+            result.push({
+                event: events.find(e => e.id === event.id)!, // Map back to original event object to avoid type loss
+                column: col,
+                totalColumns: maxColumns,
+                position
+            });
+        });
+    });
 
     return result;
 };

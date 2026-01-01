@@ -145,6 +145,7 @@ function App() {
                         onSelectionChange={setSelectedPersonnelIds}
                         onPriorityChange={updatePersonnelPriority}
                         className="h-full"
+                        colorMap={personnelColorMap}
                     />
                 </ResizablePanel>
 

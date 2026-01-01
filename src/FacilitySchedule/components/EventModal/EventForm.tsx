@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import type { Resource, ResourceGroup, ScheduleEvent } from '../../FacilitySchedule.schema';
+import type { Personnel } from '../../../PersonnelPanel/PersonnelPanel.schema';
 import { checkScheduleConflict } from '../../utils/scheduleHelpers';
 import { Checkbox } from '@/components/ui/Checkbox';
 
@@ -84,6 +85,7 @@ interface EventFormProps {
   onCancel: () => void;
   onDelete?: () => void;
   readOnlyResource?: boolean;
+  personnel?: Personnel[];
 }
 
 export function EventForm({
@@ -97,6 +99,7 @@ export function EventForm({
   onCancel,
   onDelete,
   readOnlyResource = false,
+  personnel = [],
 }: EventFormProps) {
   const { t } = useTranslation();
   const isEditMode = !!event;
@@ -188,22 +191,66 @@ export function EventForm({
           )}
         />
 
-        {/* Attendee - Hidden as requested */}
-        {/*
+        {/* Attendee */}
         <FormField
           control={form.control}
           name="attendee"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('attendee_label') || 'Attendee'} <span className="text-red-500">*</span></FormLabel>
-              <FormControl>
-                <Input {...field} placeholder={t('attendee_placeholder') || 'Enter attendee name'} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const inputValue = field.value || '';
+            const lastSegment = inputValue.split(/,|、/).pop()?.trim() || ''; // Support both comma types
+            const showSuggestions = lastSegment.length > 0;
+
+            const filteredPersonnel = showSuggestions
+              ? (personnel || []).filter(p =>
+                p.name.toLowerCase().includes(lastSegment.toLowerCase()) ||
+                (p.department && p.department.toLowerCase().includes(lastSegment.toLowerCase()))
+              ).slice(0, 5) // Limit to 5 suggestions
+              : [];
+
+            const handleSelect = (p: Personnel) => {
+              const segments = inputValue.split(/,|、/);
+              segments.pop(); // Remove partial input
+              segments.push(p.name);
+              const newValue = segments.map(s => s.trim()).filter(s => s).join(', ') + ', ';
+              field.onChange(newValue);
+              // Focus back to input is handled automatically
+            };
+
+            return (
+              <FormItem className="relative">
+                <FormLabel>{t('attendee_label') || 'Attendee'} <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <div>
+                    <Input
+                      {...field}
+                      placeholder={t('attendee_placeholder') || 'Enter attendee name'}
+                      autoComplete="off"
+                    />
+                    {filteredPersonnel.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground border border-border rounded-md shadow-md overflow-hidden animate-in fade-in-0 zoom-in-95">
+                        {filteredPersonnel.map(p => (
+                          <div
+                            key={p.id}
+                            className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground flex justify-between items-center"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleSelect(p);
+                            }}
+                          >
+                            <span className="font-medium">{p.name}</span>
+                            {p.department && <span className="text-xs text-muted-foreground ml-2">{p.department}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
-        */}
 
         {/* Resource Selection */}
         <FormField

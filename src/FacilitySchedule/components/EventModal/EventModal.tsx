@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Resource, ResourceGroup, ScheduleEvent } from '../../FacilitySchedule.schema';
+import type { Personnel } from '../../../PersonnelPanel/PersonnelPanel.schema';
 
 import { EventForm, type EventFormData } from './EventForm';
 
@@ -17,6 +18,7 @@ interface EventModalProps {
   resources: Resource[];
   groups: ResourceGroup[];
   events: ScheduleEvent[];
+  personnel?: Personnel[];
 
   defaultResourceId?: string;
   defaultStartTime?: Date;
@@ -39,6 +41,7 @@ export function EventModal({
   onSave,
   onDelete,
   readOnlyResource,
+  personnel = [],
 }: EventModalProps) {
   const { t } = useTranslation();
   const isEditMode = !!event;
@@ -116,6 +119,7 @@ export function EventModal({
           resources={resources}
           groups={groups}
           events={events}
+          personnel={personnel}
           defaultResourceId={defaultResourceId}
           defaultStartTime={defaultStartTime}
           onSubmit={onSave}

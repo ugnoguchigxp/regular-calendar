@@ -50,9 +50,9 @@ export function DayView({
         () =>
             timeEvents.map((event) => ({
                 event,
-                position: calculateEventPosition(event, timeInterval, startHour),
+                position: calculateEventPosition(event, timeInterval, startHour, settings.timeZone),
             })),
-        [timeEvents, timeInterval, startHour]
+        [timeEvents, timeInterval, startHour, settings.timeZone]
     );
 
     const today = new Date();
@@ -148,6 +148,7 @@ export function DayView({
                             startHour={startHour}
                             endHour={endHour}
                             relative={true}
+                            timeZone={settings.timeZone}
                         />
 
                         {/* Slots Background */}

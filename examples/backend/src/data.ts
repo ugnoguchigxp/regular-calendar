@@ -123,13 +123,23 @@ personnel.forEach((person) => {
         const eventDay = String(eventDate.getDate()).padStart(2, '0');
         const dateStr = `${eventYear}-${eventMonth}-${eventDay}`;
 
-        // Random start hour between 8-17
+        // Random start hour (8-17) and minute (0, 15, 30, 45)
         const startHour = Math.floor(Math.random() * 10) + 8;
-        // Duration: 30min, 1h, 1.5h, 2h
-        const durations = [30, 60, 90, 120];
-        const duration = durations[Math.floor(Math.random() * durations.length)];
-        const endHour = startHour + Math.floor(duration / 60);
-        const endMin = duration % 60;
+        const startMinute = Math.floor(Math.random() * 4) * 15;
+
+        // Duration: Random between 30 and 180 minutes (3 hours) in 15-min steps
+        // (180 - 30) / 15 = 10 steps. +1 for inclusive range -> 11 options
+        const durationSteps = Math.floor(Math.random() * 11);
+        const duration = 30 + (durationSteps * 15);
+
+        let endHour = startHour + Math.floor((startMinute + duration) / 60);
+        let endMinute = (startMinute + duration) % 60;
+
+        // Cap at 23:59 if overflows (simple cap)
+        if (endHour >= 24) {
+            endHour = 23;
+            endMinute = 59;
+        }
 
         const title = eventTitles[Math.floor(Math.random() * eventTitles.length)];
 
@@ -142,8 +152,8 @@ personnel.forEach((person) => {
             groupId: null,
             title: `${title}`,
             attendee: person.name,
-            startDate: isAllDay ? `${dateStr}T00:00:00` : `${dateStr}T${String(startHour).padStart(2, '0')}:00:00`,
-            endDate: isAllDay ? `${dateStr}T23:59:59` : `${dateStr}T${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}:00`,
+            startDate: isAllDay ? `${dateStr}T00:00:00` : `${dateStr}T${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}:00`,
+            endDate: isAllDay ? `${dateStr}T23:59:59` : `${dateStr}T${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00`,
             status: 'booked',
             isAllDay,
             extendedProps: { personnelId: person.id },

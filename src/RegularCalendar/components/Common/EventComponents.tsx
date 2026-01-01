@@ -82,7 +82,7 @@ export const EventItem: React.FC<EventItemProps> = ({
         absolute rounded px-1 py-1 text-sm cursor-pointer
         transition-all select-none
         active:scale-95
-        ${isDragging ? 'opacity-50 z-50' : 'hover:shadow-md z-10'}
+        ${isDragging ? 'opacity-50' : 'hover:shadow-md'}
       `}
             style={{
                 top: `${position.top}px`,
@@ -92,6 +92,7 @@ export const EventItem: React.FC<EventItemProps> = ({
                 width: `calc(${widthPercent}% - 4px)`,
                 backgroundColor: event.color || '#3b82f6',
                 color: 'white',
+                zIndex: isDragging ? 50 : 10 + column,
             }}
         >
             <div className="font-medium truncate text-xs">{title}</div>

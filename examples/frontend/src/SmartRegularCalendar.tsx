@@ -23,7 +23,8 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
         error,
         createEvent,
         updateEvent,
-        deleteEvent
+        deleteEvent,
+        personnel,
     } = useScheduleApi();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,9 +45,11 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
     // Merge API settings with local settings
     const mergedSettings = {
         ...apiSettings,
+        defaultDuration: 30, // Force 30 minute grid/slot duration
         weekStartsOn: settings.weekStartsOn,
         startTime: settings.businessHoursStart,
         endTime: settings.businessHoursEnd,
+        timeZone: settings.timeZone,
     };
 
     const handleTimeSlotClick = (date: Date) => {
@@ -117,6 +120,7 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
                 resources={resources}
                 groups={groups}
                 events={events}
+                personnel={personnel}
             />
         </>
     );

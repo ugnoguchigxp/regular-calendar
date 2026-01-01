@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { Personnel } from './PersonnelPanel.schema';
 import { PersonnelContextMenu } from './PersonnelContextMenu';
-import { getPersonnelColor } from './personnelColors';
 
 interface PersonnelPanelProps {
     personnel: Personnel[];
@@ -9,6 +8,7 @@ interface PersonnelPanelProps {
     onSelectionChange: (ids: string[]) => void;
     onPriorityChange: (id: string, priority: number) => void;
     className?: string;
+    colorMap?: Map<string, string>;
 }
 
 export function PersonnelPanel({
@@ -17,21 +17,13 @@ export function PersonnelPanel({
     onSelectionChange,
     onPriorityChange,
     className = '',
+    colorMap = new Map(),
 }: PersonnelPanelProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [contextMenu, setContextMenu] = useState<{
         personnel: Personnel | null;
         position: { x: number; y: number } | null;
     }>({ personnel: null, position: null });
-
-    // Create color map for selected personnel
-    const colorMap = useMemo(() => {
-        const map = new Map<string, string>();
-        selectedIds.forEach((id, index) => {
-            map.set(id, getPersonnelColor(index));
-        });
-        return map;
-    }, [selectedIds]);
 
     // Filter personnel by search query
     const filteredPersonnel = useMemo(() => {

@@ -16,6 +16,8 @@ interface CurrentTimeLineProps {
     endHour: number;
     /** Relative positioning */
     relative?: boolean;
+    /** Time Zone */
+    timeZone?: string;
 }
 
 /**
@@ -27,6 +29,7 @@ export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
     startHour,
     endHour,
     relative = false,
+    timeZone = 'Asia/Tokyo',
 }) => {
     // State to force re-render/update position
     const [now, setNow] = React.useState(new Date());
@@ -40,11 +43,11 @@ export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
         return () => clearInterval(timer);
     }, []);
 
-    if (!isToday || !isCurrentTimeInRange(startHour, endHour)) {
+    if (!isToday || !isCurrentTimeInRange(startHour, endHour, timeZone)) {
         return null;
     }
 
-    const position = getCurrentTimePosition(interval, startHour);
+    const position = getCurrentTimePosition(interval, startHour, timeZone);
 
     return (
         <>
