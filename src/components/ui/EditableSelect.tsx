@@ -36,7 +36,27 @@ export const EditableSelect = React.forwardRef<HTMLInputElement, IEditableSelect
         ref
     ) => {
         const [isOpen, setIsOpen] = React.useState(false);
+        const [activeIndex, setActiveIndex] = React.useState(-1);
         const containerRef = React.useRef<HTMLDivElement>(null);
+        const listRef = React.useRef<HTMLDivElement>(null);
+
+        // Reset or sync active index when opening
+        React.useEffect(() => {
+            if (isOpen) {
+                const index = options.indexOf(value as any);
+                setActiveIndex(index >= 0 ? index : -1);
+            }
+        }, [isOpen, value, options]);
+
+        // Scroll into view when active index changes
+        React.useEffect(() => {
+            if (isOpen && activeIndex >= 0 && listRef.current) {
+                const activeItem = listRef.current.children[activeIndex] as HTMLElement;
+                if (activeItem) {
+                    activeItem.scrollIntoView({ block: 'nearest' });
+                }
+            }
+        }, [activeIndex, isOpen]);
 
         React.useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
@@ -54,8 +74,46 @@ export const EditableSelect = React.forwardRef<HTMLInputElement, IEditableSelect
             setIsOpen(false);
         };
 
+        const handleKeyDown = (e: React.KeyboardEvent) => {
+            if (!isOpen) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    setIsOpen(true);
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    // Allow default form submission if closed? 
+                    // Or open list? Usually Enter in input submits form.
+                    // Let's keep default behavior if closed.
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActiveIndex(prev => (prev + 1) % options.length);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActiveIndex(prev => (prev - 1 + options.length) % options.length);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (activeIndex >= 0) {
+                    handleOptionClick(options[activeIndex]);
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                setIsOpen(false);
+            }
+        };
+
         return (
-            <div className={cn('relative', className)} ref={containerRef}>
+            <div
+                className={cn('relative', className)}
+                ref={containerRef}
+                onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setIsOpen(false);
+                    }
+                }}
+            >
                 <div
                     className={cn(
                         selectTriggerVariants({ variant, size }),
@@ -70,6 +128,7 @@ export const EditableSelect = React.forwardRef<HTMLInputElement, IEditableSelect
                         type="text"
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder={placeholder}
                         disabled={disabled}
                         className={cn(
@@ -93,19 +152,25 @@ export const EditableSelect = React.forwardRef<HTMLInputElement, IEditableSelect
                 </div>
 
                 {isOpen && (
-                    <div className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-background border border-border rounded-md shadow-lg scrollbar-thin">
-                        {options.map((option) => (
+                    <div
+                        ref={listRef}
+                        className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-background border border-border rounded-md shadow-lg scrollbar-thin"
+                    >
+                        {options.map((option, index) => (
                             <button
                                 key={option}
                                 type="button"
+                                tabIndex={-1}
                                 onClick={() => handleOptionClick(option)}
+                                onMouseEnter={() => setActiveIndex(index)}
                                 className={cn(
                                     selectItemVariants({
                                         size: size as SelectItemVariants['size'],
                                         indicator: 'none',
                                         padding: 'plain',
                                     }),
-                                    'w-full text-left text-foreground hover:bg-accent hover:text-accent-foreground'
+                                    'w-full text-left text-foreground',
+                                    index === activeIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'
                                 )}
                             >
                                 {option}

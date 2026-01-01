@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/Button';
 
 import './index.css';
 
+import { ScheduleProvider } from './ScheduleContext';
+
 // Demo: "Me" is the first personnel (p1)
 const MY_PERSONNEL_ID = 'p1';
 
-function App() {
+function AppContent() {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'facility' | 'regular'>('regular');
     const { settings, updateSettings, resetSettings } = useSettings();
@@ -184,6 +186,14 @@ function App() {
                 />
             )}
         </div>
+    );
+}
+
+function App() {
+    return (
+        <ScheduleProvider>
+            <AppContent />
+        </ScheduleProvider>
     );
 }
 

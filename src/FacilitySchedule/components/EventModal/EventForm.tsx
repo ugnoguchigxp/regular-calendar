@@ -30,10 +30,11 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import type { Resource, ResourceGroup, ScheduleEvent } from '../../FacilitySchedule.schema';
+import type { Resource, ResourceGroup, ScheduleEvent, AttendeeInfo } from '../../FacilitySchedule.schema';
 import type { Personnel } from '../../../PersonnelPanel/PersonnelPanel.schema';
 import { checkScheduleConflict } from '../../utils/scheduleHelpers';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { AttendeeInput } from './AttendeeInput';
 
 // Helper for duration formatting
 const formatDuration = (hours: number) => {
@@ -49,8 +50,8 @@ const formatDuration = (hours: number) => {
 
 const eventSchema = z.object({
   title: z.string().min(1, 'required'), // Was patientId -> mapped to title
-  attendee: z.string().min(1, 'required'),
-  resourceId: z.string().min(1, 'required'),
+  attendee: z.string(), // Allow empty (will be '[]')
+  resourceId: z.string().optional(),
   startDate: z.string().min(1, 'required'),
   durationHours: z.number().min(0.25).max(24),
   status: z.string().optional(),
@@ -62,6 +63,22 @@ const eventSchema = z.object({
   endDate: z.string().optional(),
   isAllDay: z.boolean().optional(),
 });
+
+// Helper to parse attendee JSON or fallback to comma-separated string
+const parseAttendees = (str: string): AttendeeInfo[] => {
+  if (!str) return [];
+  try {
+    const parsed = JSON.parse(str);
+    if (Array.isArray(parsed)) return parsed as AttendeeInfo[];
+  } catch (e) {
+    // ignore
+  }
+  // Fallback for legacy data
+  return str.split(/,|、/).map(s => s.trim()).filter(Boolean).map(name => ({
+    name,
+    type: 'external'
+  }));
+};
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
@@ -109,7 +126,7 @@ export function EventForm({
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event?.title || '',
-      attendee: event?.attendee || '',
+      attendee: event?.attendee || '[]',
       resourceId: event?.resourceId || defaultResourceId || '',
       startDate: format(
         event?.startDate || defaultStartTime || new Date(),
@@ -167,8 +184,10 @@ export function EventForm({
 
     onSubmit({
       ...data,
+      resourceId: data.resourceId || undefined,
       startDate: start,
       endDate: end,
+      attendee: data.attendee === "[]" || !data.attendee ? "[]" : data.attendee,
     });
   };
 
@@ -195,61 +214,20 @@ export function EventForm({
         <FormField
           control={form.control}
           name="attendee"
-          render={({ field }) => {
-            const inputValue = field.value || '';
-            const lastSegment = inputValue.split(/,|、/).pop()?.trim() || ''; // Support both comma types
-            const showSuggestions = lastSegment.length > 0;
-
-            const filteredPersonnel = showSuggestions
-              ? (personnel || []).filter(p =>
-                p.name.toLowerCase().includes(lastSegment.toLowerCase()) ||
-                (p.department && p.department.toLowerCase().includes(lastSegment.toLowerCase()))
-              ).slice(0, 5) // Limit to 5 suggestions
-              : [];
-
-            const handleSelect = (p: Personnel) => {
-              const segments = inputValue.split(/,|、/);
-              segments.pop(); // Remove partial input
-              segments.push(p.name);
-              const newValue = segments.map(s => s.trim()).filter(s => s).join(', ') + ', ';
-              field.onChange(newValue);
-              // Focus back to input is handled automatically
-            };
-
-            return (
-              <FormItem className="relative">
-                <FormLabel>{t('attendee_label') || 'Attendee'} <span className="text-red-500">*</span></FormLabel>
-                <FormControl>
-                  <div>
-                    <Input
-                      {...field}
-                      placeholder={t('attendee_placeholder') || 'Enter attendee name'}
-                      autoComplete="off"
-                    />
-                    {filteredPersonnel.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground border border-border rounded-md shadow-md overflow-hidden animate-in fade-in-0 zoom-in-95">
-                        {filteredPersonnel.map(p => (
-                          <div
-                            key={p.id}
-                            className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground flex justify-between items-center"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleSelect(p);
-                            }}
-                          >
-                            <span className="font-medium">{p.name}</span>
-                            {p.department && <span className="text-xs text-muted-foreground ml-2">{p.department}</span>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('attendee_label') || 'Attendee'}</FormLabel>
+              <FormControl>
+                <AttendeeInput
+                  value={parseAttendees(field.value)}
+                  onChange={(val) => field.onChange(JSON.stringify(val))}
+                  personnel={personnel || []}
+                  placeholder={t('attendee_placeholder') || 'Enter attendee name'}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         {/* Resource Selection */}

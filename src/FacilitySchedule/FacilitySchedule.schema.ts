@@ -6,13 +6,20 @@ import { z } from 'zod';
 
 export const ViewModeSchema = z.enum(['day', 'week', 'month']);
 
+export const AttendeeInfoSchema = z.object({
+  name: z.string(),
+  email: z.string().optional(),
+  personnelId: z.string().optional(),
+  type: z.enum(['personnel', 'external']).default('external'),
+});
+
 // ==========================================
 // Entity Schemas
 // ==========================================
 
 export const ScheduleEventSchema = z.object({
   id: z.string(),
-  resourceId: z.string(), // Was positionId
+  resourceId: z.string().nullable().optional(), // Was positionId
   groupId: z.string(), // Was roomId
   title: z.string(), // Was patientName
   attendee: z.string(),
@@ -105,6 +112,7 @@ export interface ScheduleConflict {
 // ==========================================
 
 export type ViewMode = z.infer<typeof ViewModeSchema>;
+export type AttendeeInfo = z.infer<typeof AttendeeInfoSchema>;
 export type ScheduleEvent = z.infer<typeof ScheduleEventSchema>;
 export type Resource = z.infer<typeof ResourceSchema>;
 export type ResourceGroup = z.infer<typeof ResourceGroupSchema>;
