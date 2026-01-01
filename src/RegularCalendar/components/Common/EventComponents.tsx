@@ -36,6 +36,19 @@ interface EventItemProps {
     onEventClick?: (event: ScheduleEvent) => void;
 }
 
+// Helper to get display attendee
+const getDisplayAttendee = (attendee?: string | null): string => {
+    if (!attendee || attendee === '[]' || attendee === '') return '自分のみ';
+    try {
+        const parsed = JSON.parse(attendee);
+        if (Array.isArray(parsed)) {
+            const names = parsed.map((p: any) => p.name).filter(Boolean);
+            if (names.length > 0) return names.join(', ');
+        }
+    } catch { }
+    return attendee;
+};
+
 export const EventItem: React.FC<EventItemProps> = ({
     event,
     position,
@@ -57,7 +70,8 @@ export const EventItem: React.FC<EventItemProps> = ({
 
     const title = event.title;
     const locationText = getEventLocation(event);
-    const attendee = event.attendee;
+    // Use helper to allow "自分のみ" display
+    const displayAttendee = getDisplayAttendee(event.attendee);
 
     // Calculate width and left position for overlapping events
     const widthPercent = 100 / totalColumns;
@@ -96,7 +110,7 @@ export const EventItem: React.FC<EventItemProps> = ({
             }}
         >
             <div className="font-medium truncate text-xs">{title}</div>
-            {attendee && <div className="text-[10px] opacity-90 truncate">{attendee}</div>}
+            <div className="text-[10px] opacity-90 truncate">{displayAttendee}</div>
             {position.height > 60 && locationText && (
                 <div className="text-[10px] opacity-90 truncate">{locationText}</div>
             )}
@@ -151,6 +165,8 @@ interface EventDragOverlayProps {
 export const EventDragOverlay: React.FC<EventDragOverlayProps> = ({ event }) => {
     const title = event.title;
     const locationText = getEventLocation(event);
+    const displayAttendee = getDisplayAttendee(event.attendee);
+    const isSelfOnly = displayAttendee === '自分のみ';
 
     return (
         <div
@@ -162,7 +178,9 @@ export const EventDragOverlay: React.FC<EventDragOverlayProps> = ({ event }) => 
             }}
         >
             <div className="font-medium">{title}</div>
-            {event.attendee && <div className="text-xs opacity-90">with {event.attendee}</div>}
+            <div className="text-xs opacity-90">
+                {isSelfOnly ? displayAttendee : `with ${displayAttendee}`}
+            </div>
             {locationText && <div className="text-sm opacity-90">{locationText}</div>}
         </div>
     );

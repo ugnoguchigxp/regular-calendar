@@ -111,6 +111,64 @@ export interface ScheduleConflict {
 // Inferred Types
 // ==========================================
 
+export interface EventFormData {
+  title: string;
+  attendee: string;
+  resourceId?: string;
+  groupId?: string;
+  startDate: Date;
+  endDate: Date;
+  isAllDay?: boolean;
+  notes?: string;
+  description?: string;
+  color?: string;
+  [key: string]: any;
+}
+
+export interface FacilityScheduleProps {
+  // Data
+  events: ScheduleEvent[];
+  resources: Resource[];
+  groups: ResourceGroup[];
+  settings: FacilityScheduleSettings;
+
+  // State (controlled)
+  currentDate?: Date;
+  viewMode?: ViewMode;
+  selectedGroupId?: string | null;
+
+  // Actions
+  onDateChange?: (date: Date) => void;
+  onViewChange?: (view: ViewMode) => void;
+  onGroupChange?: (groupId: string | null) => void;
+
+  // CRUD Actions
+  onEventCreate?: (data: EventFormData) => void;
+  onEventUpdate?: (id: string, data: EventFormData) => void;
+  onEventDelete?: (eventId: string) => void;
+
+  // Customization
+  isLoading?: boolean;
+  className?: string;
+  hideGroupSelector?: boolean;
+
+  /**
+   * Custom components to override default internal components.
+   */
+  components?: {
+    EventModal?: React.ComponentType<any>;
+  };
+
+  // Custom header slots
+  headerLeft?: React.ReactNode;
+  headerRight?: React.ReactNode;
+
+  // Persistence & Defaults
+  defaultView?: ViewMode;
+  enablePersistence?: boolean;
+  storageKey?: string;
+}
+
 export type ViewMode = z.infer<typeof ViewModeSchema>;
 export type AttendeeInfo = z.infer<typeof AttendeeInfoSchema>;
 export type ScheduleEvent = z.infer<typeof ScheduleEventSchema>;
@@ -119,3 +177,4 @@ export type ResourceGroup = z.infer<typeof ResourceGroupSchema>;
 export type TimeSlot = z.infer<typeof TimeSlotSchema>;
 export type FacilityScheduleSettings = z.infer<typeof FacilityScheduleSettingsSchema>;
 export type DensityData = z.infer<typeof DensityDataSchema>;
+

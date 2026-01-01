@@ -13,8 +13,10 @@ import {
   getDayKey,
   getEventsByDay,
 } from '../../utils/scheduleIndexHelpers';
+import { generateDateRange, getMonthStart, getWeekStart } from '../../utils/scheduleHelpers';
 import { DayCell } from './DayCell';
 import { LegendBar } from './LegendBar';
+import { addDays } from 'date-fns';
 
 interface MonthViewProps {
   month: Date;
@@ -46,27 +48,14 @@ export function MonthView({
   }, [selectedGroupId, resources, events]);
 
   const calendarDays = useMemo(() => {
-    const firstDay = new Date(month.getFullYear(), month.getMonth(), 1);
-    const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+    const start = getMonthStart(month);
 
-    const startDayOfWeek = settings.weekStartsOn ?? 1;
-    const startDate = new Date(firstDay);
-    const firstDayOfWeek = firstDay.getDay();
-    const daysToSubtract = (firstDayOfWeek - startDayOfWeek + 7) % 7;
-    startDate.setDate(startDate.getDate() - daysToSubtract);
+    const weekStart = getWeekStart(start, (settings.weekStartsOn ?? 1) as any);
 
-    const days: Date[] = [];
-    const current = new Date(startDate);
 
-    for (let i = 0; i < 42; i++) {
-      days.push(new Date(current));
-      current.setDate(current.getDate() + 1);
-
-      if (current > lastDay && current.getDay() === startDayOfWeek) {
-        break;
-      }
-    }
-
+    // If we need exactly 6 weeks (42 days) to avoid jumpy UI, or just fit the month.
+    // The previous implementation used 42. I'll stick to 42 for stability.
+    const days = generateDateRange(weekStart, addDays(weekStart, 41));
     return days;
   }, [month, settings.weekStartsOn]);
 

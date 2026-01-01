@@ -1,10 +1,38 @@
 {
     "name": "regular-calendar",
     "version": "0.0.1",
+    "description": "A generic, high-performance facility schedule management component for React. Designed to be domain-agnostic, customizable, and easy to integrate with any backend.",
     "type": "module",
+    "keywords": [
+        "react",
+        "calendar",
+        "schedule",
+        "scheduler",
+        "facility",
+        "booking",
+        "resource-management",
+        "drag-and-drop",
+        "typescript"
+    ],
+    "author": "ugnoguchigxp (Yuji Noguchi)",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ugnoguchigxp/regular-calendar.git"
+    },
+    "homepage": "https://wysiwyg-doc.com/",
+    "bugs": {
+        "url": "https://github.com/ugnoguchigxp/regular-calendar/issues"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
     "workspaces": [
         ".",
         "examples/*"
+    ],
+    "sideEffects": [
+        "*.css"
     ],
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -27,12 +55,15 @@
         "type-check": "tsc --noEmit",
         "lint": "biome check .",
         "format": "biome format --write .",
-        "test": "vitest"
+        "test": "vitest",
+        "test:run": "vitest run",
+        "prepublishOnly": "npm run test:run && npm run build"
     },
     "peerDependencies": {
         "@gxp/design-system": "*",
         "react": "^18.0.0 || ^19.0.0",
         "react-dom": "^18.0.0 || ^19.0.0",
+        "date-fns": "^3.0.0 || ^4.0.0",
         "i18next": ">= 23.0.0",
         "react-i18next": ">= 13.0.0"
     },
@@ -53,7 +84,6 @@
         "@radix-ui/react-slot": "^1.2.4",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
-        "date-fns": "^4.1.0",
         "lucide-react": "^0.562.0",
         "react-day-picker": "^9.13.0",
         "react-hook-form": "^7.51.3",
@@ -65,6 +95,7 @@
         "@biomejs/biome": "^2.3.8",
         "@tailwindcss/postcss": "^4.1.18",
         "@testing-library/dom": "^10.0.0",
+        "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^15.0.0",
         "@testing-library/user-event": "^14.5.2",
         "@types/node": "^24.10.2",

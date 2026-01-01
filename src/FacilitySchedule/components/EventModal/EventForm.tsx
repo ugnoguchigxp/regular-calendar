@@ -26,15 +26,19 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Icons } from '@/components/ui/Icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import type { Resource, ResourceGroup, ScheduleEvent, AttendeeInfo } from '../../FacilitySchedule.schema';
+import type { Resource, ResourceGroup, ScheduleEvent } from '../../FacilitySchedule.schema';
 import type { Personnel } from '../../../PersonnelPanel/PersonnelPanel.schema';
-import { checkScheduleConflict } from '../../utils/scheduleHelpers';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { AttendeeInput } from './AttendeeInput';
+
+// Import new hooks
+import { useResourceAvailability } from '../../hooks/useResourceAvailability';
+import { useScheduleConflict } from '../../hooks/useScheduleConflict';
+import { useAttendeeManagement } from '../../hooks/useAttendeeManagement';
 
 // Helper for duration formatting
 const formatDuration = (hours: number) => {
@@ -64,22 +68,6 @@ const eventSchema = z.object({
   isAllDay: z.boolean().optional(),
 });
 
-// Helper to parse attendee JSON or fallback to comma-separated string
-const parseAttendees = (str: string): AttendeeInfo[] => {
-  if (!str) return [];
-  try {
-    const parsed = JSON.parse(str);
-    if (Array.isArray(parsed)) return parsed as AttendeeInfo[];
-  } catch (e) {
-    // ignore
-  }
-  // Fallback for legacy data
-  return str.split(/,|、/).map(s => s.trim()).filter(Boolean).map(name => ({
-    name,
-    type: 'external'
-  }));
-};
-
 type EventFormValues = z.infer<typeof eventSchema>;
 
 export interface EventFormData extends Omit<EventFormValues, 'startDate' | 'endDate'> {
@@ -94,6 +82,7 @@ interface EventFormProps {
   resources: Resource[];
   groups: ResourceGroup[];
   events: ScheduleEvent[];
+  resourceAvailability?: { resourceId: string; isAvailable: boolean }[];
 
   defaultResourceId?: string;
   defaultStartTime?: Date;
@@ -103,6 +92,7 @@ interface EventFormProps {
   onDelete?: () => void;
   readOnlyResource?: boolean;
   personnel?: Personnel[];
+  currentUserId?: string;
 }
 
 export function EventForm({
@@ -110,6 +100,7 @@ export function EventForm({
   resources,
   groups,
   events,
+  resourceAvailability,
   defaultResourceId,
   defaultStartTime,
   onSubmit,
@@ -117,6 +108,7 @@ export function EventForm({
   onDelete,
   readOnlyResource = false,
   personnel = [],
+  currentUserId,
 }: EventFormProps) {
   const { t } = useTranslation();
   const isEditMode = !!event;
@@ -125,7 +117,7 @@ export function EventForm({
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      title: event?.title || '',
+      title: (event as any)?.extendedProps?.originalTitle || event?.title || '',
       attendee: event?.attendee || '[]',
       resourceId: event?.resourceId || defaultResourceId || '',
       startDate: format(
@@ -143,9 +135,6 @@ export function EventForm({
   });
 
   const isAllDay = form.watch('isAllDay');
-
-
-
   const startDateVal = form.watch('startDate');
   const durationVal = form.watch('durationHours');
   const resourceIdVal = form.watch('resourceId');
@@ -156,21 +145,32 @@ export function EventForm({
     endDateDisplay.setTime(new Date(startDateVal).getTime() + minutes * 60000);
   }
 
-  const conflict = useMemo(() => {
-    const start = new Date(startDateVal);
-    const end = new Date(start);
-    const minutes = (Number(durationVal) || 0) * 60;
-    end.setMinutes(end.getMinutes() + minutes);
+  // Use new hooks
+  const { availableResources, resourceNames, getDisplayName } = useResourceAvailability({
+    resources,
+    groups,
+    events,
+    timeRange: {
+      start: new Date(startDateVal),
+      end: endDateDisplay,
+    },
+    currentEventId: event?.id,
+    externalAvailability: resourceAvailability,
+  });
 
-    if (!resourceIdVal || Number.isNaN(start.getTime())) return null;
+  const conflict = useScheduleConflict({
+    startDate: startDateVal,
+    duration: durationVal,
+    resourceId: resourceIdVal,
+    events,
+    currentEventId: event?.id,
+  });
 
-    const otherEvents = events.filter((e) => e.id !== event?.id);
-
-    return checkScheduleConflict(
-      { startDate: start, endDate: end, resourceId: resourceIdVal },
-      otherEvents
-    );
-  }, [startDateVal, durationVal, resourceIdVal, events, event?.id]);
+  const { parseAttendees, processAttendeesForSubmit } = useAttendeeManagement({
+    personnel,
+    currentUserId,
+    isEditMode,
+  });
 
   const handleSubmit = (data: EventFormValues) => {
     const start = new Date(data.startDate);
@@ -182,13 +182,20 @@ export function EventForm({
     const minutes = (Number(data.durationHours) || 0) * 60;
     end.setMinutes(end.getMinutes() + minutes);
 
+    const { finalAttendees, shouldDelete } = processAttendeesForSubmit(data.attendee);
+
+    if (shouldDelete && onDelete) {
+      onDelete();
+      return;
+    }
+
     onSubmit({
       ...data,
       resourceId: data.resourceId || undefined,
       startDate: start,
       endDate: end,
-      attendee: data.attendee === "[]" || !data.attendee ? "[]" : data.attendee,
-    });
+      attendee: finalAttendees,
+    } as any);
   };
 
   return (
@@ -230,25 +237,13 @@ export function EventForm({
           )}
         />
 
-        {/* Resource Selection */}
+
+        {/* リソース選択 */}
         <FormField
           control={form.control}
           name="resourceId"
           render={({ field }) => {
-            const resourceNames = useMemo(() => {
-              return resources.map(r => {
-                const group = groups.find(g => g.id === r.groupId);
-                return group ? `${r.name} (${group.name})` : r.name;
-              });
-            }, [resources, groups]);
-
-            const displayValue = useMemo(() => {
-              // field.value is ID, convert to display name
-              const res = resources.find(r => r.id === field.value);
-              if (!res) return field.value; // Fallback to ID if not found
-              const group = groups.find(g => g.id === res.groupId);
-              return group ? `${res.name} (${group.name})` : res.name;
-            }, [field.value, resources, groups]);
+            const displayValue = getDisplayName(field.value || '');
 
             return (
               <FormItem>
@@ -258,7 +253,7 @@ export function EventForm({
                     <div className="p-2 bg-muted rounded-md text-sm border border-input">
                       {displayValue || t('resource_placeholder')}
                     </div>
-                    {/* Hidden input to maintain form state */}
+                    {/* フォーム状態維持用の隠しinput */}
                     <input type="hidden" {...field} />
                   </>
                 ) : (
@@ -266,11 +261,10 @@ export function EventForm({
                     <EditableSelect
                       value={displayValue || ''}
                       onChange={(val) => {
-                        // Reverse lookup: Display Name -> ID
-                        const match = resources.find(r => {
-                          const g = groups.find(g => g.id === r.groupId);
-                          const d = g ? `${r.name} (${g.name})` : r.name;
-                          return d === val;
+                        // 逆引き: 表示名 -> ID
+                        const match = availableResources.find(r => {
+                          const displayName = getDisplayName(r.id);
+                          return displayName === val;
                         });
                         field.onChange(match ? match.id : val);
                       }}

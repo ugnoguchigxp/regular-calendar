@@ -30,9 +30,6 @@ export default defineConfig({
                 'react-dom',
                 'react/jsx-runtime',
                 'date-fns',
-
-                'tailwind-merge',
-                'clsx',
             ],
             output: {
                 globals: {
@@ -43,3 +40,4 @@ export default defineConfig({
         },
     },
 });
+

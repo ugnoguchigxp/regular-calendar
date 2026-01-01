@@ -20,8 +20,11 @@ import {
   filterEventsByDateRange,
   filterEventsByResource,
   generateDateRange,
+  getWeekStart,
+  getWeekEnd,
   sortEventsByTime,
 } from '../../utils/scheduleHelpers';
+import { addDays } from 'date-fns';
 import {
   createEventIndexes,
   getDayKey,
@@ -49,24 +52,12 @@ export function WeekView({
   onEmptySlotClick,
 }: WeekViewProps) {
   const normalizedWeekStart = useMemo(() => {
-    const start = new Date(weekStart);
-    start.setHours(0, 0, 0, 0);
-    return start;
-  }, [weekStart]);
+    return getWeekStart(weekStart, (settings.weekStartsOn ?? 1) as any);
+  }, [weekStart, settings.weekStartsOn]);
 
   const weekEndInclusive = useMemo(() => {
-    const end = new Date(normalizedWeekStart);
-    end.setDate(end.getDate() + 6);
-    end.setHours(0, 0, 0, 0);
-    return end;
-  }, [normalizedWeekStart]);
-
-  const weekEndExclusive = useMemo(() => {
-    const end = new Date(weekEndInclusive);
-    end.setDate(end.getDate() + 1);
-    end.setHours(0, 0, 0, 0);
-    return end;
-  }, [weekEndInclusive]);
+    return getWeekEnd(weekStart, (settings.weekStartsOn ?? 1) as any);
+  }, [weekStart, settings.weekStartsOn]);
 
   // Map groups for lookup
   const groupMap = useMemo(() => {
@@ -82,9 +73,9 @@ export function WeekView({
   }, [normalizedWeekStart, weekEndInclusive]);
 
   const weekEvents = useMemo(() => {
-    const filtered = filterEventsByDateRange(events, normalizedWeekStart, weekEndExclusive);
+    const filtered = filterEventsByDateRange(events, normalizedWeekStart, addDays(weekEndInclusive, 1));
     return sortEventsByTime(filtered);
-  }, [events, normalizedWeekStart, weekEndExclusive]);
+  }, [events, normalizedWeekStart, weekEndInclusive]);
 
   const eventIndexes = useMemo(() => {
     return createEventIndexes(weekEvents);

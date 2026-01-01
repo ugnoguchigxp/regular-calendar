@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { defaultStorage, type StorageAdapter } from '../utils/StorageAdapter';
 
 interface ResizablePanelProps {
     children: React.ReactNode;
     defaultWidth?: number;
     minWidth?: number;
     maxWidth?: number;
-    storageKey?: string; // localStorage key for persistence
+    storageKey?: string; // storage key for persistence
+    storage?: StorageAdapter;
     className?: string;
 }
 
@@ -15,12 +17,13 @@ export function ResizablePanel({
     minWidth = 180,
     maxWidth = 400,
     storageKey,
+    storage = defaultStorage,
     className = '',
 }: ResizablePanelProps) {
     const [width, setWidth] = useState(() => {
-        // Load from localStorage if key provided
-        if (storageKey && typeof window !== 'undefined') {
-            const saved = localStorage.getItem(storageKey);
+        // Load from storage if key provided
+        if (storageKey) {
+            const saved = storage.getItem(storageKey);
             if (saved) {
                 const parsed = parseInt(saved, 10);
                 if (!isNaN(parsed) && parsed >= minWidth && parsed <= maxWidth) {
@@ -33,12 +36,12 @@ export function ResizablePanel({
     const isResizing = useRef(false);
     const panelRef = useRef<HTMLDivElement>(null);
 
-    // Save to localStorage when width changes
+    // Save to storage when width changes
     useEffect(() => {
-        if (storageKey && typeof window !== 'undefined') {
-            localStorage.setItem(storageKey, String(width));
+        if (storageKey) {
+            storage.setItem(storageKey, String(width));
         }
-    }, [width, storageKey]);
+    }, [width, storageKey, storage]);
 
     const startResize = useCallback((e: React.MouseEvent) => {
         e.preventDefault();

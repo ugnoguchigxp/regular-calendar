@@ -3,7 +3,7 @@
  */
 
 import { ConfirmModal, Modal } from '@/components/ui/Modal';
-import { format } from 'date-fns';
+
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ interface EventModalProps {
   groups: ResourceGroup[];
   events: ScheduleEvent[];
   personnel?: Personnel[];
+  resourceAvailability?: { resourceId: string; isAvailable: boolean }[];
 
   defaultResourceId?: string;
   defaultStartTime?: Date;
@@ -27,6 +28,7 @@ interface EventModalProps {
   onClose: () => void;
   onSave: (data: EventFormData) => void;
   onDelete?: (eventId: string) => void;
+  currentUserId?: string;
 }
 
 export function EventModal({
@@ -42,6 +44,8 @@ export function EventModal({
   onDelete,
   readOnlyResource,
   personnel = [],
+  currentUserId,
+  resourceAvailability,
 }: EventModalProps) {
   const { t } = useTranslation();
   const isEditMode = !!event;
@@ -95,37 +99,20 @@ export function EventModal({
       title={isEditMode ? t('event_edit_title') : t('event_create_title')}
     >
       <div style={{ pointerEvents: isModalReady ? 'auto' : 'none' }}>
-        {isEditMode && event && (
-          <div className="p-4 bg-card border border-border rounded-lg mb-4 text-sm grid grid-cols-2 gap-2">
-            <div>
-              <span className="text-muted-foreground">Title:</span>
-              <span className="ml-2 font-semibold">{event.title}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Resource:</span>
-              <span className="ml-2 font-semibold">
-                {resources.find(r => r.id === event.resourceId)?.name || event.resourceId}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Time:</span>
-              <span className="ml-2 font-semibold">{format(event.startDate, 'MM/dd HH:mm')}</span>
-            </div>
-          </div>
-        )}
-
         <EventForm
           event={event}
           resources={resources}
           groups={groups}
           events={events}
           personnel={personnel}
+          resourceAvailability={resourceAvailability}
           defaultResourceId={defaultResourceId}
           defaultStartTime={defaultStartTime}
           onSubmit={onSave}
           onCancel={onClose}
           onDelete={isEditMode && onDelete ? handleDelete : undefined}
           readOnlyResource={readOnlyResource}
+          currentUserId={currentUserId}
         />
       </div>
 

@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/customeventmodal.tsx","./src/smartfacilityschedule.tsx","./src/smartregularcalendar.tsx","./src/styledebug.tsx","./src/i18n.ts","./src/main.tsx","./src/usescheduleapi.ts","./src/usesettings.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/styledebug.tsx","./src/i18n.ts","./src/main.tsx","./src/usesettings.ts"],"version":"5.9.3"}

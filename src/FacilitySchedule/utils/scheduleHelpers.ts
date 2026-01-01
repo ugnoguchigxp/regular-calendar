@@ -1,3 +1,14 @@
+import {
+  areIntervalsOverlapping,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  addDays,
+  format
+} from 'date-fns';
 import type { Resource, ScheduleConflict, ScheduleEvent } from '../FacilitySchedule.schema';
 
 /**
@@ -7,7 +18,10 @@ export function hasTimeOverlap(
   schedule1: { startDate: Date; endDate: Date },
   schedule2: { startDate: Date; endDate: Date }
 ): boolean {
-  return schedule1.startDate < schedule2.endDate && schedule1.endDate > schedule2.startDate;
+  return areIntervalsOverlapping(
+    { start: schedule1.startDate, end: schedule1.endDate },
+    { start: schedule2.startDate, end: schedule2.endDate }
+  );
 }
 
 /**
@@ -19,12 +33,13 @@ export function checkScheduleConflict(
 ): ScheduleConflict | null {
   for (const existing of existingEvents) {
     if (existing.status === 'cancelled') continue;
+    if (existing.id === newEvent.id) continue; // Skip same event
 
     if (existing.resourceId === newEvent.resourceId) {
       if (hasTimeOverlap(existing, newEvent)) {
         return {
-          resourceId: newEvent.resourceId, // Keep positionId property name if schema uses it, or rename to resourceId in schema
-          existingSchedule: existing, // TODO: Update schema property name
+          resourceId: newEvent.resourceId,
+          existingSchedule: existing,
           newSchedule: newEvent,
           conflictType: 'double-booking',
         };
@@ -34,18 +49,16 @@ export function checkScheduleConflict(
   return null;
 }
 
-// NOTE: ScheduleConflict schema still uses 'positionId' etc in my previous overwrite?
-// Let's check schema again. I updated schema in Step 94.
-// Step 94 Schema: doesn't explicitly export ScheduleConflictSchema... wait.
-// I need option check.
-
 export function filterEventsByDateRange(
   events: ScheduleEvent[],
   startDate: Date,
   endDate: Date
 ): ScheduleEvent[] {
   return events.filter((event) => {
-    return event.startDate < endDate && event.endDate > startDate;
+    return areIntervalsOverlapping(
+      { start: event.startDate, end: event.endDate },
+      { start: startDate, end: endDate }
+    );
   });
 }
 
@@ -60,13 +73,7 @@ export function filterEventsByDay(
   events: ScheduleEvent[],
   date: Date
 ): ScheduleEvent[] {
-  const dayStart = new Date(date);
-  dayStart.setHours(0, 0, 0, 0);
-
-  const dayEnd = new Date(date);
-  dayEnd.setHours(23, 59, 59, 999);
-
-  return filterEventsByDateRange(events, dayStart, dayEnd);
+  return filterEventsByDateRange(events, startOfDay(date), endOfDay(date));
 }
 
 export function sortEventsByTime(events: ScheduleEvent[]): ScheduleEvent[] {
@@ -83,39 +90,31 @@ export function getEventDuration(event: ScheduleEvent): number {
 }
 
 export function getEventDisplayText(event: ScheduleEvent): string {
-  const startTime = event.startDate.toLocaleTimeString('ja-JP', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const endTime = event.endDate.toLocaleTimeString('ja-JP', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const startTime = format(event.startDate, 'HH:mm');
+  const endTime = format(event.endDate, 'HH:mm');
   return `${event.title} (${startTime}-${endTime})`;
 }
 
-// ... Date helpers (keep as is or rename) ...
+// ... Date helpers ...
 const dateRangeCache = new Map<string, Date[]>();
 const MAX_CACHE_SIZE = 100;
 
 export function generateDateRange(start: Date, end: Date): Date[] {
-  const normalizedStart = new Date(start);
-  normalizedStart.setHours(0, 0, 0, 0);
-  const normalizedEnd = new Date(end);
-  normalizedEnd.setHours(0, 0, 0, 0);
+  const s = startOfDay(start);
+  const e = startOfDay(end);
 
-  const cacheKey = `${normalizedStart.getTime()}-${normalizedEnd.getTime()}`;
+  const cacheKey = `${s.getTime()}-${e.getTime()}`;
 
   if (dateRangeCache.has(cacheKey)) {
     return dateRangeCache.get(cacheKey)!;
   }
 
   const dates: Date[] = [];
-  const current = new Date(normalizedStart);
+  let current = s;
 
-  while (current <= normalizedEnd) {
-    dates.push(new Date(current));
-    current.setDate(current.getDate() + 1);
+  while (current <= e) {
+    dates.push(current);
+    current = addDays(current, 1);
   }
 
   if (dateRangeCache.size >= MAX_CACHE_SIZE) {
@@ -127,36 +126,20 @@ export function generateDateRange(start: Date, end: Date): Date[] {
   return dates;
 }
 
-export function getWeekStart(date: Date, weekStartsOn: 0 | 1): Date {
-  const result = new Date(date);
-  const day = result.getDay();
-  const diff = day < weekStartsOn ? 7 - weekStartsOn + day : day - weekStartsOn;
-  result.setDate(result.getDate() - diff);
-  result.setHours(0, 0, 0, 0);
-  return result;
+export function getWeekStart(date: Date, weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 1): Date {
+  return startOfWeek(date, { weekStartsOn });
 }
 
-export function getWeekEnd(date: Date, weekStartsOn: 0 | 1): Date {
-  const weekStart = getWeekStart(date, weekStartsOn);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-  weekEnd.setHours(23, 59, 59, 999);
-  return weekEnd;
+export function getWeekEnd(date: Date, weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 1): Date {
+  return endOfWeek(date, { weekStartsOn });
 }
 
 export function getMonthStart(date: Date): Date {
-  const result = new Date(date);
-  result.setDate(1);
-  result.setHours(0, 0, 0, 0);
-  return result;
+  return startOfMonth(date);
 }
 
 export function getMonthEnd(date: Date): Date {
-  const result = new Date(date);
-  result.setMonth(result.getMonth() + 1);
-  result.setDate(0);
-  result.setHours(23, 59, 59, 999);
-  return result;
+  return endOfMonth(date);
 }
 
 export function detectAndMarkConflicts(events: ScheduleEvent[]): ScheduleEvent[] {
@@ -178,4 +161,45 @@ export function detectAndMarkConflicts(events: ScheduleEvent[]): ScheduleEvent[]
   }
 
   return result;
+}
+
+/**
+ * Calculates the display range for a given view mode and reference date.
+ * Useful for DayView and WeekView to extend hours if settings require it.
+ */
+export function calculateViewRange(
+  date: Date,
+  viewMode: 'day' | 'week' | 'month',
+  settings: { startTime: string; endTime: string; weekStartsOn?: number }
+): { start: Date; end: Date } {
+  const startParts = settings.startTime.split(':');
+  const endParts = settings.endTime.split(':');
+  const startHour = Number(startParts[0] ?? 0);
+  const endHour = Number(endParts[0] ?? 23);
+
+  if (viewMode === 'day') {
+    const start = startOfDay(date);
+    start.setHours(startHour);
+
+    const end = startOfDay(date);
+    if (endHour >= 24) {
+      const extraDays = Math.floor(endHour / 24);
+      const remainingHours = endHour % 24;
+      const targetDate = addDays(end, extraDays);
+      targetDate.setHours(remainingHours, 59, 59, 999);
+      return { start, end: targetDate };
+    } else {
+      end.setHours(endHour, 59, 59, 999);
+      return { start, end };
+    }
+  }
+
+  if (viewMode === 'week') {
+    const start = getWeekStart(date, (settings.weekStartsOn ?? 1) as any);
+    const end = getWeekEnd(date, (settings.weekStartsOn ?? 1) as any);
+    return { start, end };
+  }
+
+  // Month
+  return { start: getMonthStart(date), end: getMonthEnd(date) };
 }

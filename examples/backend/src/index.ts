@@ -4,7 +4,8 @@ import { nanoid } from 'nanoid';
 import { db, ensureTables } from './db';
 import { events, groups, resources, personnel } from './db/schema';
 import { eq } from 'drizzle-orm';
-import { settings, groups as seedGroups, resources as seedResources, allEvents as seedEvents, personnel as seedPersonnel } from './data';
+import { settings } from './data';
+import { seed } from './seed';
 
 const app = new Hono();
 
@@ -16,12 +17,7 @@ ensureTables();
 // Seed logic (Simple check)
 const groupCount = await db.select().from(groups).limit(1);
 if (groupCount.length === 0) {
-    console.log('Seeding database...');
-    await db.insert(groups).values(seedGroups);
-    await db.insert(resources).values(seedResources);
-    await db.insert(events).values(seedEvents);
-    await db.insert(personnel).values(seedPersonnel);
-    console.log('Seeding complete.');
+    await seed();
 }
 
 // --- Config ---
@@ -43,27 +39,138 @@ app.get('/api/events', async (c) => {
     const personnelIdsParam = c.req.query('personnelIds');
     const allEvents = await db.select().from(events).all();
 
-    // If personnelIds is provided, filter events by personnel
+    let filteredEvents = allEvents;
+
+    // Filter by personnel IDs (Regular Calendar View)
     if (personnelIdsParam) {
-        const personnelIds = personnelIdsParam.split(',');
-        const filteredEvents = allEvents.filter((event: any) => {
+        const personnelIds = new Set(personnelIdsParam.split(','));
+        filteredEvents = filteredEvents.filter((event: any) => {
+            // Check attendee JSON list (Primary)
+            try {
+                if (event.attendee && event.attendee !== '[]') {
+                    const attendees = JSON.parse(event.attendee);
+                    if (Array.isArray(attendees)) {
+                        // Return true if ANY attendee matches requested IDs
+                        if (attendees.some((a: any) => a.personnelId && personnelIds.has(a.personnelId))) {
+                            return true;
+                        }
+                    }
+                }
+            } catch { }
+
+            // Check extendedProps (Legacy Fallback)
             const extProps = event.extendedProps;
             if (typeof extProps === 'string') {
                 try {
                     const parsed = JSON.parse(extProps);
-                    return personnelIds.includes(parsed.personnelId);
-                } catch {
-                    return false;
-                }
+                    return personnelIds.has(parsed.personnelId);
+                } catch { return false; }
             } else if (extProps && typeof extProps === 'object') {
-                return personnelIds.includes(extProps.personnelId);
+                return personnelIds.has(extProps.personnelId);
             }
+
             return false;
         });
-        return c.json(filteredEvents);
     }
 
-    return c.json(allEvents);
+    return c.json(filteredEvents);
+});
+
+// --- Resource Availability ---
+// 指定日付・期間のリソース予約状況を返す
+app.get('/api/resource-availability', async (c) => {
+    const dateParam = c.req.query('date');
+    const viewParam = c.req.query('view') || 'day'; // day, week, month
+
+    // 基準日
+    const targetDate = dateParam ? new Date(dateParam) : new Date();
+
+    // 期間の計算
+    let startDate = new Date(targetDate);
+    startDate.setHours(0, 0, 0, 0);
+    let endDate = new Date(targetDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (viewParam === 'week') {
+        const day = startDate.getDay(); // 0 (Sun) - 6 (Sat)
+        // Assume week starts on Sunday
+        const diff = startDate.getDate() - day;
+        startDate.setDate(diff);
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        endDate.setHours(23, 59, 59, 999);
+    } else if (viewParam === 'month') {
+        startDate.setDate(1);
+        endDate = new Date(startDate);
+        endDate.setMonth(endDate.getMonth() + 1);
+        endDate.setDate(0); // Last day of previous month
+        endDate.setHours(23, 59, 59, 999);
+    }
+
+    // 全イベントを取得
+    const allEvents = await db.select().from(events).all();
+
+    // リソースに紐づくイベントのみフィルタ
+    const resourceEvents = allEvents.filter((e: any) => !!e.resourceId);
+
+    // 指定期間と重なるイベントをフィルタ
+    const periodEvents = resourceEvents.filter((e: any) => {
+        // 終日イベントの処理
+        const isAllDayVal = e.isAllDay ?? (typeof e.extendedProps === 'object' ? e.extendedProps?.isAllDay : false);
+        const isAllDay = isAllDayVal === true || isAllDayVal === 'true' || isAllDayVal === 1 || isAllDayVal === '1';
+
+        let eStart = new Date(e.startDate);
+        let eEnd = new Date(e.endDate);
+
+        if (isAllDay) {
+            eStart.setHours(0, 0, 0, 0);
+            if (eEnd <= eStart || (eEnd.getDate() === eStart.getDate() && eEnd.getFullYear() === eStart.getFullYear() && eEnd.getMonth() === eStart.getMonth())) {
+                eEnd = new Date(eStart);
+                eEnd.setDate(eEnd.getDate() + 1);
+            } else {
+                eEnd.setHours(0, 0, 0, 0);
+                if (eEnd <= eStart) {
+                    eEnd = new Date(eStart);
+                    eEnd.setDate(eEnd.getDate() + 1);
+                }
+            }
+        }
+
+        // 期間と重なるか判定
+        return startDate < eEnd && endDate > eStart;
+    });
+
+    // 全リソースを取得
+    const allResources = await db.select().from(resources).all();
+
+    // 各リソースの空き状況を計算
+    const availability = allResources.map((resource: any) => {
+        const resourceBookings = periodEvents.filter((e: any) => e.resourceId === resource.id && e.status !== 'cancelled');
+        return {
+            resourceId: resource.id,
+            resourceName: resource.name,
+            groupId: resource.groupId,
+            isAvailable: resourceBookings.length === 0, // 期間中完全に空いているか (FacilityViewではあまり意味がないがModalの単日では有効)
+            bookings: resourceBookings.map((e: any) => ({
+                id: e.id,
+                eventId: e.id,
+                title: e.title,
+                startDate: e.startDate,
+                endDate: e.endDate,
+                isAllDay: e.isAllDay,
+                attendee: e.attendee,
+                resourceId: e.resourceId,
+                extendedProps: e.extendedProps
+            })),
+        };
+    });
+
+    return c.json({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        view: viewParam,
+        resources: availability,
+    });
 });
 
 app.post('/api/events', async (c) => {

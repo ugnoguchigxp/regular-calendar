@@ -39,10 +39,14 @@ export function ScheduleEventCard({
       ((event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60 * 60)) * 10
     ) / 10;
 
+
   // Determine styling
+  // Standard background only if no custom color is provided
   const bgColor = event.hasConflict
     ? 'bg-destructive border-destructive'
-    : 'bg-primary border-primary/30';
+    : event.color
+      ? 'border-primary/30' // If custom color, just border (or custom border)
+      : 'bg-primary border-primary/30';
 
   // Helper for formatting time
   const formatTime = (date: Date) => {
@@ -53,6 +57,20 @@ export function ScheduleEventCard({
   };
 
   const displayDuration = `${durationHours}h`;
+
+  // Custom style overrides
+  const customStyle: React.CSSProperties = {
+    top: `${top}px`,
+    height: `${height}px`,
+    left: `${leftPercent}%`,
+    width: `${widthPercent}%`,
+    paddingLeft: leftPercent > 0 ? '2px' : '4px',
+    paddingRight: leftPercent + widthPercent < 100 ? '2px' : '4px',
+  };
+
+  if (event.color && !event.hasConflict) {
+    customStyle.backgroundColor = event.color;
+  }
 
   return (
     <TooltipProvider>
@@ -67,14 +85,7 @@ export function ScheduleEventCard({
         ${bgColor} text-primary-foreground
         ${event.hasConflict ? 'ring-2 ring-red-400 ring-offset-1' : ''}
       `}
-            style={{
-              top: `${top}px`,
-              height: `${height}px`,
-              left: `${leftPercent}%`,
-              width: `${widthPercent}%`,
-              paddingLeft: leftPercent > 0 ? '2px' : '4px',
-              paddingRight: leftPercent + widthPercent < 100 ? '2px' : '4px',
-            }}
+            style={customStyle}
             onPointerUp={(e) => {
               e.stopPropagation();
             }}

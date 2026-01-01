@@ -9,7 +9,7 @@ import type {
   ScheduleEvent,
 } from '../../FacilitySchedule.schema';
 import { DAY_VIEW } from '../../constants';
-import { sortEventsByTime } from '../../utils/scheduleHelpers';
+import { calculateViewRange, filterEventsByDateRange, sortEventsByTime } from '../../utils/scheduleHelpers';
 import { createEventIndexes, getEventsByResource } from '../../utils/scheduleIndexHelpers';
 import { ResourceColumn } from './ResourceColumn';
 import { TimeGrid } from './TimeGrid';
@@ -38,31 +38,17 @@ export function DayView({
   const endHour = Number(endParts[0] ?? 23);
   const gridHeight = (endHour - startHour + 1) * DAY_VIEW.SLOT_HEIGHT + DAY_VIEW.HEADER_HEIGHT;
 
-  // Filter events for the day with support for extended hours
+  // Filter events for the day using centralized logic
   const { allDayEvents, timedEvents } = useMemo(() => {
-    // Determine view range
-    const viewStart = new Date(currentDate);
-    viewStart.setHours(0, 0, 0, 0);
-
-    const viewEnd = new Date(currentDate);
-    // If endHour > 23, we extend to next day(s)
-    if (endHour > 23) {
-      viewEnd.setHours(endHour, 59, 59, 999);
-    } else {
-      viewEnd.setHours(23, 59, 59, 999);
-    }
-
-    const filtered = events.filter((e) => {
-      return e.startDate < viewEnd && e.endDate > viewStart;
-    });
-
+    const { start, end } = calculateViewRange(currentDate, 'day', settings);
+    const filtered = filterEventsByDateRange(events, start, end);
     const sorted = sortEventsByTime(filtered);
 
     return {
       allDayEvents: sorted.filter(e => e.isAllDay),
       timedEvents: sorted.filter(e => !e.isAllDay)
     };
-  }, [events, currentDate, startHour, endHour]);
+  }, [events, currentDate, settings]);
 
   // Indexing for performance
   const eventIndexes = useMemo(() => {

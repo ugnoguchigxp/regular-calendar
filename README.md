@@ -6,6 +6,12 @@ Designed to be domain-agnostic, customizable, and easy to integrate with any bac
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
 
+## Screenshots 📸
+
+| Facility Schedule | Regular Calendar |
+|-------------------|------------------|
+| ![Facility Schedule](./assets/facilitySchyedule.png) | ![Regular Calendar](./assets/regularCalendar.png) |
+
 ## Features 🚀
 
 - **Generic & Domain-Agnostic**: Manage generic "Resources" (beds, rooms, machines) and "Events". No baked-in business logic.
@@ -37,7 +43,7 @@ pnpm install react react-dom date-fns
 
 ```tsx
 import { FacilitySchedule } from 'regular-calendar';
-import 'regular-calendar/dist/style.css'; 
+import 'regular-calendar/styles'; 
 ```
 
 2. **Render the schedule**:
@@ -45,7 +51,7 @@ import 'regular-calendar/dist/style.css';
 ```tsx
 import { useState } from 'react';
 import { FacilitySchedule } from 'regular-calendar';
-import 'regular-calendar/dist/style.css';
+import 'regular-calendar/styles';
 
 function App() {
   const [events, setEvents] = useState([
@@ -147,6 +153,51 @@ See [Walkthrough](./examples/README.md) (or simply explore the folder) for detai
 
 ## Customization 🎨
 
+### Theme Configuration
+
+Use the `ThemeProvider` to customize UI tokens like density, border radius, and font size.
+
+```tsx
+import { FacilitySchedule, ThemeProvider } from 'regular-calendar';
+import 'regular-calendar/styles';
+
+function App() {
+  return (
+    <ThemeProvider config={{
+      density: 'compact',    // 'compact' | 'normal' | 'spacious'
+      radius: 0.5,           // Border radius in rem (0.5rem = 8px)
+      fontSize: 0.875,       // Base font size in rem (0.875rem = 14px)
+      tabletMode: false,     // Enable touch-optimized UI
+    }}>
+      <FacilitySchedule ... />
+    </ThemeProvider>
+  );
+}
+```
+
+#### Available Options
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `density` | `'compact' \| 'normal' \| 'spacious'` | UI density preset |
+| `tabletMode` | `boolean` | Enable touch-optimized UI (44px touch targets) |
+| `radius` | `number` | Border radius in rem |
+| `fontSize` | `number` | Base font size in rem |
+| `componentHeight` | `number` | Component height in rem |
+| `gap` | `number` | Base gap between elements in rem |
+| `paddingX` / `paddingY` | `number` | Component padding in rem |
+| `buttonPaddingX` / `buttonPaddingY` | `number` | Button padding in rem |
+
+You can also override CSS variables directly:
+
+```css
+:root {
+  --radius: 0.25rem;
+  --ui-font-size-base: 1rem;
+  --ui-component-height: 2.5rem;
+}
+```
+
 ### Custom Modal
 You can replace the default event creation modal with your own by passing a component to the `components` prop.
 
@@ -165,11 +216,11 @@ You can replace the default event creation modal with your own by passing a comp
 # Install dependencies
 pnpm install
 
-# Run development server (Vite)
-pnpm run dev
-
 # Run tests (Vitest)
 pnpm test
+
+# Build the library
+pnpm run build
 
 # Type Checking
 pnpm run type-check

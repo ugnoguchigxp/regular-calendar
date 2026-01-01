@@ -1,6 +1,6 @@
-import { ConfirmModal, Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { ConfirmModal, Modal } from '../components/ui/Modal';
+import { Button } from '../components/ui/Button';
+import { DatePicker } from '../components/ui/DatePicker';
 import {
     Form,
     FormControl,
@@ -8,64 +8,37 @@ import {
     FormItem,
     FormLabel,
     FormMessage
-} from '@/components/ui/Form';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { KeypadModal } from '@/components/ui/KeypadModal';
+} from '../components/ui/Form';
+import { Input } from '../components/ui/Input';
+import { Textarea } from '../components/ui/Textarea';
+import { KeypadModal } from '../components/ui/KeypadModal';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue
-} from '@/components/ui/Select';
-import { Icons } from '@/components/ui/Icons';
-import { zodResolver } from '@hookform/resolvers/zod';
+} from '../components/ui/Select';
+import { Icons } from '../components/ui/Icons';
 import { format } from 'date-fns';
 import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { EditableSelect } from '@/components/ui/EditableSelect';
-import { Checkbox } from '@/components/ui/Checkbox';
+import { EditableSelect } from '../components/ui/EditableSelect';
+import { Checkbox } from '../components/ui/Checkbox';
+import type { Resource, ResourceGroup, ScheduleEvent } from '../FacilitySchedule/FacilitySchedule.schema';
+import { getResourceAvailability } from '../FacilitySchedule/utils/resourceAvailability';
+import { useScheduleContext } from './ScheduleContext';
 import {
-    checkScheduleConflict,
-    type Resource,
-    type ResourceGroup,
-    type ScheduleEvent
-} from 'regular-calendar';
+    useEventForm,
+    useConflictCheck,
+    useAvailableResources,
+    useResourceDisplayNames,
+    prepareEventFormData,
+    type EventFormValues
+} from './hooks';
+import { formatDuration } from './utils';
 
-// Helper for duration formatting
-const formatDuration = (hours: number) => {
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}h`;
-    return `${h}h ${m}m`;
-};
-
-// 1. Define Custom Schema with Extra Field (Usage instead of Department)
-const customEventSchema = z.object({
-    title: z.string().min(1, 'required'),
-    attendee: z.string().min(1, 'required'),
-    resourceId: z.string().min(1, 'required'),
-    startDate: z.string().min(1, 'required'),
-    durationHours: z.number().min(0.25).max(24),
-    status: z.string().optional(),
-    note: z.string().optional(),
-    usage: z.string().optional(), // CHANGED from department
-    isAllDay: z.boolean().optional(),
-});
-
-type CustomEventFormValues = z.infer<typeof customEventSchema>;
-
-export interface CustomEventFormData extends Omit<CustomEventFormValues, 'startDate'> {
-    startDate: Date;
-    endDate: Date;
-    extendedProps?: Record<string, any>;
-}
-
-interface CustomEventModalProps {
+interface ConnectedEventModalProps {
     isOpen: boolean;
     event?: ScheduleEvent;
     resources: Resource[];
@@ -77,9 +50,10 @@ interface CustomEventModalProps {
     onClose: () => void;
     onSave: (data: any) => void;
     onDelete?: (eventId: string) => void;
+    currentUserId?: string;
 }
 
-export function CustomEventModal({
+export function ConnectedEventModal({
     isOpen,
     event,
     resources,
@@ -91,12 +65,36 @@ export function CustomEventModal({
     onSave,
     onDelete,
     readOnlyResource = false,
-}: CustomEventModalProps) {
+    currentUserId,
+}: ConnectedEventModalProps) {
     const { t } = useTranslation();
-    const isEditMode = !!event;
+    const { fetchResourceAvailability, getResourceAvailabilityFromCache } = useScheduleContext();
+
+    // Use extracted form hook
+    const {
+        form,
+        isEditMode,
+        startDateVal,
+        durationVal,
+        resourceIdVal,
+        isAllDay,
+        // endDateDisplay available if needed
+    } = useEventForm({
+        event,
+        defaultResourceId,
+        defaultStartTime,
+        resources,
+    });
+
+    // Check ownership
+    const ownerId = (event as any)?.extendedProps?.ownerId;
+    const isOwner = !isEditMode || !ownerId || ownerId === currentUserId;
+    const canEdit = isOwner;
+
+    // Modal state
     const [isModalReady, setIsModalReady] = useState(false);
     const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
-
+    const [resourceAvailability, setResourceAvailability] = useState<{ resourceId: string; isAvailable: boolean }[]>([]);
     const [confirmModal, setConfirmModal] = useState<{
         open: boolean;
         title: string;
@@ -118,72 +116,54 @@ export function CustomEventModal({
         setIsModalReady(false);
     }, [isOpen]);
 
-    // Form Setup
-    const form = useForm<CustomEventFormValues>({
-        resolver: zodResolver(customEventSchema),
-        defaultValues: {
-            title: event?.title || 'Anonymous',
-            attendee: event?.attendee || '',
-            resourceId: event?.resourceId || defaultResourceId || resources[0]?.id || '',
-            startDate: format(
-                event?.startDate || defaultStartTime || new Date(),
-                "yyyy-MM-dd'T'HH:mm"
-            ),
-            durationHours: event
-                ? Math.round((event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60 * 60) * 100) / 100
-                : 1,
-            status: event?.status || 'booked',
-            note: event?.note || '',
-            usage: (event as any)?.extendedProps?.usage || 'Meeting',
-            isAllDay: event?.isAllDay || false,
-        },
-    });
+    // Fetch resource availability on modal open
+    useEffect(() => {
+        if (!isOpen) return;
 
-    const isAllDay = form.watch('isAllDay');
+        const targetDate = event?.startDate || defaultStartTime || new Date();
 
-    // Watchers
-    const startDateVal = form.watch('startDate');
-    const durationVal = form.watch('durationHours');
-    const resourceIdVal = form.watch('resourceId');
-    const endDateDisplay = new Date(startDateVal);
-    if (!Number.isNaN(endDateDisplay.getTime())) {
-        const minutes = (Number(durationVal) || 0) * 60;
-        endDateDisplay.setTime(new Date(startDateVal).getTime() + minutes * 60000);
-    }
-
-    // Conflict Check
-    const conflict = useMemo(() => {
-        const start = new Date(startDateVal);
-        if (Number.isNaN(start.getTime()) || !resourceIdVal) return null;
-
-        const minutes = (Number(durationVal) || 0) * 60;
-        const end = new Date(start.getTime() + minutes * 60000);
-
-        const otherEvents = events.filter((e) => e.id !== event?.id);
-        return checkScheduleConflict(
-            { startDate: start, endDate: end, resourceId: resourceIdVal },
-            otherEvents
-        );
-    }, [startDateVal, durationVal, resourceIdVal, events, event?.id]);
-
-
-    const handleSubmit = (data: CustomEventFormValues) => {
-        const start = new Date(data.startDate);
-        if (data.isAllDay) {
-            start.setHours(0, 0, 0, 0);
+        const cached = getResourceAvailabilityFromCache(targetDate);
+        if (cached) {
+            console.log('[ConnectedEventModal] Using cached resource availability');
+            setResourceAvailability(cached.map(r => ({ resourceId: r.resourceId, isAvailable: r.isAvailable })));
+            return;
         }
 
-        const minutes = (Number(data.durationHours) || 0) * 60;
-        const end = new Date(start.getTime() + minutes * 60000);
-
-        onSave({
-            ...data,
-            startDate: start,
-            endDate: end,
-            extendedProps: {
-                usage: data.usage
-            }
+        console.log('[ConnectedEventModal] Fetching resource availability');
+        fetchResourceAvailability(targetDate).then(availability => {
+            setResourceAvailability(availability.map(r => ({ resourceId: r.resourceId, isAvailable: r.isAvailable })));
         });
+    }, [isOpen, event?.startDate, defaultStartTime, fetchResourceAvailability, getResourceAvailabilityFromCache]);
+
+    // Use extracted hooks for derived data (at top level, not in render)
+    const conflict = useConflictCheck(startDateVal, durationVal, resourceIdVal, events, event?.id);
+
+    // Compute available resources
+    const availabilityForFilter = useMemo(() => {
+        if (resourceAvailability.length > 0) {
+            return resourceAvailability;
+        }
+        // Fallback to local calculation
+        const start = new Date(startDateVal);
+        const minutes = (Number(durationVal) || 0) * 60;
+        const end = new Date(start.getTime() + minutes * 60000);
+        return getResourceAvailability(resources, events, { start, end }, event?.id);
+    }, [resourceAvailability, resources, events, startDateVal, durationVal, event?.id]);
+
+    const availableResources = useAvailableResources(resources, availabilityForFilter);
+    const resourceDisplayNames = useResourceDisplayNames(availableResources, groups);
+
+    // Display value for selected resource
+    const displayValue = useMemo(() => {
+        const res = resources.find(r => r.id === resourceIdVal);
+        if (!res) return resourceIdVal;
+        const group = groups.find(g => g.id === res.groupId);
+        return group ? `${res.name} (${group.name})` : res.name;
+    }, [resourceIdVal, resources, groups]);
+
+    const handleSubmit = (data: EventFormValues) => {
+        const formData = prepareEventFormData(data, event, currentUserId);
+        onSave(formData);
     };
 
     const handleDelete = () => {
@@ -194,35 +174,52 @@ export function CustomEventModal({
             description: t('confirm_delete_message'),
             onConfirm: () => {
                 onDelete(event.id);
-                setConfirmModal((prev) => ({ ...prev, open: false }));
+                setConfirmModal(prev => ({ ...prev, open: false }));
                 onClose();
             },
         });
     };
 
-
-
     return (
         <Modal
             open={isOpen}
             onOpenChange={(open) => !open && onClose()}
-            title={isEditMode ? t('event_custom_edit_title') : t('event_custom_create_title')}
+            title={isEditMode ? (canEdit ? t('event_custom_edit_title') : 'View Event (Read Only)') : t('event_custom_create_title')}
         >
             <div style={{ pointerEvents: isModalReady ? 'auto' : 'none' }}>
+                {!canEdit && isEditMode && (
+                    <div className="mb-4 p-2 bg-yellow-50 text-yellow-800 text-sm rounded border border-yellow-200">
+                        You cannot edit this event because you are not the owner.
+                    </div>
+                )}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 text-foreground">
 
-                        {/* Custom Usage (Purpose) Field - Standard Style */}
-                        {/* Custom Usage (Purpose) Field - Standard Style */}
+                        {/* Event Name (Title) */}
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('event_name_label') || 'Event Name (予定名称)'} <span className="text-red-500">*</span></FormLabel>
+                                    <FormControl>
+                                        <Input {...field} placeholder={t('event_name_placeholder') || 'Enter event name'} disabled={!canEdit} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Custom Usage (Purpose) Field */}
                         <FormField
                             control={form.control}
                             name="usage"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t('usage_label') || 'Usage (Purpose)'}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={!canEdit}>
                                         <FormControl>
-                                            <SelectTrigger autoFocus>
+                                            <SelectTrigger>
                                                 <SelectValue placeholder={t('usage_placeholder') || "Select usage"} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -236,10 +233,6 @@ export function CustomEventModal({
                             )}
                         />
 
-
-
-
-                        {/* Attendee */}
                         {/* Attendee */}
                         <FormField
                             control={form.control}
@@ -248,7 +241,7 @@ export function CustomEventModal({
                                 <FormItem>
                                     <FormLabel>{t('attendee_label') || 'Attendee'} <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
-                                        <Input {...field} placeholder={t('attendee_placeholder') || 'Enter attendee name'} />
+                                        <Input {...field} placeholder={t('attendee_placeholder') || 'Enter attendee name'} disabled={!canEdit} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -256,57 +249,40 @@ export function CustomEventModal({
                         />
 
                         {/* Resource Selection */}
-                        {/* Resource Selection */}
                         <FormField
                             control={form.control}
                             name="resourceId"
-                            render={({ field }) => {
-                                const resourceNames = useMemo(() => {
-                                    return resources.map(r => {
-                                        const group = groups.find(g => g.id === r.groupId);
-                                        return group ? `${r.name} (${group.name})` : r.name;
-                                    });
-                                }, [resources, groups]);
-
-                                const displayValue = useMemo(() => {
-                                    const res = resources.find(r => r.id === field.value);
-                                    if (!res) return field.value;
-                                    const group = groups.find(g => g.id === res.groupId);
-                                    return group ? `${res.name} (${group.name})` : res.name;
-                                }, [field.value, resources, groups]);
-
-                                return (
-                                    <FormItem>
-                                        <FormLabel>{t('resource_label')} <span className="text-red-500">*</span></FormLabel>
-                                        {readOnlyResource ? (
-                                            <>
-                                                <div className="p-2 bg-muted rounded-md text-sm border border-input">
-                                                    {displayValue || t('resource_placeholder')}
-                                                </div>
-                                                {/* Hidden input to maintain form state */}
-                                                <input type="hidden" {...field} />
-                                            </>
-                                        ) : (
-                                            <FormControl>
-                                                <EditableSelect
-                                                    value={displayValue}
-                                                    onChange={(val) => {
-                                                        const match = resources.find(r => {
-                                                            const g = groups.find(g => g.id === r.groupId);
-                                                            const d = g ? `${r.name} (${g.name})` : r.name;
-                                                            return d === val;
-                                                        });
-                                                        field.onChange(match ? match.id : val);
-                                                    }}
-                                                    options={resourceNames}
-                                                    placeholder={t('resource_placeholder')}
-                                                />
-                                            </FormControl>
-                                        )}
-                                        <FormMessage />
-                                    </FormItem>
-                                );
-                            }}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('resource_label')} <span className="text-red-500">*</span></FormLabel>
+                                    {readOnlyResource ? (
+                                        <>
+                                            <div className="p-2 bg-muted rounded-md text-sm border border-input">
+                                                {displayValue || t('resource_placeholder')}
+                                            </div>
+                                            <input type="hidden" {...field} />
+                                        </>
+                                    ) : (
+                                        <FormControl>
+                                            <EditableSelect
+                                                value={displayValue}
+                                                onChange={(val) => {
+                                                    const match = availableResources.find(r => {
+                                                        const g = groups.find(g => g.id === r.groupId);
+                                                        const d = g ? `${r.name} (${g.name})` : r.name;
+                                                        return d === val;
+                                                    });
+                                                    field.onChange(match ? match.id : val);
+                                                }}
+                                                options={Array.from(resourceDisplayNames.values())}
+                                                placeholder={t('resource_placeholder')}
+                                                disabled={!canEdit}
+                                            />
+                                        </FormControl>
+                                    )}
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
 
                         {/* Date and Duration */}
@@ -323,6 +299,7 @@ export function CustomEventModal({
                                                     <Checkbox
                                                         checked={field.value}
                                                         onCheckedChange={field.onChange}
+                                                        disabled={!canEdit}
                                                     />
                                                 </FormControl>
                                                 <FormLabel className="font-normal cursor-pointer">
@@ -339,7 +316,7 @@ export function CustomEventModal({
                                         render={({ field }) => (
                                             <DatePicker
                                                 value={new Date(field.value)}
-                                                disabled={isAllDay}
+                                                disabled={isAllDay || !canEdit}
                                                 onChange={(date) => {
                                                     if (date) {
                                                         const d = new Date(field.value);
@@ -357,10 +334,11 @@ export function CustomEventModal({
                                     {!isAllDay && (
                                         <Input
                                             value={format(new Date(startDateVal), 'HH:mm')}
-                                            readOnly
+                                            readOnly={!canEdit}
                                             className="w-24 cursor-pointer"
-                                            onClick={() => setIsTimeModalOpen(true)}
+                                            onClick={() => canEdit && setIsTimeModalOpen(true)}
                                             tabIndex={-1}
+                                            disabled={!canEdit}
                                         />
                                     )}
                                 </div>
@@ -372,11 +350,9 @@ export function CustomEventModal({
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>{t('duration_label')}</FormLabel>
-                                        <Select onValueChange={v => field.onChange(Number(v))} value={String(field.value)} disabled={isAllDay}>
+                                        <Select onValueChange={v => field.onChange(Number(v))} value={String(field.value)} disabled={isAllDay || !canEdit}>
                                             <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
                                             </FormControl>
                                             <SelectContent className="max-h-[200px]">
                                                 {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.5, 4, 4.5, 5].map(h => (
@@ -409,7 +385,7 @@ export function CustomEventModal({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t('status_label')}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={!canEdit}>
                                         <FormControl>
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                         </FormControl>
@@ -431,7 +407,7 @@ export function CustomEventModal({
                                 <FormItem>
                                     <FormLabel>{t('note_label')}</FormLabel>
                                     <FormControl>
-                                        <Textarea {...field} placeholder="Add notes..." rows={2} />
+                                        <Textarea {...field} placeholder="Add notes..." rows={2} disabled={!canEdit} />
                                     </FormControl>
                                 </FormItem>
                             )}
@@ -439,17 +415,19 @@ export function CustomEventModal({
 
                         {/* Action Buttons */}
                         <div className="flex gap-3 pt-4 border-t border-border">
-                            {isEditMode && onDelete && (
+                            {canEdit && isEditMode && onDelete && (
                                 <Button type="button" variant="outline-delete" size="sm" onClick={handleDelete} className="flex-1">
                                     {t('delete_button')}
                                 </Button>
                             )}
                             <Button type="button" variant="outline" size="sm" onClick={onClose} className="flex-1">
-                                {t('cancel_button')}
+                                {canEdit ? t('cancel_button') : 'Close'}
                             </Button>
-                            <Button type="submit" variant="default" size="sm" className="flex-1">
-                                {t('save_button')}
-                            </Button>
+                            {canEdit && (
+                                <Button type="submit" variant="default" size="sm" className="flex-1">
+                                    {t('save_button')}
+                                </Button>
+                            )}
                         </div>
                     </form>
                 </Form>
@@ -471,7 +449,7 @@ export function CustomEventModal({
 
             <ConfirmModal
                 open={confirmModal.open}
-                onOpenChange={(open) => setConfirmModal((prev) => ({ ...prev, open }))}
+                onOpenChange={(open) => setConfirmModal(prev => ({ ...prev, open }))}
                 title={confirmModal.title}
                 description={confirmModal.description}
                 onConfirm={confirmModal.onConfirm}

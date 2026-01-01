@@ -1,19 +1,24 @@
-import { useState, useMemo } from 'react';
-import {
-    RegularCalendar,
-    EventModal,
-    type ScheduleEvent,
-    type EventFormData
-} from 'regular-calendar';
-import { useScheduleApi } from './useScheduleApi';
-import type { AppSettings } from './useSettings';
+import { useState } from 'react';
+import { RegularCalendar } from '../RegularCalendar/RegularCalendar';
+import { ConnectedEventModal } from './ConnectedEventModal';
+import type { ScheduleEvent } from '../FacilitySchedule/FacilitySchedule.schema';
+import type { EventFormData } from './hooks/useEventForm';
+import { useScheduleContext } from './ScheduleContext';
+import { mergeEvents, cleanEventId } from './utils';
 
-interface Props {
-    settings: AppSettings;
+interface ConnectedCalendarProps {
+    settings: {
+        weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+        businessHoursStart: string;
+        businessHoursEnd: string;
+        timeZone: string;
+        [key: string]: any;
+    };
     additionalEvents?: ScheduleEvent[];
+    currentUserId?: string;
 }
 
-export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props) {
+export function ConnectedCalendar({ settings, additionalEvents = [], currentUserId }: ConnectedCalendarProps) {
     const {
         events,
         resources,
@@ -24,20 +29,14 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
         createEvent,
         updateEvent,
         deleteEvent,
-        personnel,
-    } = useScheduleApi();
+    } = useScheduleContext();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | undefined>(undefined);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-    // Use only personnel events (additionalEvents) - don't mix with facility events
-    const allEvents = useMemo(() => {
-        return additionalEvents.map(e => ({
-            ...e,
-            isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false
-        }));
-    }, [additionalEvents]);
+    // Merge all events using utility function
+    const allEvents = mergeEvents(events, additionalEvents);
 
     if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
     if (!apiSettings || loading) return <div className="p-4">Loading schedule data...</div>;
@@ -45,7 +44,7 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
     // Merge API settings with local settings
     const mergedSettings = {
         ...apiSettings,
-        defaultDuration: 30, // Force 30 minute grid/slot duration
+        defaultDuration: 30,
         weekStartsOn: settings.weekStartsOn,
         startTime: settings.businessHoursStart,
         endTime: settings.businessHoursEnd,
@@ -59,7 +58,9 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
     };
 
     const handleEventClick = (event: ScheduleEvent) => {
-        setSelectedEvent(event);
+        // Restore real ID using utility function
+        const cleanEvent = cleanEventId(event);
+        setSelectedEvent(cleanEvent);
         setSelectedDate(undefined);
         setIsModalOpen(true);
     };
@@ -80,7 +81,6 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
             handleClose();
         } catch (e) {
             console.error('Failed to save event', e);
-            // Optionally show error toast
         }
     };
 
@@ -98,8 +98,8 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
     return (
         <>
             <RegularCalendar
-                events={allEvents}
-                settings={mergedSettings}
+                events={allEvents as any}
+                settings={mergedSettings as any}
                 isLoading={loading}
                 onEventClick={handleEventClick}
                 onTimeSlotClick={handleTimeSlotClick}
@@ -109,8 +109,7 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
                 storageKey="regular-calendar-demo-view"
             />
 
-
-            <EventModal
+            <ConnectedEventModal
                 isOpen={isModalOpen}
                 onClose={handleClose}
                 onSave={handleSave}
@@ -119,10 +118,9 @@ export function SmartRegularCalendar({ settings, additionalEvents = [] }: Props)
                 defaultStartTime={selectedDate}
                 resources={resources}
                 groups={groups}
-                events={events}
-                personnel={personnel}
+                events={events as any}
+                currentUserId={currentUserId}
             />
         </>
     );
 }
-

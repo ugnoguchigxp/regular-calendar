@@ -13,9 +13,11 @@ export function createEventIndexes(events: ScheduleEvent[]): EventIndexes {
 
   for (const event of events) {
     // By Resource
-    const resourceList = byResource.get(event.resourceId) ?? [];
-    resourceList.push(event);
-    byResource.set(event.resourceId, resourceList);
+    if (event.resourceId) {
+      const resourceList = byResource.get(event.resourceId) ?? [];
+      resourceList.push(event);
+      byResource.set(event.resourceId, resourceList);
+    }
 
     // By Day
     const dayKey = getDayKey(event.startDate);

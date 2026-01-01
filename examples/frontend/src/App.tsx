@@ -1,18 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SmartFacilitySchedule } from './SmartFacilitySchedule';
-import { SmartRegularCalendar } from './SmartRegularCalendar';
+import { ConnectedCalendar, ConnectedFacilitySchedule, ScheduleProvider, useScheduleContext as useScheduleApi, SettingsModal, FacilityStructureSettings, PersonnelPanel, ResizablePanel, getPersonnelColor } from 'regular-calendar';
 import { useSettings } from './useSettings';
-import { useScheduleApi } from './useScheduleApi';
-import { SettingsModal, FacilityStructureSettings, PersonnelPanel, ResizablePanel, getPersonnelColor } from 'regular-calendar';
 import { Button } from '@/components/ui/Button';
 
 import './index.css';
 
-import { ScheduleProvider } from './ScheduleContext';
-
 // Demo: "Me" is the first personnel (p1)
-const MY_PERSONNEL_ID = 'p1';
+const MY_PERSONNEL_ID = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+
 
 function AppContent() {
     const { t } = useTranslation();
@@ -80,16 +76,51 @@ function AppContent() {
     const coloredPersonnelEvents = useMemo(() => {
         // Filter to only show visible personnel's events
         const visibleSet = new Set(visiblePersonnelIds);
-        return personnelEvents
-            .filter(event => {
+
+        return personnelEvents.flatMap(event => {
+            const matches: { personnelId: string; color: string }[] = [];
+
+            // Check parsed attendee list for visible personnel
+            try {
+                if (event.attendee && event.attendee !== '[]') {
+                    const attendees = JSON.parse(event.attendee);
+                    if (Array.isArray(attendees)) {
+                        attendees.forEach((a: any) => {
+                            if (a.personnelId && visibleSet.has(a.personnelId)) {
+                                const color = personnelColorMap.get(a.personnelId);
+                                if (color) {
+                                    matches.push({ personnelId: a.personnelId, color });
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch { } // ignore parse error
+
+            // Fallback to legacy extendedProps if no matches found in attendees
+            if (matches.length === 0) {
                 const personnelId = event.extendedProps?.personnelId;
-                return personnelId && visibleSet.has(personnelId);
-            })
-            .map(event => {
-                const personnelId = event.extendedProps?.personnelId;
-                const color = personnelId ? personnelColorMap.get(personnelId) : undefined;
-                return color ? { ...event, color } : event;
-            });
+                if (personnelId && visibleSet.has(personnelId)) {
+                    const color = personnelColorMap.get(personnelId);
+                    if (color) {
+                        matches.push({ personnelId, color });
+                    }
+                }
+            }
+
+            // Return exploded events (one per visible attendee)
+            return matches.map(match => ({
+                ...event,
+                // Make ID unique for Rendering/DndKit (OriginalID + PersonnelID)
+                id: `${event.id}_${match.personnelId}`,
+                color: match.color,
+                extendedProps: {
+                    ...event.extendedProps,
+                    // Store real ID to be restored on click/edit
+                    realId: event.id
+                }
+            }));
+        });
     }, [personnelEvents, visiblePersonnelIds, personnelColorMap]);
 
     return (
@@ -134,31 +165,34 @@ function AppContent() {
 
             <div className="flex-1 overflow-hidden flex">
                 {/* Left: PersonnelPanel - Desktop only, Resizable */}
-                <ResizablePanel
-                    defaultWidth={256}
-                    minWidth={180}
-                    maxWidth={400}
-                    storageKey="personnelPanelWidth"
-                    className="hidden lg:block border-r border-border"
-                >
-                    <PersonnelPanel
-                        personnel={personnel}
-                        selectedIds={selectedPersonnelIds}
-                        onSelectionChange={setSelectedPersonnelIds}
-                        onPriorityChange={updatePersonnelPriority}
-                        className="h-full"
-                        colorMap={personnelColorMap}
-                    />
-                </ResizablePanel>
+                {activeTab === 'regular' && (
+                    <ResizablePanel
+                        defaultWidth={256}
+                        minWidth={180}
+                        maxWidth={400}
+                        storageKey="personnelPanelWidth"
+                        className="hidden lg:block border-r border-border"
+                    >
+                        <PersonnelPanel
+                            personnel={personnel}
+                            selectedIds={selectedPersonnelIds}
+                            onSelectionChange={setSelectedPersonnelIds}
+                            onPriorityChange={updatePersonnelPriority}
+                            className="h-full"
+                            colorMap={personnelColorMap}
+                        />
+                    </ResizablePanel>
+                )}
 
                 {/* Right: Calendar */}
                 <div className="flex-1 overflow-hidden">
                     {activeTab === 'facility' ? (
-                        <SmartFacilitySchedule settings={settings} />
+                        <ConnectedFacilitySchedule settings={settings} />
                     ) : (
-                        <SmartRegularCalendar
+                        <ConnectedCalendar
                             settings={settings}
                             additionalEvents={coloredPersonnelEvents}
+                            currentUserId={MY_PERSONNEL_ID}
                         />
                     )}
                 </div>
@@ -176,12 +210,12 @@ function AppContent() {
                 <FacilityStructureSettings
                     groups={groups}
                     resources={resources}
-                    onCreateGroup={createGroup}
-                    onUpdateGroup={updateGroup}
-                    onDeleteGroup={deleteGroup}
-                    onCreateResource={createResource}
-                    onUpdateResource={updateResource}
-                    onDeleteResource={deleteResource}
+                    onCreateGroup={async (d) => { await createGroup(d); }}
+                    onUpdateGroup={async (id, d) => { await updateGroup(id, d); }}
+                    onDeleteGroup={async (id) => { await deleteGroup(id); }}
+                    onCreateResource={async (d) => { await createResource(d); }}
+                    onUpdateResource={async (id, d) => { await updateResource(id, d); }}
+                    onDeleteResource={async (id) => { await deleteResource(id); }}
                     onClose={() => setIsFacilitySettingsOpen(false)}
                 />
             )}

@@ -8,6 +8,8 @@ import { MonthView } from './components/MonthView/MonthView';
 import { ViewSelector } from '@/components/ui/ViewSelector';
 import { WeekView } from './components/WeekView/WeekView';
 import type { FacilityScheduleSettings, ScheduleEvent, ViewMode } from './RegularCalendar.schema';
+import { defaultStorage, type StorageAdapter } from '../utils/StorageAdapter';
+import { navigateDate } from '../utils/dateNavigation';
 
 export interface RegularCalendarProps {
     // Data
@@ -39,6 +41,7 @@ export interface RegularCalendarProps {
     defaultView?: ViewMode;
     enablePersistence?: boolean;
     storageKey?: string;
+    storage?: StorageAdapter;
 }
 
 export function RegularCalendar({
@@ -57,7 +60,8 @@ export function RegularCalendar({
     headerRight,
     defaultView = 'week',
     enablePersistence = false,
-    storageKey = 'regular-calendar-view'
+    storageKey = 'regular-calendar-view',
+    storage = defaultStorage
 }: RegularCalendarProps) {
     const { t } = useTranslation();
 
@@ -66,14 +70,14 @@ export function RegularCalendar({
 
     // Initialize view state with persistence logic
     const [internalViewMode, setInternalViewMode] = useState<ViewMode>(() => {
-        if (enablePersistence && typeof window !== 'undefined') {
+        if (enablePersistence) {
             try {
-                const saved = localStorage.getItem(storageKey);
+                const saved = storage.getItem(storageKey);
                 if (saved && ['day', 'week', 'month'].includes(saved)) {
                     return saved as ViewMode;
                 }
             } catch (e) {
-                console.warn('Failed to load calendar view from localStorage', e);
+                console.warn('Failed to load calendar view from storage', e);
             }
         }
         return defaultView;
@@ -85,25 +89,18 @@ export function RegularCalendar({
 
     // Persist view changes
     useEffect(() => {
-        if (enablePersistence && !propViewMode && typeof window !== 'undefined') {
+        if (enablePersistence && !propViewMode) {
             try {
-                localStorage.setItem(storageKey, internalViewMode);
+                storage.setItem(storageKey, internalViewMode);
             } catch (e) {
-                console.warn('Failed to save calendar view to localStorage', e);
+                console.warn('Failed to save calendar view to storage', e);
             }
         }
-    }, [internalViewMode, enablePersistence, storageKey, propViewMode]);
+    }, [internalViewMode, enablePersistence, storageKey, propViewMode, storage]);
 
     // Helpers
     const handleDateNavigate = (direction: 'prev' | 'next') => {
-        const newDate = new Date(currentDate);
-        if (viewMode === 'day') {
-            newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1));
-        } else if (viewMode === 'week') {
-            newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-        } else {
-            newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-        }
+        const newDate = navigateDate(currentDate, viewMode, direction);
 
         if (onDateChange) onDateChange(newDate);
         else setInternalDate(newDate);
