@@ -3,11 +3,17 @@
     "module": "src/index.ts",
     "type": "module",
     "devDependencies": {
+        "@cloudflare/workers-types": "^4.20240405.0",
         "@types/bun": "latest",
-        "drizzle-kit": "^0.20.14"
+        "drizzle-kit": "^0.20.14",
+        "wrangler": "^3.0.0"
     },
     "scripts": {
-        "dev": "bun run --watch src/index.ts"
+        "dev": "bun run --watch src/index.ts",
+        "deploy": "wrangler deploy",
+        "cf-typegen": "wrangler types",
+        "generate:sqlite": "drizzle-kit generate:sqlite",
+        "db:init": "wrangler d1 execute regular-calendar-db --file=./schema.sql"
     },
     "peerDependencies": {
         "typescript": "^5.0.0"

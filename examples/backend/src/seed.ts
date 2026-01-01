@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker/locale/ja';
-import { db } from './db';
 import { groups, resources, events, personnel } from './db/schema';
 
 // Static Data Definitions
@@ -73,7 +72,7 @@ const initialEvents = [
 const JOHN_DOE_ID = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 const departments = ['営業部', '開発部', '総務部', '経理部', '人事部', '企画部'];
 
-export async function seed() {
+export async function seed(db: any) {
     console.log('Seeding database...');
 
     // 1. Insert Groups

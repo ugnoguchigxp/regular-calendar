@@ -105,6 +105,7 @@ function App() {
 | `groups` | `ResourceGroup[]` | Optional grouping for resources. |
 | `settings` | `FacilityScheduleSettings` | Configuration for time ranges, grid size, etc. |
 | `isLoading` | `boolean` | Shows a loading state if true. |
+| `className` | `string` | Additional CSS classes for the container. |
 | `components` | `{ EventModal?: React.ComponentType }` | Inject custom components (e.g. your own Event creation modal). |
 
 ### Callbacks
@@ -142,6 +143,64 @@ interface Resource {
 }
 ```
 
+### Configuration (Settings)
+
+The `settings` prop controls the calendar's behavior and constraints.
+
+```typescript
+type FacilityScheduleSettings = {
+  // Business Hours
+  startTime: string;   // e.g. "09:00"
+  endTime: string;     // e.g. "18:00"
+
+  // Grid Configuration
+  defaultDuration: number; // Default event duration in minutes (e.g., 60)
+  
+  // Holidays / Closed Days
+  closedDays: number[]; // 0=Sunday, 1=Monday, etc.
+
+  // Display
+  weekStartsOn: 0 | 1;  // 0=Sunday, 1=Monday
+  timeZone?: string;    // e.g. "Asia/Tokyo"
+  
+  // Custom Time Slots (optional override)
+  timeSlots?: Array<{
+    id: string | number;
+    label: string;
+    startTime: string;
+    endTime: string;
+  }>;
+};
+```
+
+### Internationalization (i18n) 🌍
+
+This library uses `react-i18next` for translations. You must provide translations for the following keys in your i18n configuration:
+
+```json
+{
+  "loading": "Loading...",
+  "today_button": "Today",
+  "view_day": "Day",
+  "view_week": "Week",
+  "view_month": "Month",
+  "event_modal_title_create": "New Schedule",
+  "event_modal_title_edit": "Edit Schedule",
+  "title_label": "Title",
+  "attendee_label": "Attendee",
+  "resource_label": "Resource",
+  "date_label": "Date",
+  "time_label": "Time",
+  "save_button": "Save",
+  "delete_button": "Delete",
+  "cancel_button": "Cancel",
+  "confirm_delete_title": "Delete Schedule",
+  "confirm_delete_message": "Are you sure you want to delete this schedule?"
+}
+```
+
+Ensure your `i18n` instance is initialized before rendering the component.
+
 ## Full Stack Example 🏗️
 
 Check out the `examples/` directory for a complete Full-Stack implementation using **Bun**, **Hono**, **SQLite**, and **React**.
@@ -153,9 +212,34 @@ See [Walkthrough](./examples/README.md) (or simply explore the folder) for detai
 
 ## Customization 🎨
 
+### Tailwind Integration 🌬️
+
+If you are using Tailwind CSS, you can use our preset to inherit all theme variables and utility classes.
+
+1.  **Update `tailwind.config.js`**:
+
+```javascript
+import regularCalendarPreset from 'regular-calendar/tailwind-preset';
+
+export default {
+  presets: [regularCalendarPreset],
+  content: [
+    // ... your app content
+    './node_modules/regular-calendar/dist/**/*.{js,ts,jsx,tsx}'
+  ],
+  // ...
+};
+```
+
+This makes all `regular-calendar` utility classes (like `bg-primary`, `text-foreground`) available in your app, ensuring perfect visual consistency.
+
 ### Theme Configuration
 
-Use the `ThemeProvider` to customize UI tokens like density, border radius, and font size.
+`regular-calendar` uses CSS variables for all styling. You can customize the look and feel by overriding these variables in your CSS.
+
+#### 1. Setup Theme Provider
+
+Use the `ThemeProvider` to control high-level settings like density and border radius.
 
 ```tsx
 import { FacilitySchedule, ThemeProvider } from 'regular-calendar';
@@ -165,8 +249,7 @@ function App() {
   return (
     <ThemeProvider config={{
       density: 'compact',    // 'compact' | 'normal' | 'spacious'
-      radius: 0.5,           // Border radius in rem (0.5rem = 8px)
-      fontSize: 0.875,       // Base font size in rem (0.875rem = 14px)
+      radius: 0.5,           // Border radius in rem
       tabletMode: false,     // Enable touch-optimized UI
     }}>
       <FacilitySchedule ... />
@@ -175,26 +258,47 @@ function App() {
 }
 ```
 
-#### Available Options
+#### 2. CSS Variables (Theming)
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `density` | `'compact' \| 'normal' \| 'spacious'` | UI density preset |
-| `tabletMode` | `boolean` | Enable touch-optimized UI (44px touch targets) |
-| `radius` | `number` | Border radius in rem |
-| `fontSize` | `number` | Base font size in rem |
-| `componentHeight` | `number` | Component height in rem |
-| `gap` | `number` | Base gap between elements in rem |
-| `paddingX` / `paddingY` | `number` | Component padding in rem |
-| `buttonPaddingX` / `buttonPaddingY` | `number` | Button padding in rem |
-
-You can also override CSS variables directly:
+You can globally override colors and layout metrics in your main CSS file. We support **Dark Mode** out of the box via the `.dark` class.
 
 ```css
 :root {
-  --radius: 0.25rem;
-  --ui-font-size-base: 1rem;
-  --ui-component-height: 2.5rem;
+  /* --- Layout Metrics --- */
+  --radius: 0.5rem;
+  --ui-font-size-base: 0.875rem;
+  --ui-component-height: 2.5rem;  /* Height of inputs, buttons */
+  
+  /* --- Colors (HSL values) --- */
+  --primary: 221 83% 53%;         /* Main Brand Color */
+  --primary-foreground: 210 40% 98%;
+  
+  --background: 0 0% 100%;        /* Page Background */
+  --foreground: 222 47% 11%;      /* Main Text */
+  
+  --muted: 210 40% 96.1%;         /* Secondary Backgrounds */
+  --muted-foreground: 215 16% 47%;
+  
+  --border: 214 32% 91%;          /* Borders */
+  --input: 214 32% 91%;           /* Input Borders */
+  
+  --accent: 210 40% 96.1%;        /* Hover/Active States */
+  --accent-foreground: 222 47% 11%;
+}
+
+/* Dark Mode Overrides */
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 11%;
+  
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
 }
 ```
 
@@ -211,6 +315,8 @@ You can replace the default event creation modal with your own by passing a comp
 ```
 
 ## Development & Contributing 🛠️
+
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
 ```bash
 # Install dependencies

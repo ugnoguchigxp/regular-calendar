@@ -1,45 +1,66 @@
+import { drizzle as drizzleD1 } from 'drizzle-orm/d1';
+import { drizzle as drizzleSqlite } from 'drizzle-orm/bun-sqlite';
 import * as schema from './schema';
+import { Database } from 'bun:sqlite';
 
-const dbType = process.env.DB_TYPE || 'sqlite';
-let dbInstance: any;
-let ensureTablesFn: () => void = () => { };
+export type Bindings = {
+  DB: D1Database;
+};
 
-if (dbType === 'postgres') {
-  // Postgres Implementation
-  // Note: 'postgres' package must be installed: bun add postgres
-  console.log('Initializing Postgres DB...');
-  ensureTablesFn = () => {
-    console.log('Note: For PostgreSQL, please use Drizzle Kit extensions for migrations.');
-  };
-} else {
-  // SQLite Implementation (Default)
-  const { Database } = require('bun:sqlite');
-  const { drizzle } = require('drizzle-orm/bun-sqlite');
+// Cache for Bun SQLite instance
+let bunSqliteInstance: any;
 
+export function getDb(env?: Bindings) {
+  if (env && env.DB) {
+    // Cloudflare D1 environment
+    return drizzleD1(env.DB, { schema });
+  } else {
+    // Local Bun SQLite environment
+    if (!bunSqliteInstance) {
+      const sqlite = new Database('sqlite.db');
+      bunSqliteInstance = drizzleSqlite(sqlite, { schema });
+
+      // Auto-run migrations equivalent (create tables) for local dev
+      // ensureTables(sqlite); 
+    }
+    return bunSqliteInstance;
+  }
+}
+
+// Local SQLite Table Creation Helper (Keep for local Bun dev compatibility)
+export const ensureTables = () => {
   const sqlite = new Database('sqlite.db');
-  dbInstance = drizzle(sqlite, { schema });
-
-  ensureTablesFn = () => {
-    sqlite.run(`
+  sqlite.run(`
       CREATE TABLE IF NOT EXISTS groups (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         display_mode TEXT DEFAULT 'grid' NOT NULL,
-        dimension INTEGER DEFAULT 1 NOT NULL
+        dimension INTEGER DEFAULT 1 NOT NULL,
+        created_at INTEGER,
+        updated_at INTEGER
       );
     `);
 
-    sqlite.run(`
+  sqlite.run(`
       CREATE TABLE IF NOT EXISTS resources (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         order_index INTEGER NOT NULL,
         is_available INTEGER DEFAULT 1 NOT NULL,
-        group_id TEXT REFERENCES groups(id)
+        group_id TEXT REFERENCES groups(id),
+        created_at INTEGER,
+        updated_at INTEGER
       );
     `);
 
-    sqlite.run(`
+  // Note: Drizzle schema uses camelCase in TypeScript but snake_case in DB usually, 
+  // but here we are using manual SQL. Let's match whatever schema.sqlite.ts expects.
+  // Looking at schema.sqlite.ts (in previous view), it likely uses default names or snake_case.
+  // Based on previous file content, it seemed to default to name-as-is or similar.
+  // However, the cleanest way is often Drizzle Kit. 
+  // Use simple table creation for now matching typical Drizzle behavior.
+
+  sqlite.run(`
       CREATE TABLE IF NOT EXISTS events (
         id TEXT PRIMARY KEY,
         resource_id TEXT REFERENCES resources(id),
@@ -57,7 +78,7 @@ if (dbType === 'postgres') {
       );
     `);
 
-    sqlite.run(`
+  sqlite.run(`
       CREATE TABLE IF NOT EXISTS personnel (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -68,8 +89,4 @@ if (dbType === 'postgres') {
         updated_at INTEGER NOT NULL
       );
     `);
-  };
-}
-
-export const db = dbInstance;
-export const ensureTables = ensureTablesFn;
+};

@@ -1,0 +1,16 @@
+name = "regular-calendar-backend-example"
+main = "src/index.ts"
+compatibility_date = "2024-04-05"
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "regular-calendar-db"
+database_id = "d1-database-id" # Placeholder, will be replaced by user or during setup
+
+# Cron Trigger for 30-minute reset
+[triggers]
+crons = ["*/30 * * * *"]
+
+[observability]
+enabled = true

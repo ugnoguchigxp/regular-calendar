@@ -1,28 +1,38 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { nanoid } from 'nanoid';
-import { db, ensureTables } from './db';
+import { getDb, ensureTables, Bindings } from './db';
 import { events, groups, resources, personnel } from './db/schema';
 import { eq } from 'drizzle-orm';
 import { settings } from './data';
 import { seed } from './seed';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Bindings }>();
 
 app.use('/*', cors());
 
-// Initialize DB
+// Initialize DB (Local SQLite only)
+// For D1, tables should be created via wrangler migrations, but for simple demo we can skip or assume created.
 ensureTables();
 
-// Seed logic (Simple check)
-const groupCount = await db.select().from(groups).limit(1);
-if (groupCount.length === 0) {
-    await seed();
-}
+// Seed logic (Simple check on startup - mostly for local dev)
+app.use('*', async (c, next) => {
+    const db = getDb(c.env);
+    try {
+        const groupCount = await db.select().from(groups).limit(1);
+        if (groupCount.length === 0) {
+            await seed(db);
+        }
+    } catch (e) {
+        console.error("DB Init check failed (might be first run or D1 not ready):", e);
+    }
+    await next();
+});
 
 // --- Config ---
 
 app.get('/api/config', async (c) => {
+    const db = getDb(c.env);
     const allGroups = await db.select().from(groups).all();
     const allResources = await db.select().from(resources).all();
 
@@ -36,6 +46,7 @@ app.get('/api/config', async (c) => {
 // --- Events CRUD ---
 
 app.get('/api/events', async (c) => {
+    const db = getDb(c.env);
     const personnelIdsParam = c.req.query('personnelIds');
     const allEvents = await db.select().from(events).all();
 
@@ -79,6 +90,7 @@ app.get('/api/events', async (c) => {
 // --- Resource Availability ---
 // 指定日付・期間のリソース予約状況を返す
 app.get('/api/resource-availability', async (c) => {
+    const db = getDb(c.env);
     const dateParam = c.req.query('date');
     const viewParam = c.req.query('view') || 'day'; // day, week, month
 
@@ -174,8 +186,8 @@ app.get('/api/resource-availability', async (c) => {
 });
 
 app.post('/api/events', async (c) => {
+    const db = getDb(c.env);
     const body = await c.req.json();
-    const newEventId = crypto.randomUUID();
 
     // Infer groupId from resource if not provided and resourceId exists
     let groupId = body.groupId;
@@ -208,13 +220,9 @@ app.post('/api/events', async (c) => {
 });
 
 app.put('/api/events/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     const body = await c.req.json();
-
-    const toUpdate = {
-        ...body,
-        updatedAt: new Date(),
-    };
 
     // Explicitly allow extendedProps update
     const cleanUpdate: any = {};
@@ -238,6 +246,7 @@ app.put('/api/events/:id', async (c) => {
 });
 
 app.delete('/api/events/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     await db.delete(events).where(eq(events.id, id));
     return c.json({ success: true });
@@ -246,6 +255,7 @@ app.delete('/api/events/:id', async (c) => {
 // --- Groups CRUD ---
 
 app.post('/api/groups', async (c) => {
+    const db = getDb(c.env);
     const body = await c.req.json();
     const newGroupId = crypto.randomUUID();
 
@@ -266,6 +276,7 @@ app.post('/api/groups', async (c) => {
 });
 
 app.put('/api/groups/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     const body = await c.req.json();
 
@@ -281,6 +292,7 @@ app.put('/api/groups/:id', async (c) => {
 });
 
 app.delete('/api/groups/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     // Note: In a real app, we should probably check for dependent resources/events or cascade delete.
     // For this example, we'll just delete the group.
@@ -291,6 +303,7 @@ app.delete('/api/groups/:id', async (c) => {
 // --- Resources CRUD ---
 
 app.post('/api/resources', async (c) => {
+    const db = getDb(c.env);
     const body = await c.req.json();
     const newResourceId = crypto.randomUUID();
 
@@ -309,6 +322,7 @@ app.post('/api/resources', async (c) => {
 });
 
 app.put('/api/resources/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     const body = await c.req.json();
 
@@ -325,6 +339,7 @@ app.put('/api/resources/:id', async (c) => {
 });
 
 app.delete('/api/resources/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     await db.delete(resources).where(eq(resources.id, id));
     return c.json({ success: true });
@@ -333,6 +348,7 @@ app.delete('/api/resources/:id', async (c) => {
 // --- Personnel ---
 
 app.get('/api/personnel', async (c) => {
+    const db = getDb(c.env);
     const allPersonnel = await db.select().from(personnel).all();
     // Sort by priority (desc) then name (asc)
     allPersonnel.sort((a: { priority: number; name: string }, b: { priority: number; name: string }) => {
@@ -343,6 +359,7 @@ app.get('/api/personnel', async (c) => {
 });
 
 app.put('/api/personnel/:id', async (c) => {
+    const db = getDb(c.env);
     const id = c.req.param('id');
     const body = await c.req.json();
 
@@ -355,10 +372,27 @@ app.put('/api/personnel/:id', async (c) => {
     return c.json(updated);
 });
 
-export default {
+// --- Scheduled Reset (Cron) ---
+
+const worker = {
     port: 3006,
     fetch: app.fetch,
+    async scheduled(event: any, env: Bindings, ctx: any) {
+        console.log('Scheduled reset triggered');
+        const db = getDb(env);
+
+        // Delete all data
+        await db.delete(events);
+        await db.delete(resources);
+        await db.delete(groups);
+        await db.delete(personnel);
+
+        // Reseed
+        await seed(db);
+        console.log('Database reset complete');
+    },
 };
 
-console.log('Server running on http://localhost:3006 (SQLite)');
+export default worker;
 
+console.log('Server running on http://localhost:3006');

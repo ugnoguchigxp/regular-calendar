@@ -6,7 +6,10 @@
     "scripts": {
         "dev": "bun ./debug-server.ts",
         "build": "tsc -b && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:coverage": "vitest --coverage"
     },
     "dependencies": {
         "i18next": "^25.7.3",
@@ -21,13 +24,18 @@
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.18",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.1",
+        "@testing-library/user-event": "^14.6.1",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^4.3.1",
         "autoprefixer": "^10.4.23",
+        "happy-dom": "^20.0.11",
         "postcss": "^8.5.6",
         "tailwindcss": "^4.1.18",
         "typescript": "^5.2.2",
-        "vite": "^5.3.4"
+        "vite": "^5.3.4",
+        "vitest": "^4.0.16"
     }
 }

@@ -101,3 +101,53 @@ it('calls onClick when clicked', async () => {
 4.  **Snapshots**:
     - 大規模なスナップショットは壊れやすいため推奨しません。
     - 変化してはいけない重要なDOM構造や、計算結果のオブジェクトに対してのみ限定的に使用してください。
+
+## 🎯 カバレッジ目標
+
+UIコンポーネントライブラリとしての品質を担保するため、以下の目標を設定します。
+
+- **ロジック（Utils/Hooks）**: 100%
+  - 計算ロジック、データ変換、フックの状態遷移は完全にカバーする。
+- **UIコンポーネント**: 80%以上
+  - 全てのPropsパターン、インタラクション、条件分岐をカバーする。
+  - スタイルや細かな表示の差異テストはコスト対効果を考慮する。
+
+## 💡 トラブルシューティング
+
+### 1. タイムゾーン問題
+カレンダーシステムのテストではタイムゾーンが原因で失敗することがあります。テスト実行時は常にUTCまたは固定のローカルタイムで実行されるようにします。
+
+```typescript
+beforeEach(() => {
+  // テスト中はタイムゾーンを固定
+  vi.setSystemTime(new Date('2025-01-01T10:00:00Z'));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+```
+
+### 2. 非同期処理とタイマー
+ドラッグ＆ドロップやアニメーションを含む操作のテストには、非同期ユーティリティやフェイクタイマーを活用します。
+
+```typescript
+// タイマー待ちが必要な場合
+vi.useFakeTimers();
+// ...操作...
+vi.advanceTimersByTime(100);
+```
+
+### 3. モックの活用
+外部依存（日付ライブラリなど）やブラウザAPI（LocalStorage, ResizeObserver）は適切にモックします。
+
+```typescript
+// LocalStorageのモック例
+const localStorageMock = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    clear: vi.fn(),
+};
+vi.stubGlobal('localStorage', localStorageMock);
+```
+
