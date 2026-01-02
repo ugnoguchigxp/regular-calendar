@@ -8,7 +8,8 @@ import { WeekView } from "./WeekView";
 
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 	}),
 }));
 
@@ -67,8 +68,8 @@ describe("WeekView", () => {
 			/>,
 		);
 
-		expect(screen.getByText("days_short_sun")).toBeInTheDocument();
-		expect(screen.getByText("days_short_mon")).toBeInTheDocument();
+		expect(screen.getByText("Sun")).toBeInTheDocument();
+		expect(screen.getByText("Mon")).toBeInTheDocument();
 	});
 
 	it("renders time slots", () => {
@@ -109,7 +110,7 @@ describe("WeekView", () => {
 			/>,
 		);
 
-		expect(screen.getByText("終日")).toBeInTheDocument();
+		expect(screen.getByText("All day")).toBeInTheDocument();
 		expect(screen.getByText("All Day Event")).toBeInTheDocument();
 	});
 
@@ -137,7 +138,7 @@ describe("WeekView", () => {
 			/>,
 		);
 
-		expect(screen.queryByText("終日")).not.toBeInTheDocument();
+		expect(screen.queryByText("All day")).not.toBeInTheDocument();
 	});
 
 	it("highlights today", () => {

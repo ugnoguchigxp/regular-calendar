@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useAppTranslation } from "@/utils/i18n";
 import { PersonnelContextMenu } from "./PersonnelContextMenu";
 import type { Personnel } from "./PersonnelPanel.schema";
 
@@ -19,6 +20,7 @@ export function PersonnelPanel({
 	className = "",
 	colorMap = new Map(),
 }: PersonnelPanelProps) {
+	const { t } = useAppTranslation();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [contextMenu, setContextMenu] = useState<{
 		personnel: Personnel | null;
@@ -98,12 +100,12 @@ export function PersonnelPanel({
 					</div>
 				</div>
 				{p.priority === 1 && (
-					<span className="text-xs" title="高優先度">
+					<span className="text-xs" title={t("personnel_priority_high")}>
 						⬆️
 					</span>
 				)}
 				{p.priority === -1 && (
-					<span className="text-xs" title="低優先度">
+					<span className="text-xs" title={t("personnel_priority_low")}>
 						⬇️
 					</span>
 				)}
@@ -117,10 +119,12 @@ export function PersonnelPanel({
 		>
 			{/* Header */}
 			<div className="p-2 border-b border-border">
-				<div className="text-sm font-semibold mb-2">職員一覧</div>
+				<div className="text-sm font-semibold mb-2">
+					{t("personnel_list_title")}
+				</div>
 				<input
 					type="text"
-					placeholder="名前・メールで検索..."
+					placeholder={t("personnel_search_placeholder")}
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
@@ -132,7 +136,7 @@ export function PersonnelPanel({
 				{groupedPersonnel.high.length > 0 && (
 					<div className="mb-2">
 						<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
-							高優先度
+							{t("personnel_priority_high")}
 						</div>
 						{groupedPersonnel.high.map(renderPersonnelItem)}
 					</div>
@@ -142,7 +146,7 @@ export function PersonnelPanel({
 					<div className="mb-2">
 						{groupedPersonnel.high.length > 0 && (
 							<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
-								通常
+								{t("personnel_priority_normal")}
 							</div>
 						)}
 						{groupedPersonnel.normal.map(renderPersonnelItem)}
@@ -152,7 +156,7 @@ export function PersonnelPanel({
 				{groupedPersonnel.low.length > 0 && (
 					<div className="mb-2">
 						<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
-							低優先度
+							{t("personnel_priority_low")}
 						</div>
 						{groupedPersonnel.low.map(renderPersonnelItem)}
 					</div>
@@ -160,7 +164,7 @@ export function PersonnelPanel({
 
 				{filteredPersonnel.length === 0 && (
 					<div className="px-2 py-4 text-center text-sm text-muted-foreground">
-						該当する職員が見つかりません
+						{t("personnel_no_results")}
 					</div>
 				)}
 			</div>
@@ -168,8 +172,11 @@ export function PersonnelPanel({
 			{/* Footer - Selection count */}
 			<div className="p-2 border-t border-border text-xs text-muted-foreground">
 				{selectedIds.length > 0
-					? `${selectedIds.length}名 選択中`
-					: "右クリックで優先度設定"}
+					? t("personnel_selected_count", {
+							count: selectedIds.length,
+							defaultValue: `${selectedIds.length} selected`,
+						})
+					: t("personnel_context_hint")}
 			</div>
 
 			{/* Context Menu */}

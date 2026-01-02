@@ -1,5 +1,6 @@
 import type React from "react";
 import { z } from "zod";
+import type { Personnel } from "../PersonnelPanel/PersonnelPanel.schema";
 
 // ==========================================
 // Field Schemas
@@ -86,7 +87,15 @@ export const FacilityScheduleSettingsSchema = z.object({
 	closedDays: z.array(z.number()), // 0=Sunday
 
 	// Display
-	weekStartsOn: z.union([z.literal(0), z.literal(1)]),
+	weekStartsOn: z.union([
+		z.literal(0),
+		z.literal(1),
+		z.literal(2),
+		z.literal(3),
+		z.literal(4),
+		z.literal(5),
+		z.literal(6),
+	]),
 	timeZone: z.string().optional(),
 
 	// Time slots
@@ -119,11 +128,31 @@ export interface EventFormData {
 	groupId?: string;
 	startDate: Date;
 	endDate: Date;
+	durationHours: number;
+	status?: string;
+	note?: string;
 	isAllDay?: boolean;
 	notes?: string;
 	description?: string;
 	color?: string;
 	[key: string]: unknown;
+}
+
+export interface EventModalComponentProps {
+	isOpen: boolean;
+	event?: ScheduleEvent;
+	resources: Resource[];
+	groups: ResourceGroup[];
+	events: ScheduleEvent[];
+	personnel?: Personnel[];
+	resourceAvailability?: { resourceId: string; isAvailable: boolean }[];
+	defaultResourceId?: string;
+	defaultStartTime?: Date;
+	readOnlyResource?: boolean;
+	onClose: () => void;
+	onSave: (data: EventFormData) => void;
+	onDelete?: (eventId: string) => void;
+	currentUserId?: string;
 }
 
 export interface FacilityScheduleProps {
@@ -157,7 +186,7 @@ export interface FacilityScheduleProps {
 	 * Custom components to override default internal components.
 	 */
 	components?: {
-		EventModal?: React.ComponentType<unknown>;
+		EventModal?: React.ComponentType<EventModalComponentProps>;
 	};
 
 	// Custom header slots

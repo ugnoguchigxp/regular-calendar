@@ -4,7 +4,8 @@ import { DateDisplay, DateFormat } from "./DateDisplay";
 
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 		i18n: {
 			language: "ja",
 		},

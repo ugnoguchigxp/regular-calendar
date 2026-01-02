@@ -16,20 +16,28 @@ export function mergeEvents(
 
 	// 1. Add unassigned events (no attendee) from global list
 	globalEvents.forEach((e) => {
+		const extendedIsAllDay =
+			typeof e.extendedProps?.isAllDay === "boolean"
+				? e.extendedProps.isAllDay
+				: undefined;
 		// Only include if no specific attendee is assigned
 		if (!e.attendee || e.attendee === "[]") {
 			eventMap.set(e.id, {
 				...e,
-				isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false,
+				isAllDay: e.isAllDay ?? extendedIsAllDay ?? false,
 			});
 		}
 	});
 
 	// 2. Override with colored personnel events
 	additionalEvents.forEach((e) => {
+		const extendedIsAllDay =
+			typeof e.extendedProps?.isAllDay === "boolean"
+				? e.extendedProps.isAllDay
+				: undefined;
 		eventMap.set(e.id, {
 			...e,
-			isAllDay: e.isAllDay ?? e.extendedProps?.isAllDay ?? false,
+			isAllDay: e.isAllDay ?? extendedIsAllDay ?? false,
 		});
 	});
 

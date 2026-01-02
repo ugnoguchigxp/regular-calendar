@@ -1,8 +1,8 @@
 import { format } from "date-fns";
-import { ja } from "date-fns/locale";
+import { enUS, ja } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
-
+import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "./Button";
 import { Calendar } from "./Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
@@ -47,13 +47,16 @@ export type DatePickerProps = SingleDatePickerProps | RangeDatePickerProps;
 export function DatePicker(props: DatePickerProps) {
 	const {
 		className,
-		label = "日付を選択",
+		label,
 		disabled,
 		minDate,
 		maxDate,
 		monthsShown = 1,
 		selectsRange,
 	} = props;
+	const { t, i18n } = useAppTranslation();
+	const locale = i18n.language?.startsWith("ja") ? ja : enUS;
+	const resolvedLabel = label ?? t("date_picker_label");
 
 	// Determine state for Single Mode
 	// Prioritize 'value' (legacy) over 'date' (new) if both present, but usually only one is used.
@@ -97,16 +100,16 @@ export function DatePicker(props: DatePickerProps) {
 	];
 
 	// Determine display text
-	let displayText = label;
+	let displayText = resolvedLabel;
 	const isValueSelected = selectsRange ? !!rangeDate?.from : !!singleDate;
 
 	if (selectsRange && rangeDate?.from) {
-		displayText = format(rangeDate.from, "yyyy年MM月dd日", { locale: ja });
+		displayText = format(rangeDate.from, "PPP", { locale });
 		if (rangeDate.to) {
-			displayText += ` - ${format(rangeDate.to, "yyyy年MM月dd日", { locale: ja })}`;
+			displayText += ` - ${format(rangeDate.to, "PPP", { locale })}`;
 		}
 	} else if (!selectsRange && singleDate) {
-		displayText = format(singleDate, "yyyy年MM月dd日", { locale: ja });
+		displayText = format(singleDate, "PPP", { locale });
 	}
 
 	return (

@@ -296,7 +296,7 @@ describe("FacilityScheduleSettingsSchema", () => {
 		expect(() =>
 			FacilityScheduleSettingsSchema.parse({
 				...baseSettings,
-				weekStartsOn: 2,
+				weekStartsOn: 7,
 			}),
 		).toThrow();
 	});

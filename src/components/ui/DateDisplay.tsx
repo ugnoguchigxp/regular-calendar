@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/utils/i18n";
 import { cn } from "./Button"; // Reusing cn utility
 
 interface DateDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -41,7 +41,7 @@ interface DateDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
  * Get locale string based on language
  */
 const getLocale = (lang: string): string => {
-	return lang === "ja" ? "ja-JP" : "en-GB";
+	return lang.startsWith("ja") ? "ja-JP" : "en-GB";
 };
 
 const isDisplayFormat = (
@@ -69,8 +69,8 @@ export const DateDisplay: React.FC<DateDisplayProps> = React.memo(
 		showDayOfWeek,
 		...props
 	}) => {
-		const { i18n } = useTranslation();
-		const lang = i18n.language || "ja"; // Default to ja if undefined
+		const { i18n } = useAppTranslation();
+		const lang = i18n.language || "en"; // Default to English if undefined
 		const locale = getLocale(lang);
 
 		// Compatibility mapper: Map 'variant' to 'format' if format is default

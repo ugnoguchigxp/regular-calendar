@@ -8,7 +8,8 @@ import { MonthView } from "./MonthView";
 
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 	}),
 }));
 
@@ -58,8 +59,8 @@ describe("MonthView", () => {
 			/>,
 		);
 
-		expect(screen.getByText("days_short_sun")).toBeInTheDocument();
-		expect(screen.getByText("days_short_mon")).toBeInTheDocument();
+		expect(screen.getByText("Sun")).toBeInTheDocument();
+		expect(screen.getByText("Mon")).toBeInTheDocument();
 	});
 
 	it("rotates day names when week starts on Monday", () => {
@@ -75,7 +76,7 @@ describe("MonthView", () => {
 			/>,
 		);
 
-		const dayNames = screen.getAllByText(/days_short_/);
+		const dayNames = screen.getAllByText(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)$/);
 		expect(dayNames.length).toBe(7);
 	});
 
@@ -89,7 +90,7 @@ describe("MonthView", () => {
 			/>,
 		);
 
-		const dayButtons = screen.getAllByRole("button", { name: "day_cell" });
+		const dayButtons = screen.getAllByRole("button", { name: "Day cell" });
 		if (dayButtons.length > 0) {
 			fireEvent.click(dayButtons[0]);
 			expect(mockOnDateClick).toHaveBeenCalled();

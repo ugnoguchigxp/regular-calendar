@@ -1,23 +1,23 @@
 import { Button } from "@/components/ui/Button";
 
-export interface ViewOption {
-	value: string;
+export interface ViewOption<T extends string = string> {
+	value: T;
 	label: string;
 }
 
-interface ViewSelectorProps {
-	currentView: string;
-	onViewChange: (view: string) => void;
-	options: ViewOption[];
+interface ViewSelectorProps<T extends string = string> {
+	currentView: T;
+	onViewChange: (view: T) => void;
+	options: ViewOption<T>[];
 	className?: string;
 }
 
-export function ViewSelector({
+export function ViewSelector<T extends string = string>({
 	currentView,
 	onViewChange,
 	options,
 	className,
-}: ViewSelectorProps) {
+}: ViewSelectorProps<T>) {
 	return (
 		<div className={`flex bg-muted p-1 rounded-md ${className || ""}`}>
 			{options.map((option) => (

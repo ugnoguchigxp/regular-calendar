@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { DateDisplay as DateFormat } from "@/components/ui/DateDisplay";
 import { Icons } from "@/components/ui/Icons";
@@ -10,6 +9,7 @@ import {
 	SelectValue,
 } from "@/components/ui/Select";
 import { ViewSelector } from "@/components/ui/ViewSelector";
+import { useAppTranslation } from "@/utils/i18n";
 import type { ResourceGroup, ViewMode } from "../FacilitySchedule.schema";
 
 interface ScheduleHeaderProps {
@@ -41,7 +41,7 @@ export function ScheduleHeader({
 	onViewChange,
 	onGroupChange,
 }: ScheduleHeaderProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	return (
 		<header className="border-b border-border px-4 py-3 flex items-center justify-between gap-4">

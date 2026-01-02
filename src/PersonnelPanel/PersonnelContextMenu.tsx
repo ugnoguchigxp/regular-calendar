@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useAppTranslation } from "@/utils/i18n";
 import type { Personnel } from "./PersonnelPanel.schema";
 
 interface PersonnelContextMenuProps {
@@ -14,6 +15,7 @@ export function PersonnelContextMenu({
 	onClose,
 	onSetPriority,
 }: PersonnelContextMenuProps) {
+	const { t } = useAppTranslation();
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -29,9 +31,9 @@ export function PersonnelContextMenu({
 	if (!personnel || !position) return null;
 
 	const menuItems = [
-		{ label: "高優先度に設定", priority: 1, icon: "⬆️" },
-		{ label: "通常に設定", priority: 0, icon: "➖" },
-		{ label: "低優先度に設定", priority: -1, icon: "⬇️" },
+		{ label: t("personnel_priority_high"), priority: 1, icon: "⬆️" },
+		{ label: t("personnel_priority_normal"), priority: 0, icon: "➖" },
+		{ label: t("personnel_priority_low"), priority: -1, icon: "⬇️" },
 	];
 
 	return (

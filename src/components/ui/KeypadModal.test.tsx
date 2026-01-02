@@ -28,7 +28,7 @@ describe("KeypadModal", () => {
 
 		await user.click(screen.getByRole("button", { name: "C" }));
 		await user.click(screen.getByRole("button", { name: "OK" }));
-		expect(screen.getByText("値を入力してください")).toBeInTheDocument();
+		expect(screen.getByText("Please enter a value")).toBeInTheDocument();
 	});
 
 	it("validates phone hyphen usage", async () => {
@@ -47,7 +47,7 @@ describe("KeypadModal", () => {
 		await user.click(screen.getByRole("button", { name: "-" }));
 		await user.click(screen.getByRole("button", { name: "OK" }));
 		expect(
-			screen.getByText("ハイフンで終わることはできません"),
+			screen.getByText("Value cannot end with a hyphen"),
 		).toBeInTheDocument();
 	});
 
@@ -60,9 +60,7 @@ describe("KeypadModal", () => {
 
 		await user.click(screen.getByRole("button", { name: "-" }));
 		await user.click(screen.getByRole("button", { name: "-" }));
-		expect(
-			screen.getByText("ハイフンを連続して入力することはできません"),
-		).toBeInTheDocument();
+		expect(screen.getByText("Hyphen cannot be repeated")).toBeInTheDocument();
 	});
 
 	it("validates decimal input and prevents trailing dot", async () => {
@@ -84,7 +82,7 @@ describe("KeypadModal", () => {
 		await user.click(screen.getByRole("button", { name: "OK" }));
 
 		expect(
-			screen.getByText("小数点で終わることはできません"),
+			screen.getByText("Value cannot end with a decimal point"),
 		).toBeInTheDocument();
 		expect(onSubmit).not.toHaveBeenCalled();
 	});
@@ -104,7 +102,7 @@ describe("KeypadModal", () => {
 		await user.click(screen.getByRole("button", { name: "OK" }));
 
 		expect(
-			screen.getByText("有効な時刻を 4 桁で入力してください（例: 0930）"),
+			screen.getByText("Enter a valid 4-digit time (e.g., 0930)"),
 		).toBeInTheDocument();
 		expect(onSubmit).not.toHaveBeenCalled();
 	});

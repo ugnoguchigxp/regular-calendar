@@ -5,9 +5,9 @@
 
 import { addDays } from "date-fns";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { DateDisplay } from "@/components/ui/DateDisplay";
 import { PercentFormat } from "@/components/ui/PercentFormat";
+import { useAppTranslation } from "@/utils/i18n";
 import type {
 	FacilityScheduleSettings,
 	Resource,
@@ -43,7 +43,7 @@ export function MonthView({
 	selectedGroupId,
 	onDayClick,
 }: MonthViewProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	const { filteredResources, filteredEvents } = useMemo(() => {
 		if (!selectedGroupId) {

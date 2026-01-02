@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
@@ -31,6 +30,7 @@ import {
 	SelectValue,
 } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { useAppTranslation } from "@/utils/i18n";
 import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
 import type {
 	Resource,
@@ -87,6 +87,7 @@ export interface EventFormData
 	startDate: Date;
 	endDate: Date;
 	description?: string;
+	[key: string]: unknown;
 	// mapped fields
 }
 
@@ -123,7 +124,7 @@ export function EventForm({
 	personnel = [],
 	currentUserId,
 }: EventFormProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	const isEditMode = !!event;
 	const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 

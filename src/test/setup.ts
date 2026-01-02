@@ -4,7 +4,8 @@ import { vi } from "vitest";
 // Mock react-i18next
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 		i18n: {
 			changeLanguage: vi.fn(),
 		},

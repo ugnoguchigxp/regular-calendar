@@ -12,7 +12,8 @@ import {
 // Mock i18next
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (str: string) => str,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 		i18n: {
 			language: "ja", // ensure JP locale for tests
 			changeLanguage: () => new Promise(() => {}),

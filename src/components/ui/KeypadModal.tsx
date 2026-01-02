@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useAppTranslation } from "@/utils/i18n";
 import { Modal } from "./Modal";
 
 // Reusing types locally or adapting
@@ -135,20 +136,20 @@ const KeypadModalLayout: React.FC<KeypadLayoutProps> = React.memo(
 
 const variantDefaults: Record<
 	KeypadVariant,
-	{ title: string; placeholder: string; maxLength: number }
+	{ titleKey: string; placeholder: string; maxLength: number }
 > = {
 	number: {
-		title: "数値を入力",
+		titleKey: "keypad_title_number",
 		placeholder: "",
 		maxLength: 10,
 	},
 	phone: {
-		title: "電話番号を入力",
+		titleKey: "keypad_title_phone",
 		placeholder: "090-0000-0000",
 		maxLength: 13,
 	},
 	time: {
-		title: "時刻を入力",
+		titleKey: "keypad_title_time",
 		placeholder: "__:__",
 		maxLength: TIME_MAX_DIGITS,
 	},
@@ -166,6 +167,7 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 		maxLength,
 		allowDecimal = false,
 	}) => {
+		const { t } = useAppTranslation();
 		const sanitizedInitialValue = useMemo(
 			() =>
 				variant === "time" ? sanitizeTimeValue(initialValue) : initialValue,
@@ -177,7 +179,7 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 		const [isPristine, setIsPristine] = useState(true);
 
 		const config = useMemo(() => variantDefaults[variant], [variant]);
-		const resolvedTitle = title ?? config.title;
+		const resolvedTitle = title ?? t(config.titleKey);
 		const resolvedPlaceholder = placeholder ?? config.placeholder;
 		const resolvedMaxLength =
 			variant === "time" ? TIME_MAX_DIGITS : (maxLength ?? config.maxLength);
@@ -203,7 +205,12 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 						const effectivePrev = isPristine ? "" : prev;
 
 						if (effectivePrev.length >= TIME_MAX_DIGITS) {
-							setError(`最大${TIME_MAX_DIGITS}文字まで入力できます`);
+							setError(
+								t("keypad_error_max_length", {
+									defaultValue: `Up to ${TIME_MAX_DIGITS} characters`,
+									max: TIME_MAX_DIGITS,
+								}),
+							);
 							return effectivePrev;
 						}
 						setError("");
@@ -222,14 +229,19 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 					const effectivePrev = isPristine ? "" : prev;
 
 					if (effectivePrev.length >= resolvedMaxLength) {
-						setError(`最大${resolvedMaxLength}文字まで入力できます`);
+						setError(
+							t("keypad_error_max_length", {
+								defaultValue: `Up to ${resolvedMaxLength} characters`,
+								max: resolvedMaxLength,
+							}),
+						);
 						return effectivePrev;
 					}
 					setError("");
 					return `${effectivePrev}${digit}`;
 				});
 			},
-			[resolvedMaxLength, isTimeVariant, isPristine],
+			[resolvedMaxLength, isTimeVariant, isPristine, t],
 		);
 
 		const handleHyphenClick = useCallback(() => {
@@ -239,17 +251,22 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 				const effectivePrev = isPristine ? "" : prev;
 
 				if (effectivePrev.length >= resolvedMaxLength) {
-					setError(`最大${resolvedMaxLength}文字まで入力できます`);
+					setError(
+						t("keypad_error_max_length", {
+							defaultValue: `Up to ${resolvedMaxLength} characters`,
+							max: resolvedMaxLength,
+						}),
+					);
 					return effectivePrev;
 				}
 				if (effectivePrev.endsWith("-")) {
-					setError("ハイフンを連続して入力することはできません");
+					setError(t("keypad_error_hyphen_repeat"));
 					return effectivePrev;
 				}
 				setError("");
 				return `${effectivePrev}-`;
 			});
-		}, [canUseHyphen, resolvedMaxLength, isPristine]);
+		}, [canUseHyphen, resolvedMaxLength, isPristine, t]);
 
 		const handleDecimalClick = useCallback(() => {
 			if (!canUseDecimal) return;
@@ -258,13 +275,13 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 				const effectivePrev = isPristine ? "" : prev;
 
 				if (effectivePrev.includes(".")) {
-					setError("小数点は1つまでです");
+					setError(t("keypad_error_decimal_repeat"));
 					return effectivePrev;
 				}
 				setError("");
 				return `${effectivePrev}.`;
 			});
-		}, [canUseDecimal, isPristine]);
+		}, [canUseDecimal, isPristine, t]);
 
 		const handleBackspace = useCallback(() => {
 			setIsPristine(false);
@@ -282,7 +299,7 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 			if (isTimeVariant) {
 				setValue((currentValue) => {
 					if (!isValidTimeDigits(currentValue)) {
-						setError("有効な時刻を 4 桁で入力してください（例: 0930）");
+						setError(t("keypad_error_time_invalid"));
 						return currentValue;
 					}
 					onSubmit(toFormattedTime(currentValue));
@@ -293,21 +310,21 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 
 			setValue((currentValue) => {
 				if (currentValue === "") {
-					setError("値を入力してください");
+					setError(t("keypad_error_value_required"));
 					return currentValue;
 				}
 				if (canUseDecimal && currentValue.endsWith(".")) {
-					setError("小数点で終わることはできません");
+					setError(t("keypad_error_decimal_end"));
 					return currentValue;
 				}
 				if (canUseHyphen && currentValue.endsWith("-")) {
-					setError("ハイフンで終わることはできません");
+					setError(t("keypad_error_hyphen_end"));
 					return currentValue;
 				}
 				onSubmit(currentValue);
 				return currentValue;
 			});
-		}, [canUseDecimal, canUseHyphen, isTimeVariant, onSubmit]);
+		}, [canUseDecimal, canUseHyphen, isTimeVariant, onSubmit, t]);
 
 		useEffect(() => {
 			if (!open) return;

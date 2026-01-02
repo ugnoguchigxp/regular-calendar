@@ -55,9 +55,7 @@ describe("PersonnelPanel", () => {
 		);
 
 		fireEvent.contextMenu(screen.getByRole("button", { name: /Bob/ }));
-		const menuButton = screen.getByText("高優先度に設定").closest("button");
-		if (!menuButton) throw new Error("Menu item not found");
-		fireEvent.click(menuButton);
+		fireEvent.click(screen.getByRole("button", { name: /High Priority/ }));
 
 		expect(onPriorityChange).toHaveBeenCalledWith("p2", 1);
 	});

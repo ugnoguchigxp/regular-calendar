@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "../components/ui/Button";
 import { Checkbox } from "../components/ui/Checkbox";
 import { DatePicker } from "../components/ui/DatePicker";
@@ -72,7 +72,7 @@ export function ConnectedEventModal({
 	readOnlyResource = false,
 	currentUserId,
 }: ConnectedEventModalProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	const { fetchResourceAvailability, getResourceAvailabilityFromCache } =
 		useScheduleContext();
 
@@ -261,7 +261,7 @@ export function ConnectedEventModal({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>
-										{t("event_name_label") || "Event Name (予定名称)"}{" "}
+										{t("event_name_label") || "Event Name"}{" "}
 										<span className="text-red-500">*</span>
 									</FormLabel>
 									<FormControl>
@@ -298,11 +298,9 @@ export function ConnectedEventModal({
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="Meeting">Meeting (会議)</SelectItem>
-											<SelectItem value="Event">Event (イベント)</SelectItem>
-											<SelectItem value="Interview">
-												Interview (面談)
-											</SelectItem>
+											<SelectItem value="Meeting">Meeting</SelectItem>
+											<SelectItem value="Event">Event</SelectItem>
+											<SelectItem value="Interview">Interview</SelectItem>
 										</SelectContent>
 									</Select>
 								</FormItem>

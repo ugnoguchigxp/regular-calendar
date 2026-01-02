@@ -44,10 +44,10 @@ describe("ScheduleHeader", () => {
 			/>,
 		);
 
-		await user.click(screen.getByRole("button", { name: /today_button/i }));
+		await user.click(screen.getByRole("button", { name: /today/i }));
 		expect(onToday).toHaveBeenCalled();
 
-		await user.click(screen.getByRole("button", { name: /view_week/i }));
+		await user.click(screen.getByRole("button", { name: /week/i }));
 		expect(onViewChange).toHaveBeenCalledWith("week");
 
 		await user.click(screen.getByRole("button", { name: "Chevron left" }));

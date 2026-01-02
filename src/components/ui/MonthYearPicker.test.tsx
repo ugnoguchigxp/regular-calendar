@@ -22,7 +22,7 @@ describe("MonthYearPicker", () => {
 		await user.click(screen.getByRole("button", { name: "Open" }));
 
 		await user.click(screen.getByRole("button", { name: "2025" }));
-		await user.click(screen.getByRole("button", { name: "2月" }));
+		await user.click(screen.getByRole("button", { name: "Feb" }));
 
 		expect(onDateChange).toHaveBeenCalled();
 		const calledDate = onDateChange.mock.calls[0][0] as Date;

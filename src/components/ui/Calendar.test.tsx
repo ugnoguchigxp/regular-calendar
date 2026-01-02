@@ -11,7 +11,7 @@ describe("Calendar", () => {
 			/>,
 		);
 		expect(
-			screen.getByText((content) => content.includes("2024年1月")),
+			screen.getByText((content) => content.includes("January 2024")),
 		).toBeInTheDocument();
 	});
 });

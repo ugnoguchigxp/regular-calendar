@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { DateDisplay as DateFormat } from "@/components/ui/DateDisplay";
 import { Icons } from "@/components/ui/Icons";
 import { ViewSelector } from "@/components/ui/ViewSelector";
+import { useAppTranslation } from "@/utils/i18n";
 import { navigateDate } from "../utils/dateNavigation";
 import { defaultStorage, type StorageAdapter } from "../utils/StorageAdapter";
 import { DayView } from "./components/DayView/DayView";
@@ -67,7 +67,7 @@ export function RegularCalendar({
 	storageKey = "regular-calendar-view",
 	storage = defaultStorage,
 }: RegularCalendarProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	// Internal State
 	const [internalDate, setInternalDate] = useState(new Date());

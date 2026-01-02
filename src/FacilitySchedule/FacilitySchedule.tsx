@@ -4,7 +4,7 @@
  * Supports Day, Week, and Month views.
  */
 
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/utils/i18n";
 import { DayView } from "./components/DayView/DayView";
 
 import { EventModal } from "./components/EventModal/EventModal";
@@ -40,7 +40,7 @@ export function FacilitySchedule({
 	enablePersistence = false,
 	storageKey = "facility-schedule-view",
 }: FacilityScheduleProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	const {
 		currentDate,

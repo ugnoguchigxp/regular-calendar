@@ -25,7 +25,14 @@ export default defineConfig({
 		},
 		cssCodeSplit: false, // Bundle all CSS into a single file
 		rollupOptions: {
-			external: ["react", "react-dom", "react/jsx-runtime", "date-fns"],
+			external: [
+				"react",
+				"react-dom",
+				"react/jsx-runtime",
+				"date-fns",
+				"i18next",
+				"react-i18next",
+			],
 			output: {
 				globals: {
 					react: "React",

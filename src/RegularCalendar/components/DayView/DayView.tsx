@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DateDisplay } from "@/components/ui/DateDisplay";
+import { useAppTranslation } from "@/utils/i18n";
 import {
 	DEFAULT_VIEW_HOURS,
 	TIME_SLOT_HEIGHT,
@@ -31,6 +32,7 @@ export function DayView({
 	onTimeSlotClick,
 	onEventClick,
 }: DayViewProps) {
+	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30; // Fallback to 30 min
 	const startHour = Number(
 		settings.startTime?.split(":")[0] || DEFAULT_VIEW_HOURS.start,
@@ -121,7 +123,9 @@ export function DayView({
 					style={{ paddingRight: scrollbarPadding || undefined }}
 				>
 					<div className="w-16 flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-1">
-						<span className="text-[9px] text-muted-foreground">終日</span>
+						<span className="text-[9px] text-muted-foreground">
+							{t("all_day")}
+						</span>
 					</div>
 					<div className="flex-1 p-0.5 min-w-0">
 						<div className="flex flex-col gap-0.5">

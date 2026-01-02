@@ -59,9 +59,7 @@ describe("FacilityStructureSettings", () => {
 			/>,
 		);
 
-		await user.click(
-			screen.getByRole("button", { name: /facility_action_add_group/i }),
-		);
+		await user.click(screen.getByRole("button", { name: /add group/i }));
 		expect(onCreateGroup).toHaveBeenCalledWith({ name: "New Name" });
 
 		const groupSection = screen.getByText("Group 1").closest("div");
@@ -72,16 +70,14 @@ describe("FacilityStructureSettings", () => {
 		const editInput = screen.getByDisplayValue("Group 1");
 		await user.clear(editInput);
 		await user.type(editInput, "Updated Group");
-		await user.click(screen.getByRole("button", { name: /save_button/i }));
+		await user.click(screen.getByRole("button", { name: /save/i }));
 		expect(onUpdateGroup).toHaveBeenCalledWith("g1", { name: "Updated Group" });
 
 		const groupButtonsAfterEdit = within(groupSection).getAllByRole("button");
 		fireEvent.click(groupButtonsAfterEdit[1]);
 		expect(onDeleteGroup).toHaveBeenCalledWith("g1");
 
-		await user.click(
-			screen.getByRole("button", { name: /facility_action_add_resource/i }),
-		);
+		await user.click(screen.getByRole("button", { name: /add resource/i }));
 		expect(onCreateResource).toHaveBeenCalledWith({
 			name: "New Name",
 			groupId: "g1",
@@ -98,7 +94,7 @@ describe("FacilityStructureSettings", () => {
 		await user.clear(resourceInput);
 		await user.type(resourceInput, "Updated Room");
 		await user.click(
-			within(resourceTag).getByRole("button", { name: /save_button/i }),
+			within(resourceTag).getByRole("button", { name: /save/i }),
 		);
 		expect(onUpdateResource).toHaveBeenCalledWith("r1", {
 			name: "Updated Room",

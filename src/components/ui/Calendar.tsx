@@ -1,8 +1,9 @@
 import { format } from "date-fns";
-import { ja } from "date-fns/locale";
+import { enUS, ja } from "date-fns/locale";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import type * as React from "react";
 import { DayPicker, useNavigation } from "react-day-picker";
+import { useAppTranslation } from "@/utils/i18n";
 import { MonthYearPicker } from "./MonthYearPicker";
 import { cn } from "./utils";
 
@@ -14,6 +15,8 @@ function Calendar({
 	showOutsideDays = true,
 	...props
 }: CalendarProps) {
+	const { i18n } = useAppTranslation();
+	const locale = i18n.language?.startsWith("ja") ? ja : enUS;
 	const { modifiers, modifiersClassNames, ...restProps } = props;
 	const mergedModifiers = {
 		...modifiers,
@@ -31,7 +34,7 @@ function Calendar({
 
 	return (
 		<DayPicker
-			locale={ja}
+			locale={locale}
 			showOutsideDays={showOutsideDays}
 			className={cn("px-ui py-ui rounded-md", className)}
 			classNames={{
@@ -84,7 +87,7 @@ function Calendar({
 							onDateChange={(d) => goToMonth?.(d)}
 						>
 							<span className="text-sm font-medium cursor-pointer hover:bg-muted/50 rounded px-2 py-1 transition-colors flex items-center justify-center gap-1">
-								{format(displayMonth, "yyyy年M月", { locale: ja })}
+								{format(displayMonth, "LLLL yyyy", { locale })}
 								<ChevronDown className="h-4 w-4 opacity-50" />
 							</span>
 						</MonthYearPicker>

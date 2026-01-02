@@ -8,7 +8,8 @@ import * as useScheduleViewModule from "./hooks/useScheduleView";
 
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 	}),
 }));
 
@@ -138,13 +139,13 @@ describe("FacilitySchedule", () => {
 	it("renders loading state when isLoading is true", () => {
 		render(<FacilitySchedule {...mockProps} isLoading={true} />);
 
-		expect(screen.getByText("loading...")).toBeInTheDocument();
+		expect(screen.getByText(/Loading/)).toBeInTheDocument();
 	});
 
 	it("does not render loading state when isLoading is false", () => {
 		render(<FacilitySchedule {...mockProps} isLoading={false} />);
 
-		expect(screen.queryByText("loading...")).not.toBeInTheDocument();
+		expect(screen.queryByText(/Loading/)).not.toBeInTheDocument();
 	});
 
 	it("applies custom className", () => {

@@ -249,10 +249,10 @@ describe("ConnectedEventModal", () => {
 			await Promise.resolve();
 		});
 
-		fireEvent.click(screen.getByRole("button", { name: /save_button/i }));
+		fireEvent.click(screen.getByRole("button", { name: /save/i }));
 		expect(onSave).toHaveBeenCalledWith({ prepared: true });
 
-		fireEvent.click(screen.getByRole("button", { name: /delete_button/i }));
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
 		fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
 		expect(onDelete).toHaveBeenCalledWith("e1");
 
@@ -309,7 +309,7 @@ describe("ConnectedEventModal", () => {
 		});
 
 		expect(
-			screen.queryByRole("button", { name: /save_button/i }),
+			screen.queryByRole("button", { name: /save/i }),
 		).not.toBeInTheDocument();
 		expect(
 			screen.getByText(

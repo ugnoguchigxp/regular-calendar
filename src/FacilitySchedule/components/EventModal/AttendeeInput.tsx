@@ -124,7 +124,7 @@ export function AttendeeInput({
 				className,
 			)}
 		>
-			{value.map((attendee) => (
+			{value.map((attendee, index) => (
 				<div
 					key={
 						attendee.personnelId ??
@@ -138,7 +138,7 @@ export function AttendeeInput({
 						type="button"
 						onClick={(e) => {
 							e.stopPropagation();
-							removeAttendee(i);
+							removeAttendee(index);
 						}}
 						className="text-muted-foreground group-hover:text-destructive transition-colors"
 					>

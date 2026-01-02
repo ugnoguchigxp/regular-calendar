@@ -3,7 +3,7 @@
  */
 
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/utils/i18n";
 import type {
 	FacilityScheduleSettings,
 	ScheduleEvent,
@@ -30,7 +30,7 @@ export function MonthView({
 	onDateClick,
 	onEventClick,
 }: MonthViewProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	const weekStart = settings.weekStartsOn ?? 1;
 
 	const calendarGrid = useMemo(

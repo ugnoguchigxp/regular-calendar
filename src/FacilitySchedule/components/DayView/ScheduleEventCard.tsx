@@ -137,7 +137,7 @@ export function ScheduleEventCard({
 						</div>
 					</button>
 				</TooltipTrigger>
-				<TooltipContent side="right">
+				<TooltipContent>
 					<div className="space-y-1">
 						{event.hasConflict && (
 							<p className="font-bold text-xs text-red-600">⚠️ Double Booking</p>

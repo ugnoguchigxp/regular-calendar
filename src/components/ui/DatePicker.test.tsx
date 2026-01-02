@@ -46,7 +46,7 @@ describe("DatePicker", () => {
 	it("renders formatted single date", () => {
 		render(<DatePicker value={new Date("2024-01-15T00:00:00Z")} />);
 		expect(
-			screen.getByRole("button", { name: /2024年01月15日/i }),
+			screen.getByRole("button", { name: /January 15th, 2024/i }),
 		).toBeInTheDocument();
 	});
 
@@ -56,7 +56,7 @@ describe("DatePicker", () => {
 		const setDate = vi.fn();
 		render(<DatePicker onChange={onChange} setDate={setDate} />);
 
-		await user.click(screen.getByRole("button", { name: /日付を選択/i }));
+		await user.click(screen.getByRole("button", { name: /Select date/i }));
 		await user.click(screen.getByRole("button", { name: "Pick" }));
 
 		expect(onChange).toHaveBeenCalledWith(new Date("2024-01-10T00:00:00Z"));
@@ -76,10 +76,12 @@ describe("DatePicker", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: /2024年02月01日/i }),
+			screen.getByRole("button", { name: /February 1st, 2024/i }),
 		).toBeInTheDocument();
 
-		await user.click(screen.getByRole("button", { name: /2024年02月01日/i }));
+		await user.click(
+			screen.getByRole("button", { name: /February 1st, 2024/i }),
+		);
 		await user.click(screen.getByRole("button", { name: "Pick" }));
 
 		expect(onRangeChange).toHaveBeenCalledWith([

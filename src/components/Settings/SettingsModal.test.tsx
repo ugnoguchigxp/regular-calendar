@@ -5,7 +5,8 @@ import { SettingsModal } from "./SettingsModal";
 
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 	}),
 }));
 
@@ -37,7 +38,7 @@ describe("SettingsModal", () => {
 			/>,
 		);
 
-		expect(screen.queryByText("settings_title")).not.toBeInTheDocument();
+		expect(screen.queryByText("Settings")).not.toBeInTheDocument();
 	});
 
 	it("renders when isOpen is true", () => {
@@ -50,7 +51,7 @@ describe("SettingsModal", () => {
 			/>,
 		);
 
-		expect(screen.getByText("settings_title")).toBeInTheDocument();
+		expect(screen.getByText("Settings")).toBeInTheDocument();
 	});
 
 	it("calls onClose when clicking overlay", () => {
@@ -110,7 +111,7 @@ describe("SettingsModal", () => {
 			/>,
 		);
 
-		const darkButton = screen.getByText("option_dark");
+		const darkButton = screen.getByText("Dark");
 		fireEvent.click(darkButton);
 		expect(mockOnUpdateSettings).toHaveBeenCalledWith({ theme: "dark" });
 	});
@@ -125,7 +126,7 @@ describe("SettingsModal", () => {
 			/>,
 		);
 
-		const compactButton = screen.getByText("option_compact");
+		const compactButton = screen.getByText("Compact");
 		fireEvent.click(compactButton);
 		expect(mockOnUpdateSettings).toHaveBeenCalledWith({ density: "compact" });
 	});
@@ -140,7 +141,7 @@ describe("SettingsModal", () => {
 			/>,
 		);
 
-		const sundayButton = screen.getByText("days_short_sun").closest("button");
+		const sundayButton = screen.getByText("Sun").closest("button");
 		if (!sundayButton) throw new Error("Sunday button not found");
 		fireEvent.click(sundayButton);
 		expect(mockOnUpdateSettings).toHaveBeenCalledWith({ closedDays: [6] });

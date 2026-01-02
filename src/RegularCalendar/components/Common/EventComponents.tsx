@@ -4,6 +4,7 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import type React from "react";
+import { useAppTranslation } from "@/utils/i18n";
 import type { ScheduleEvent } from "../../RegularCalendar.schema";
 
 // Helper to get location string
@@ -40,8 +41,11 @@ interface EventItemProps {
 }
 
 // Helper to get display attendee
-const getDisplayAttendee = (attendee?: string | null): string => {
-	if (!attendee || attendee === "[]" || attendee === "") return "自分のみ";
+const getDisplayAttendee = (
+	attendee: string | null | undefined,
+	fallbackLabel: string,
+): string => {
+	if (!attendee || attendee === "[]" || attendee === "") return fallbackLabel;
 	try {
 		const parsed = JSON.parse(attendee);
 		if (Array.isArray(parsed)) {
@@ -66,6 +70,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 	totalColumns = 1,
 	onEventClick,
 }) => {
+	const { t } = useAppTranslation();
 	// Note: Drag functionality depends on DndContext being present in parent
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: event.id,
@@ -80,8 +85,11 @@ export const EventItem: React.FC<EventItemProps> = ({
 
 	const title = event.title;
 	const locationText = getEventLocation(event);
-	// Use helper to allow "自分のみ" display
-	const displayAttendee = getDisplayAttendee(event.attendee);
+	// Use helper to allow "Only me" display
+	const displayAttendee = getDisplayAttendee(
+		event.attendee,
+		t("attendee_self"),
+	);
 
 	// Calculate width and left position for overlapping events
 	const widthPercent = 100 / totalColumns;
@@ -176,10 +184,12 @@ interface EventDragOverlayProps {
 export const EventDragOverlay: React.FC<EventDragOverlayProps> = ({
 	event,
 }) => {
+	const { t } = useAppTranslation();
 	const title = event.title;
 	const locationText = getEventLocation(event);
-	const displayAttendee = getDisplayAttendee(event.attendee);
-	const isSelfOnly = displayAttendee === "自分のみ";
+	const selfLabel = t("attendee_self");
+	const displayAttendee = getDisplayAttendee(event.attendee, selfLabel);
+	const isSelfOnly = displayAttendee === selfLabel;
 
 	return (
 		<div

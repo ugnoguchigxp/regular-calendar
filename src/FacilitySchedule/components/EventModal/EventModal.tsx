@@ -3,8 +3,8 @@
  */
 
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { ConfirmModal, Modal } from "@/components/ui/Modal";
+import { useAppTranslation } from "@/utils/i18n";
 import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
 import type {
 	Resource,
@@ -49,7 +49,7 @@ export function EventModal({
 	currentUserId,
 	resourceAvailability,
 }: EventModalProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	const isEditMode = !!event;
 
 	const [isModalReady, setIsModalReady] = React.useState(false);

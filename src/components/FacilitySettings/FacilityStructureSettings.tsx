@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Icons } from "@/components/ui/Icons";
+import { useAppTranslation } from "@/utils/i18n";
 import type {
 	Resource,
 	ResourceGroup,
@@ -35,7 +35,7 @@ export function FacilityStructureSettings({
 	onDeleteResource,
 	onClose,
 }: FacilityStructureSettingsProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 	const [editingResourceId, setEditingResourceId] = useState<string | null>(
 		null,

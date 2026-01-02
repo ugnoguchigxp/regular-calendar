@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/utils/i18n";
 import {
 	DEFAULT_VIEW_HOURS,
 	TIME_SLOT_HEIGHT,
@@ -37,7 +37,7 @@ export function WeekView({
 	onTimeSlotClick,
 	onEventClick,
 }: WeekViewProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30;
 	const startHour = Number(
 		settings.startTime?.split(":")[0] || DEFAULT_VIEW_HOURS.start,
@@ -173,7 +173,9 @@ export function WeekView({
 					style={{ paddingRight: scrollbarPadding || undefined }}
 				>
 					<div className="w-16 flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-1">
-						<span className="text-[9px] text-muted-foreground">終日</span>
+						<span className="text-[9px] text-muted-foreground">
+							{t("all_day")}
+						</span>
 					</div>
 					{weekDates.map((date) => {
 						const dayAllDayEvents = getEventsForDate(allDayEvents, date);

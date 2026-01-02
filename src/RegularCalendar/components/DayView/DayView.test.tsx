@@ -74,7 +74,7 @@ describe("DayView", () => {
 			/>,
 		);
 
-		expect(screen.getByText("終日")).toBeInTheDocument();
+		expect(screen.getByText("All day")).toBeInTheDocument();
 		fireEvent.click(screen.getByText("All Day"));
 		expect(onEventClick).toHaveBeenCalledWith(allDayEvent);
 
@@ -94,7 +94,7 @@ describe("DayView", () => {
 			/>,
 		);
 
-		expect(screen.queryByText("終日")).not.toBeInTheDocument();
+		expect(screen.queryByText("All day")).not.toBeInTheDocument();
 
 		const slots = container.querySelectorAll(
 			"button.border-b.border-border.cursor-pointer",

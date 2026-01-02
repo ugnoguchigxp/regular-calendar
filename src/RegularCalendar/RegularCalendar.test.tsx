@@ -29,9 +29,10 @@ type MonthViewProps = {
 
 vi.mock("react-i18next", () => ({
 	useTranslation: () => ({
-		t: (key: string) => key,
+		t: (key: string, options?: { defaultValue?: string }) =>
+			options?.defaultValue ?? key,
 		i18n: {
-			language: "ja",
+			language: "en",
 		},
 	}),
 }));
@@ -115,7 +116,7 @@ describe("RegularCalendar", () => {
 
 		expect(screen.getByTestId("chevron-left")).toBeInTheDocument();
 		expect(screen.getByTestId("chevron-right")).toBeInTheDocument();
-		expect(screen.getByText("today_button")).toBeInTheDocument();
+		expect(screen.getByText("Today")).toBeInTheDocument();
 		expect(screen.getByTestId("view-selector")).toBeInTheDocument();
 	});
 
@@ -150,7 +151,7 @@ describe("RegularCalendar", () => {
 			/>,
 		);
 
-		expect(screen.getByText(/1月15日/i)).toBeInTheDocument();
+		expect(screen.getByText(/January/i)).toBeInTheDocument();
 	});
 
 	it("calls onDateChange when navigating to previous date", () => {
@@ -192,7 +193,7 @@ describe("RegularCalendar", () => {
 			/>,
 		);
 
-		fireEvent.click(screen.getByText("today_button"));
+		fireEvent.click(screen.getByText("Today"));
 		expect(mockOnDateChange).toHaveBeenCalledTimes(1);
 	});
 

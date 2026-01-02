@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "./Button";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
 import { cn } from "./utils";
@@ -18,6 +19,8 @@ export function MonthYearPicker({
 	fromYear,
 	toYear,
 }: MonthYearPickerProps) {
+	const { i18n } = useAppTranslation();
+	const locale = i18n.language?.startsWith("ja") ? "ja-JP" : "en-US";
 	const [year, setYear] = React.useState(date.getFullYear());
 	const [open, setOpen] = React.useState(false);
 
@@ -121,11 +124,18 @@ export function MonthYearPicker({
 
 					{/* Right: Month Grid */}
 					<div className="w-[240px] p-3 flex flex-col">
-						<div className="text-center font-bold mb-2">{year}年</div>
+						<div className="text-center font-bold mb-2">
+							{new Intl.DateTimeFormat(locale, { year: "numeric" }).format(
+								new Date(year, 0, 1),
+							)}
+						</div>
 						<div className="grid grid-cols-3 gap-2">
 							{months.map((m) => {
 								const isCurrent =
 									m === date.getMonth() && year === date.getFullYear();
+								const monthLabel = new Intl.DateTimeFormat(locale, {
+									month: "short",
+								}).format(new Date(year, m, 1));
 								return (
 									<Button
 										key={m}
@@ -134,7 +144,7 @@ export function MonthYearPicker({
 										onClick={() => handleMonthClick(m)}
 										className={cn("h-10", isCurrent && "pointer-events-none")}
 									>
-										{m + 1}月
+										{monthLabel}
 									</Button>
 								);
 							})}

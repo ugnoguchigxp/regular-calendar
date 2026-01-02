@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/utils/i18n";
 import type { AppSettings } from "../../types";
 import { Button } from "../ui/Button";
 
@@ -31,7 +31,7 @@ export function SettingsModal({
 	onUpdateSettings,
 	onResetSettings,
 }: SettingsModalProps) {
-	const { t } = useTranslation();
+	const { t } = useAppTranslation();
 
 	if (!isOpen) return null;
 

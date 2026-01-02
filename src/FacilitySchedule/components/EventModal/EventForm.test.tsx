@@ -100,12 +100,9 @@ describe("EventForm", () => {
 			/>,
 		);
 
-		await user.type(
-			screen.getByPlaceholderText("name_placeholder"),
-			"John Doe",
-		);
+		await user.type(screen.getByPlaceholderText("Enter name"), "John Doe");
 
-		await user.click(screen.getByRole("button", { name: /save_button/i }));
+		await user.click(screen.getByRole("button", { name: /save/i }));
 		expect(onSubmit).toHaveBeenCalled();
 		expect(screen.getByText("Conflict Detected")).toBeInTheDocument();
 	});
@@ -128,7 +125,7 @@ describe("EventForm", () => {
 		);
 
 		expect(screen.getByText("Room 1")).toBeInTheDocument();
-		await user.click(screen.getByRole("button", { name: /delete_button/i }));
+		await user.click(screen.getByRole("button", { name: /delete/i }));
 		expect(onDelete).toHaveBeenCalled();
 	});
 });
