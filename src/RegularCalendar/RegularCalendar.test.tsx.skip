@@ -1,0 +1,224 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { RegularCalendar } from './RegularCalendar';
+import type { FacilityScheduleSettings, ScheduleEvent } from './RegularCalendar.schema';
+
+const mockSettings: FacilityScheduleSettings = {
+  defaultDuration: 1,
+  startTime: '08:00',
+  endTime: '18:00',
+  closedDays: [0, 6],
+  weekStartsOn: 1,
+  timeZone: 'Asia/Tokyo',
+};
+
+const mockEvents: ScheduleEvent[] = [
+  {
+    id: '1',
+    groupId: 'default',
+    title: 'イベント1',
+    attendee: '担当者1',
+    startDate: new Date('2025-01-01T10:00:00'),
+    endDate: new Date('2025-01-01T11:00:00'),
+    status: 'booked',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isAllDay: false,
+  },
+];
+
+describe('RegularCalendar', () => {
+  it('renders calendar header', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+      />
+    );
+
+    expect(screen.getByText(/today/i)).toBeInTheDocument();
+  });
+
+  it('renders date navigation buttons', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
+  });
+
+  it('renders view selector', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+      />
+    );
+
+    expect(screen.getByText(/day/i)).toBeInTheDocument();
+    expect(screen.getByText(/week/i)).toBeInTheDocument();
+    expect(screen.getByText(/month/i)).toBeInTheDocument();
+  });
+
+  it('renders week view by default', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+      />
+    );
+
+    expect(screen.getByText(/week/i)).toBeInTheDocument();
+  });
+
+  it('switches to day view', async () => {
+    const user = userEvent.setup();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+      />
+    );
+
+    await user.click(screen.getByText(/day/i));
+    expect(screen.getByText(/day/i)).toBeInTheDocument();
+  });
+
+  it('switches to month view', async () => {
+    const user = userEvent.setup();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+      />
+    );
+
+    await user.click(screen.getByText(/month/i));
+    expect(screen.getByText(/month/i)).toBeInTheDocument();
+  });
+
+  it('navigates to previous period', async () => {
+    const onDateChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        currentDate={new Date('2025-01-01')}
+        onDateChange={onDateChange}
+      />
+    );
+
+    const prevButton = screen.getByRole('button', { name: /previous/i });
+    await user.click(prevButton);
+
+    expect(onDateChange).toHaveBeenCalled();
+  });
+
+  it('navigates to next period', async () => {
+    const onDateChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        currentDate={new Date('2025-01-01')}
+        onDateChange={onDateChange}
+      />
+    );
+
+    const nextButton = screen.getByRole('button', { name: /next/i });
+    await user.click(nextButton);
+
+    expect(onDateChange).toHaveBeenCalled();
+  });
+
+  it('navigates to today', async () => {
+    const onDateChange = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        currentDate={new Date('2025-01-01')}
+        onDateChange={onDateChange}
+      />
+    );
+
+    const todayButton = screen.getByText(/today/i);
+    await user.click(todayButton);
+
+    expect(onDateChange).toHaveBeenCalled();
+  });
+
+  it('renders loading state', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        isLoading={true}
+      />
+    );
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+
+  it('renders custom header left slot', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        headerLeft={<div>Custom Left</div>}
+      />
+    );
+
+    expect(screen.getByText('Custom Left')).toBeInTheDocument();
+  });
+
+  it('renders custom header right slot', () => {
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        headerRight={<div>Custom Right</div>}
+      />
+    );
+
+    expect(screen.getByText('Custom Right')).toBeInTheDocument();
+  });
+
+  it('uses controlled date when provided', () => {
+    const onDateChange = vi.fn();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        currentDate={new Date('2025-01-01')}
+        onDateChange={onDateChange}
+      />
+    );
+
+    const todayButton = screen.getByText(/today/i);
+    todayButton.click();
+
+    expect(onDateChange).toHaveBeenCalled();
+  });
+
+  it('uses controlled view mode when provided', () => {
+    const onViewChange = vi.fn();
+    render(
+      <RegularCalendar
+        events={mockEvents}
+        settings={mockSettings}
+        viewMode="day"
+        onViewChange={onViewChange}
+      />
+    );
+
+    expect(screen.getByText(/day/i)).toBeInTheDocument();
+  });
+});

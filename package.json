@@ -55,16 +55,18 @@
         "type-check": "tsc --noEmit",
         "lint": "biome check .",
         "format": "biome format --write .",
-        "test": "vitest",
+        "test": "vitest --run",
+        "test:ui": "vitest --ui",
         "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
         "prepublishOnly": "npm run test:run && npm run build"
     },
     "peerDependencies": {
         "@gxp/design-system": "*",
-        "react": "^18.0.0 || ^19.0.0",
-        "react-dom": "^18.0.0 || ^19.0.0",
         "date-fns": "^3.0.0 || ^4.0.0",
         "i18next": ">= 23.0.0",
+        "react": "^18.0.0 || ^19.0.0",
+        "react-dom": "^18.0.0 || ^19.0.0",
         "react-i18next": ">= 13.0.0"
     },
     "peerDependenciesMeta": {
@@ -102,6 +104,8 @@
         "@types/react": "^19.2.7",
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^5.1.2",
+        "@vitest/coverage-istanbul": "^3.2.4",
+        "@vitest/ui": "^3.2.4",
         "autoprefixer": "^10.4.22",
         "jsdom": "^24.0.0",
         "postcss": "^8.5.4",
@@ -109,6 +113,6 @@
         "typescript": "^5.9.2",
         "vite": "^7.2.7",
         "vite-plugin-dts": "^4.3.0",
-        "vitest": "^1.6.0"
+        "vitest": "^3.2.4"
     }
 }

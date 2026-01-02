@@ -1,0 +1,226 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { PersonnelPanel } from './PersonnelPanel';
+import type { Personnel } from './PersonnelPanel.schema';
+
+const mockPersonnel: Personnel[] = [
+  {
+    id: '1',
+    name: '田中 太郎',
+    email: 'tanaka@example.com',
+    department: '内科',
+    priority: 1,
+  },
+  {
+    id: '2',
+    name: '山田 花子',
+    email: 'yamada@example.com',
+    department: '外科',
+    priority: 0,
+  },
+  {
+    id: '3',
+    name: '佐藤 次郎',
+    email: 'sato@example.com',
+    department: '小児科',
+    priority: -1,
+  },
+];
+
+describe('PersonnelPanel', () => {
+  it('renders all personnel', () => {
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    expect(screen.getByText('田中 太郎')).toBeInTheDocument();
+    expect(screen.getByText('山田 花子')).toBeInTheDocument();
+    expect(screen.getByText('佐藤 次郎')).toBeInTheDocument();
+  });
+
+  it('groups personnel by priority', () => {
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    expect(screen.getByText('高優先度')).toBeInTheDocument();
+    expect(screen.getByText('通常')).toBeInTheDocument();
+    expect(screen.getByText('低優先度')).toBeInTheDocument();
+  });
+
+  it('filters personnel by search query', async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText('名前・メールで検索...');
+    await user.type(searchInput, '田中');
+
+    expect(screen.getByText('田中 太郎')).toBeInTheDocument();
+    expect(screen.queryByText('山田 花子')).not.toBeInTheDocument();
+    expect(screen.queryByText('佐藤 次郎')).not.toBeInTheDocument();
+  });
+
+  it('filters by email', async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText('名前・メールで検索...');
+    await user.type(searchInput, 'yamada');
+
+    expect(screen.queryByText('田中 太郎')).not.toBeInTheDocument();
+    expect(screen.getByText('山田 花子')).toBeInTheDocument();
+    expect(screen.queryByText('佐藤 次郎')).not.toBeInTheDocument();
+  });
+
+  it('selects personnel on click', async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    await user.click(screen.getByText('田中 太郎'));
+    expect(onSelectionChange).toHaveBeenCalledWith(['1']);
+
+    await user.click(screen.getByText('山田 花子'));
+    expect(onSelectionChange).toHaveBeenCalledWith(['1', '2']);
+  });
+
+  it('deselects personnel on click', async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={['1', '2']}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    await user.click(screen.getByText('田中 太郎'));
+    expect(onSelectionChange).toHaveBeenCalledWith(['2']);
+  });
+
+  it('shows selection count in footer', () => {
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={['1', '2']}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    expect(screen.getByText('2名 選択中')).toBeInTheDocument();
+  });
+
+  it('shows no results message when no matches found', async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    const searchInput = screen.getByPlaceholderText('名前・メールで検索...');
+    await user.type(searchInput, 'nonexistent');
+
+    expect(screen.getByText('該当する職員が見つかりません')).toBeInTheDocument();
+  });
+
+  it('applies color map to selected personnel', () => {
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+    const colorMap = new Map([['1', '#FF0000']]);
+
+    const { container } = render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={['1']}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+        colorMap={colorMap}
+      />
+    );
+
+    const selectedPersonnel = container.querySelector('.border');
+    expect(selectedPersonnel).toHaveStyle({ borderColor: '#FF0000' });
+  });
+
+  it('opens context menu on right click', async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    const onPriorityChange = vi.fn();
+
+    render(
+      <PersonnelPanel
+        personnel={mockPersonnel}
+        selectedIds={[]}
+        onSelectionChange={onSelectionChange}
+        onPriorityChange={onPriorityChange}
+      />
+    );
+
+    const personnelElement = screen.getByText('田中 太郎').closest('div');
+    if (personnelElement) {
+      fireEvent.contextMenu(personnelElement);
+    }
+
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+  });
+});

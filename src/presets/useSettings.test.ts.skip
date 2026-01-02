@@ -1,0 +1,115 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { useSettings } from './useSettings';
+import { defaultStorage } from '../utils/StorageAdapter';
+
+vi.mock('../utils/StorageAdapter', () => ({
+  defaultStorage: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+  },
+}));
+
+describe('useSettings', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(document.documentElement, 'setAttribute');
+  });
+
+  it('initializes with default settings when no stored value', () => {
+    vi.mocked(defaultStorage.getItem).mockReturnValue(null);
+
+    const { result } = renderHook(() => useSettings());
+
+    expect(result.current.settings).toBeDefined();
+    expect(defaultStorage.getItem).toHaveBeenCalledWith('regular-calendar-settings');
+  });
+
+  it('initializes with stored settings', () => {
+    const storedSettings = { language: 'en', theme: 'dark' };
+    vi.mocked(defaultStorage.getItem).mockReturnValue(JSON.stringify(storedSettings));
+
+    const { result } = renderHook(() => useSettings());
+
+    expect(result.current.settings.language).toBe('en');
+    expect(result.current.settings.theme).toBe('dark');
+  });
+
+  it('handles corrupted stored data gracefully', () => {
+    vi.mocked(defaultStorage.getItem).mockReturnValue('invalid json');
+
+    const { result } = renderHook(() => useSettings());
+
+    expect(result.current.settings).toBeDefined();
+  });
+
+  it('updates settings', () => {
+    vi.mocked(defaultStorage.getItem).mockReturnValue(null);
+
+    const { result } = renderHook(() => useSettings());
+
+    result.current.updateSettings({ language: 'ja' });
+
+    expect(result.current.settings.language).toBe('ja');
+  });
+
+  it('persists settings to storage', () => {
+    vi.mocked(defaultStorage.getItem).mockReturnValue(null);
+
+    const { result } = renderHook(() => useSettings());
+
+    result.current.updateSettings({ theme: 'dark' });
+
+    expect(defaultStorage.setItem).toHaveBeenCalledWith(
+      'regular-calendar-settings',
+      expect.stringContaining('dark')
+    );
+  });
+
+  it('resets settings to defaults', () => {
+    const storedSettings = { language: 'ja', theme: 'dark' };
+    vi.mocked(defaultStorage.getItem).mockReturnValue(JSON.stringify(storedSettings));
+    vi.spyOn(window, 'location', 'get').mockReturnValue({ reload: vi.fn() } as any);
+
+    const { result } = renderHook(() => useSettings());
+
+    result.current.resetSettings();
+
+    expect(defaultStorage.removeItem).toHaveBeenCalledWith('regular-calendar-settings');
+    expect(window.location.reload).toHaveBeenCalled();
+  });
+
+  it('uses custom storage key', () => {
+    vi.mocked(defaultStorage.getItem).mockReturnValue(null);
+
+    renderHook(() => useSettings({ storageKey: 'custom-key' }));
+
+    expect(defaultStorage.getItem).toHaveBeenCalledWith('custom-key');
+  });
+
+  it('uses custom storage adapter', () => {
+    const customStorage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    };
+
+    renderHook(() => useSettings({ storage: customStorage as any }));
+
+    expect(customStorage.getItem).toHaveBeenCalled();
+  });
+
+  it('calls onLanguageChange when language changes', () => {
+    vi.mocked(defaultStorage.getItem).mockReturnValue(null);
+    const onLanguageChange = vi.fn();
+
+    const { result } = renderHook(() =>
+      useSettings({ onLanguageChange })
+    );
+
+    result.current.updateSettings({ language: 'en' });
+
+    expect(onLanguageChange).toHaveBeenCalledWith('en');
+  });
+});

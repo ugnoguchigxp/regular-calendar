@@ -86,6 +86,7 @@ it('calls onClick when clicked', async () => {
 - `pnpm test`: 全テストの実行
 - `pnpm test:ui`: Vitest UIを使用した視覚的なテスト実行（推奨）
 - `pnpm test -- [filename]`: 特定ファイルのテスト実行
+- `pnpm test:coverage`: カバレッジの確認。実装が「カバレッジ目標」を満たしているか確認する際に使用します。
 
 ### セットアップ
 - `src/test/setup.ts` にグローバルな設定（jest-domの拡張など）が含まれています。
