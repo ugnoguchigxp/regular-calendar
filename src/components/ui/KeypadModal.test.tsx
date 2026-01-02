@@ -1,58 +1,127 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { KeypadModal } from './KeypadModal';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
+import { KeypadModal } from "./KeypadModal";
 
-vi.mock('./Modal', () => ({
-    Modal: ({ children }: any) => <div>{children}</div>,
+vi.mock("./Modal", () => ({
+	Modal: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
-describe('KeypadModal', () => {
-    it('submits number input and validates empty', async () => {
-        const user = userEvent.setup();
-        const onSubmit = vi.fn();
+describe("KeypadModal", () => {
+	it("submits number input and validates empty", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
 
-        render(
-            <KeypadModal open onClose={vi.fn()} onSubmit={onSubmit} variant="number" />
-        );
+		render(
+			<KeypadModal
+				open
+				onClose={vi.fn()}
+				onSubmit={onSubmit}
+				variant="number"
+			/>,
+		);
 
-        await user.click(screen.getByRole('button', { name: '1' }));
-        await user.click(screen.getByRole('button', { name: '2' }));
-        await user.click(screen.getByRole('button', { name: 'OK' }));
-        expect(onSubmit).toHaveBeenCalledWith('12');
+		await user.click(screen.getByRole("button", { name: "1" }));
+		await user.click(screen.getByRole("button", { name: "2" }));
+		await user.click(screen.getByRole("button", { name: "OK" }));
+		expect(onSubmit).toHaveBeenCalledWith("12");
 
-        await user.click(screen.getByRole('button', { name: 'C' }));
-        await user.click(screen.getByRole('button', { name: 'OK' }));
-        expect(screen.getByText('値を入力してください')).toBeInTheDocument();
-    });
+		await user.click(screen.getByRole("button", { name: "C" }));
+		await user.click(screen.getByRole("button", { name: "OK" }));
+		expect(screen.getByText("値を入力してください")).toBeInTheDocument();
+	});
 
-    it('validates phone hyphen usage', async () => {
-        const user = userEvent.setup();
-        const onSubmit = vi.fn();
+	it("validates phone hyphen usage", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
 
-        render(
-            <KeypadModal open onClose={vi.fn()} onSubmit={onSubmit} variant="phone" />
-        );
+		render(
+			<KeypadModal
+				open
+				onClose={vi.fn()}
+				onSubmit={onSubmit}
+				variant="phone"
+			/>,
+		);
 
-        await user.click(screen.getByRole('button', { name: '-' }));
-        await user.click(screen.getByRole('button', { name: 'OK' }));
-        expect(screen.getByText('ハイフンで終わることはできません')).toBeInTheDocument();
-    });
+		await user.click(screen.getByRole("button", { name: "-" }));
+		await user.click(screen.getByRole("button", { name: "OK" }));
+		expect(
+			screen.getByText("ハイフンで終わることはできません"),
+		).toBeInTheDocument();
+	});
 
-    it('validates time format before submit', async () => {
-        const user = userEvent.setup();
-        const onSubmit = vi.fn();
+	it("prevents consecutive hyphens in phone input", async () => {
+		const user = userEvent.setup();
 
-        render(
-            <KeypadModal open onClose={vi.fn()} onSubmit={onSubmit} variant="time" />
-        );
+		render(
+			<KeypadModal open onClose={vi.fn()} onSubmit={vi.fn()} variant="phone" />,
+		);
 
-        await user.click(screen.getByRole('button', { name: '2' }));
-        await user.click(screen.getByRole('button', { name: '9' }));
-        await user.click(screen.getByRole('button', { name: '6' }));
-        await user.click(screen.getByRole('button', { name: '0' }));
-        await user.click(screen.getByRole('button', { name: 'OK' }));
+		await user.click(screen.getByRole("button", { name: "-" }));
+		await user.click(screen.getByRole("button", { name: "-" }));
+		expect(
+			screen.getByText("ハイフンを連続して入力することはできません"),
+		).toBeInTheDocument();
+	});
 
-        expect(screen.getByText('有効な時刻を 4 桁で入力してください（例: 0930）')).toBeInTheDocument();
-        expect(onSubmit).not.toHaveBeenCalled();
-    });
+	it("validates decimal input and prevents trailing dot", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+
+		render(
+			<KeypadModal
+				open
+				onClose={vi.fn()}
+				onSubmit={onSubmit}
+				variant="number"
+				allowDecimal
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "1" }));
+		await user.click(screen.getByRole("button", { name: "." }));
+		await user.click(screen.getByRole("button", { name: "OK" }));
+
+		expect(
+			screen.getByText("小数点で終わることはできません"),
+		).toBeInTheDocument();
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it("validates time format before submit", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+
+		render(
+			<KeypadModal open onClose={vi.fn()} onSubmit={onSubmit} variant="time" />,
+		);
+
+		await user.click(screen.getByRole("button", { name: "2" }));
+		await user.click(screen.getByRole("button", { name: "9" }));
+		await user.click(screen.getByRole("button", { name: "6" }));
+		await user.click(screen.getByRole("button", { name: "0" }));
+		await user.click(screen.getByRole("button", { name: "OK" }));
+
+		expect(
+			screen.getByText("有効な時刻を 4 桁で入力してください（例: 0930）"),
+		).toBeInTheDocument();
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it("submits valid time and handles keyboard input", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+		const onClose = vi.fn();
+
+		render(
+			<KeypadModal open onClose={onClose} onSubmit={onSubmit} variant="time" />,
+		);
+
+		await user.keyboard("0930{Enter}");
+		expect(onSubmit).toHaveBeenCalledWith("09:30");
+
+		await user.keyboard("{Escape}");
+		expect(onClose).toHaveBeenCalled();
+	});
 });

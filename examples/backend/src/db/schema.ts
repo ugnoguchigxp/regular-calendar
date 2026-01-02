@@ -1,4 +1,4 @@
-const dbType = process.env.DB_TYPE || 'sqlite';
+const dbType = process.env.DB_TYPE || "sqlite";
 
 // Dynamic export based on DB_TYPE
 // Note: In a real Typescript project, you might need stronger typing or separate builds,
@@ -9,14 +9,13 @@ const dbType = process.env.DB_TYPE || 'sqlite';
 
 let schemaExport;
 
-if (dbType === 'postgres') {
-    schemaExport = require('./schema.postgres');
+if (dbType === "postgres") {
+	schemaExport = require("./schema.postgres");
 } else {
-    schemaExport = require('./schema.sqlite');
+	schemaExport = require("./schema.sqlite");
 }
 
 export const groups = schemaExport.groups;
 export const resources = schemaExport.resources;
 export const events = schemaExport.events;
 export const personnel = schemaExport.personnel;
-

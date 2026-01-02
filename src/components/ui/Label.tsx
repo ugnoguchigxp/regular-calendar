@@ -1,28 +1,31 @@
-import * as React from "react"
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { type ClassValue, clsx } from "clsx";
+import * as React from "react";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
+	return twMerge(clsx(inputs));
 }
 
 export interface LabelProps
-    extends React.LabelHTMLAttributes<HTMLLabelElement> { }
+	extends React.LabelHTMLAttributes<HTMLLabelElement> {}
 
 const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
-    ({ className, ...props }, ref) => {
-        return (
-            <label
-                ref={ref}
-                className={cn(
-                    "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-                    className
-                )}
-                {...props}
-            />
-        )
-    }
-)
-Label.displayName = "Label"
+	({ className, children, ...props }, ref) => {
+		return (
+			// biome-ignore lint/a11y/noLabelWithoutControl: Consumers provide htmlFor or nest inputs.
+			<label
+				ref={ref}
+				className={cn(
+					"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+					className,
+				)}
+				{...props}
+			>
+				{children}
+			</label>
+		);
+	},
+);
+Label.displayName = "Label";
 
-export { Label }
+export { Label };

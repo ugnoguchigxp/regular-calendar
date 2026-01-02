@@ -2,68 +2,71 @@
  * Current Time Line Component
  */
 
-import React from 'react';
-import { getCurrentTimePosition, isCurrentTimeInRange } from '../../utils/calendarHelpers';
+import React from "react";
+import {
+	getCurrentTimePosition,
+	isCurrentTimeInRange,
+} from "../../utils/calendarHelpers";
 
 interface CurrentTimeLineProps {
-    /** Time Interval (minutes) */
-    interval: number;
-    /** Is Today */
-    isToday: boolean;
-    /** Start Hour */
-    startHour: number;
-    /** End Hour */
-    endHour: number;
-    /** Relative positioning */
-    relative?: boolean;
-    /** Time Zone */
-    timeZone?: string;
+	/** Time Interval (minutes) */
+	interval: number;
+	/** Is Today */
+	isToday: boolean;
+	/** Start Hour */
+	startHour: number;
+	/** End Hour */
+	endHour: number;
+	/** Relative positioning */
+	relative?: boolean;
+	/** Time Zone */
+	timeZone?: string;
 }
 
 /**
  * Visual line indicating the current time
  */
 export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
-    interval,
-    isToday,
-    startHour,
-    endHour,
-    relative = false,
-    timeZone = 'Asia/Tokyo',
+	interval,
+	isToday,
+	startHour,
+	endHour,
+	relative = false,
+	timeZone = "Asia/Tokyo",
 }) => {
-    // State to force re-render/update position
-    const [now, setNow] = React.useState(new Date());
+	// State to force re-render/update position
+	const [now, setNow] = React.useState(new Date());
 
-    React.useEffect(() => {
-        // Update every minute
-        const timer = setInterval(() => {
-            setNow(new Date());
-        }, 60000);
+	React.useEffect(() => {
+		// Update every minute
+		const timer = setInterval(() => {
+			setNow(new Date());
+		}, 60000);
 
-        return () => clearInterval(timer);
-    }, []);
+		return () => clearInterval(timer);
+	}, []);
 
-    if (!isToday || !isCurrentTimeInRange(startHour, endHour, timeZone)) {
-        return null;
-    }
+	if (!isToday || !isCurrentTimeInRange(startHour, endHour, timeZone)) {
+		return null;
+	}
 
-    const position = getCurrentTimePosition(interval, startHour, timeZone);
+	const position = getCurrentTimePosition(interval, startHour, timeZone);
 
-    return (
-        <>
-            {/* Current Time Dot */}
-            <div
-                className={`${relative ? 'absolute' : 'fixed'} left-0 w-2 h-2 bg-red-500 rounded-full -translate-x-1`}
-                style={{ top: `${position}px`, zIndex: 20 }}
-                aria-hidden="true"
-                title={`Current time: ${now.toLocaleTimeString()}`}
-            />
-            {/* Current Time Line */}
-            <div
-                className={`${relative ? 'absolute' : 'fixed'} left-0 right-0 h-0.5 bg-red-500`}
-                style={{ top: `${position}px`, zIndex: 20 }}
-                aria-hidden="true"
-            />
-        </>
-    );
+	return (
+		<>
+			{/* Current Time Dot */}
+			<div
+				className={`${relative ? "absolute" : "fixed"} left-0 w-2 h-2 bg-red-500 rounded-full -translate-x-1`}
+				style={{ top: `${position}px`, zIndex: 20 }}
+				aria-hidden="true"
+				title={`Current time: ${now.toLocaleTimeString()}`}
+			/>
+			{/* Current Time Line */}
+			<div
+				className={`${relative ? "absolute" : "fixed"} left-0 right-0 h-0.5 bg-red-500`}
+				style={{ top: `${position}px`, zIndex: 20 }}
+				aria-hidden="true"
+			/>
+		</>
+	);
 };

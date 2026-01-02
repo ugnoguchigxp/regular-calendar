@@ -1,110 +1,110 @@
-'use client';
+"use client";
 
 import {
-    type ReactNode,
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-} from 'react';
-import { defaultThemeApplier, type ThemeApplier } from './ThemeApplier';
+	createContext,
+	type ReactNode,
+	useContext,
+	useEffect,
+	useMemo,
+} from "react";
+import { defaultThemeApplier, type ThemeApplier } from "./ThemeApplier";
 
 /**
  * UI Density presets
  */
-export type UIDensity = 'compact' | 'normal' | 'spacious';
+export type UIDensity = "compact" | "normal" | "spacious";
 
 /**
  * Theme configuration options
  * All size values are in rem unless otherwise specified
  */
 export interface ThemeConfig {
-    /** UI density preset: 'compact' | 'normal' | 'spacious' */
-    density?: UIDensity;
+	/** UI density preset: 'compact' | 'normal' | 'spacious' */
+	density?: UIDensity;
 
-    /** Enable tablet mode (optimized for touch) */
-    tabletMode?: boolean;
+	/** Enable tablet mode (optimized for touch) */
+	tabletMode?: boolean;
 
-    /** Border radius in rem (e.g., 0.5 = 8px) */
-    radius?: number;
+	/** Border radius in rem (e.g., 0.5 = 8px) */
+	radius?: number;
 
-    /** Base font size in rem (e.g., 0.875 = 14px) */
-    fontSize?: number;
+	/** Base font size in rem (e.g., 0.875 = 14px) */
+	fontSize?: number;
 
-    /** Component height in rem */
-    componentHeight?: number;
+	/** Component height in rem */
+	componentHeight?: number;
 
-    /** List row height in rem */
-    listRowHeight?: number;
+	/** List row height in rem */
+	listRowHeight?: number;
 
-    /** Horizontal component padding in rem */
-    paddingX?: number;
+	/** Horizontal component padding in rem */
+	paddingX?: number;
 
-    /** Vertical component padding in rem */
-    paddingY?: number;
+	/** Vertical component padding in rem */
+	paddingY?: number;
 
-    /** Button horizontal padding in rem */
-    buttonPaddingX?: number;
+	/** Button horizontal padding in rem */
+	buttonPaddingX?: number;
 
-    /** Button vertical padding in rem */
-    buttonPaddingY?: number;
+	/** Button vertical padding in rem */
+	buttonPaddingY?: number;
 
-    /** Base gap between elements in rem */
-    gap?: number;
+	/** Base gap between elements in rem */
+	gap?: number;
 
-    /** Icon size in rem */
-    iconSize?: number;
+	/** Icon size in rem */
+	iconSize?: number;
 
-    /** Table cell padding in rem */
-    tableCellPadding?: number;
+	/** Table cell padding in rem */
+	tableCellPadding?: number;
 
-    /** Minimum touch target size in px (for accessibility) */
-    touchTargetMin?: number;
+	/** Minimum touch target size in px (for accessibility) */
+	touchTargetMin?: number;
 
-    /** Modal padding in rem */
-    modalPadding?: number;
+	/** Modal padding in rem */
+	modalPadding?: number;
 
-    /** Checkbox size in rem */
-    checkboxSize?: number;
+	/** Checkbox size in rem */
+	checkboxSize?: number;
 
-    /** Badge horizontal padding in rem */
-    badgePaddingX?: number;
+	/** Badge horizontal padding in rem */
+	badgePaddingX?: number;
 
-    /** Badge vertical padding in rem */
-    badgePaddingY?: number;
+	/** Badge vertical padding in rem */
+	badgePaddingY?: number;
 
-    /** Card padding in rem */
-    cardPadding?: number;
+	/** Card padding in rem */
+	cardPadding?: number;
 
-    /** Left drawer width in px */
-    drawerWidthLeft?: number;
+	/** Left drawer width in px */
+	drawerWidthLeft?: number;
 
-    /** Right drawer width in px */
-    drawerWidthRight?: number;
+	/** Right drawer width in px */
+	drawerWidthRight?: number;
 
-    /** Step circle size in rem */
-    stepCircleSize?: number;
+	/** Step circle size in rem */
+	stepCircleSize?: number;
 
-    /** Switch width in rem */
-    switchWidth?: number;
+	/** Switch width in rem */
+	switchWidth?: number;
 
-    /** Switch height in rem */
-    switchHeight?: number;
+	/** Switch height in rem */
+	switchHeight?: number;
 
-    /** Switch thumb size in rem */
-    switchThumbSize?: number;
+	/** Switch thumb size in rem */
+	switchThumbSize?: number;
 
-    /** Keypad button height in rem */
-    keypadButtonHeight?: number;
+	/** Keypad button height in rem */
+	keypadButtonHeight?: number;
 }
 
 interface ThemeProviderProps {
-    /** Theme configuration */
-    config?: ThemeConfig;
-    /** Child components */
-    children: ReactNode;
-    /** Theme applier for DOM operations (injectable for testing) */
-    applier?: ThemeApplier;
+	/** Theme configuration */
+	config?: ThemeConfig;
+	/** Child components */
+	children: ReactNode;
+	/** Theme applier for DOM operations (injectable for testing) */
+	applier?: ThemeApplier;
 }
 
 const ThemeContext = createContext<ThemeConfig | undefined>(undefined);
@@ -113,7 +113,7 @@ const ThemeContext = createContext<ThemeConfig | undefined>(undefined);
  * Hook to access current theme configuration
  */
 export function useTheme(): ThemeConfig | undefined {
-    return useContext(ThemeContext);
+	return useContext(ThemeContext);
 }
 
 /**
@@ -130,48 +130,25 @@ export function useTheme(): ThemeConfig | undefined {
  * </ThemeProvider>
  * ```
  */
-export function ThemeProvider({ config = {}, applier = defaultThemeApplier, children }: ThemeProviderProps) {
-    // Memoize config to prevent unnecessary re-renders
-    const memoizedConfig = useMemo(() => config, [
-        config.density,
-        config.tabletMode,
-        config.radius,
-        config.fontSize,
-        config.componentHeight,
-        config.listRowHeight,
-        config.paddingX,
-        config.paddingY,
-        config.buttonPaddingX,
-        config.buttonPaddingY,
-        config.gap,
-        config.iconSize,
-        config.tableCellPadding,
-        config.touchTargetMin,
-        config.modalPadding,
-        config.checkboxSize,
-        config.badgePaddingX,
-        config.badgePaddingY,
-        config.cardPadding,
-        config.drawerWidthLeft,
-        config.drawerWidthRight,
-        config.stepCircleSize,
-        config.switchWidth,
-        config.switchHeight,
-        config.switchThumbSize,
-        config.keypadButtonHeight,
-    ]);
+export function ThemeProvider({
+	config = {},
+	applier = defaultThemeApplier,
+	children,
+}: ThemeProviderProps) {
+	// Memoize config to prevent unnecessary re-renders
+	const memoizedConfig = useMemo(() => config, [config]);
 
-    useEffect(() => {
-        applier.applyVariables(memoizedConfig);
+	useEffect(() => {
+		applier.applyVariables(memoizedConfig);
 
-        return () => {
-            applier.removeVariables();
-        };
-    }, [memoizedConfig, applier]);
+		return () => {
+			applier.removeVariables();
+		};
+	}, [memoizedConfig, applier]);
 
-    return (
-        <ThemeContext.Provider value={memoizedConfig}>
-            {children}
-        </ThemeContext.Provider>
-    );
+	return (
+		<ThemeContext.Provider value={memoizedConfig}>
+			{children}
+		</ThemeContext.Provider>
+	);
 }

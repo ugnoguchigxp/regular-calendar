@@ -1,2 +1,2 @@
-export * from './FacilitySchedule';
-export * from './FacilitySchedule.schema';
+export * from "./FacilitySchedule";
+export * from "./FacilitySchedule.schema";

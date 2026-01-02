@@ -1,0 +1,10 @@
+{
+	"files": {
+		"includes": ["**/*", "!!**/coverage", "!!**/dist", "!!**/examples"]
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	}
+}

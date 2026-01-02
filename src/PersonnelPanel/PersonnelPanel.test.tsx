@@ -1,63 +1,64 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { PersonnelPanel } from './PersonnelPanel';
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { PersonnelPanel } from "./PersonnelPanel";
 
 const personnel = [
-    {
-        id: 'p1',
-        name: 'Alice',
-        email: 'alice@example.com',
-        department: 'Sales',
-        priority: 0,
-    },
-    {
-        id: 'p2',
-        name: 'Bob',
-        email: 'bob@example.com',
-        department: 'Support',
-        priority: 1,
-    },
+	{
+		id: "p1",
+		name: "Alice",
+		email: "alice@example.com",
+		department: "Sales",
+		priority: 0,
+	},
+	{
+		id: "p2",
+		name: "Bob",
+		email: "bob@example.com",
+		department: "Support",
+		priority: 1,
+	},
 ];
 
-describe('PersonnelPanel', () => {
-    it('filters and toggles selection', async () => {
-        const user = userEvent.setup();
-        const onSelectionChange = vi.fn();
+describe("PersonnelPanel", () => {
+	it("filters and toggles selection", async () => {
+		const user = userEvent.setup();
+		const onSelectionChange = vi.fn();
 
-        render(
-            <PersonnelPanel
-                personnel={personnel}
-                selectedIds={[]}
-                onSelectionChange={onSelectionChange}
-                onPriorityChange={vi.fn()}
-            />
-        );
+		render(
+			<PersonnelPanel
+				personnel={personnel}
+				selectedIds={[]}
+				onSelectionChange={onSelectionChange}
+				onPriorityChange={vi.fn()}
+			/>,
+		);
 
-        await user.click(screen.getByText('Alice'));
-        expect(onSelectionChange).toHaveBeenCalledWith(['p1']);
+		await user.click(screen.getByText("Alice"));
+		expect(onSelectionChange).toHaveBeenCalledWith(["p1"]);
 
-        const searchInput = screen.getByRole('textbox');
-        await user.type(searchInput, 'bob');
-        expect(screen.queryByText('Alice')).not.toBeInTheDocument();
-        expect(screen.getByText('Bob')).toBeInTheDocument();
-    });
+		const searchInput = screen.getByRole("textbox");
+		await user.type(searchInput, "bob");
+		expect(screen.queryByText("Alice")).not.toBeInTheDocument();
+		expect(screen.getByText("Bob")).toBeInTheDocument();
+	});
 
-    it('opens context menu and updates priority', () => {
-        const onPriorityChange = vi.fn();
+	it("opens context menu and updates priority", () => {
+		const onPriorityChange = vi.fn();
 
-        render(
-            <PersonnelPanel
-                personnel={personnel}
-                selectedIds={[]}
-                onSelectionChange={vi.fn()}
-                onPriorityChange={onPriorityChange}
-            />
-        );
+		render(
+			<PersonnelPanel
+				personnel={personnel}
+				selectedIds={[]}
+				onSelectionChange={vi.fn()}
+				onPriorityChange={onPriorityChange}
+			/>,
+		);
 
-        fireEvent.contextMenu(screen.getByText('Bob'));
-        const menuButtons = screen.getAllByRole('button');
-        fireEvent.click(menuButtons[0]);
+		fireEvent.contextMenu(screen.getByRole("button", { name: /Bob/ }));
+		const menuButton = screen.getByText("高優先度に設定").closest("button");
+		if (!menuButton) throw new Error("Menu item not found");
+		fireEvent.click(menuButton);
 
-        expect(onPriorityChange).toHaveBeenCalledWith('p2', 1);
-    });
+		expect(onPriorityChange).toHaveBeenCalledWith("p2", 1);
+	});
 });

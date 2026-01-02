@@ -3,155 +3,165 @@
  * Ported from TreatmentCard.tsx
  */
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip';
-import type { ScheduleEvent } from '../../FacilitySchedule.schema';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/Tooltip";
+import type { ScheduleEvent } from "../../FacilitySchedule.schema";
 
 interface ScheduleEventCardProps {
-  event: ScheduleEvent;
-  top: number; // px from top
-  height: number; // px height
-  widthPercent?: number; // % width
-  leftPercent?: number; // % left
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  isDragging?: boolean;
+	event: ScheduleEvent;
+	top: number; // px from top
+	height: number; // px height
+	widthPercent?: number; // % width
+	leftPercent?: number; // % left
+	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+	isDragging?: boolean;
 }
 
 export function ScheduleEventCard({
-  event,
-  top,
-  height,
-  widthPercent = 100,
-  leftPercent = 0,
-  onClick,
-  isDragging = false,
+	event,
+	top,
+	height,
+	widthPercent = 100,
+	leftPercent = 0,
+	onClick,
+	isDragging = false,
 }: ScheduleEventCardProps) {
-  const startTime = event.startDate.toLocaleTimeString('ja-JP', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const endTime = event.endDate.toLocaleTimeString('ja-JP', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+	const startTime = event.startDate.toLocaleTimeString("ja-JP", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+	const endTime = event.endDate.toLocaleTimeString("ja-JP", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
 
-  const durationHours =
-    Math.round(
-      ((event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60 * 60)) * 10
-    ) / 10;
+	const durationHours =
+		Math.round(
+			((event.endDate.getTime() - event.startDate.getTime()) /
+				(1000 * 60 * 60)) *
+				10,
+		) / 10;
 
+	// Determine styling
+	// Standard background only if no custom color is provided
+	const bgColor = event.hasConflict
+		? "bg-destructive border-destructive"
+		: event.color
+			? "border-primary/30" // If custom color, just border (or custom border)
+			: "bg-primary border-primary/30";
 
-  // Determine styling
-  // Standard background only if no custom color is provided
-  const bgColor = event.hasConflict
-    ? 'bg-destructive border-destructive'
-    : event.color
-      ? 'border-primary/30' // If custom color, just border (or custom border)
-      : 'bg-primary border-primary/30';
+	// Helper for formatting time
+	const formatTime = (date: Date) => {
+		return date.toLocaleTimeString("ja-JP", {
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+	};
 
-  // Helper for formatting time
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ja-JP', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+	const displayDuration = `${durationHours}h`;
 
-  const displayDuration = `${durationHours}h`;
+	// Custom style overrides
+	const customStyle: React.CSSProperties = {
+		top: `${top}px`,
+		height: `${height}px`,
+		left: `${leftPercent}%`,
+		width: `${widthPercent}%`,
+		paddingLeft: leftPercent > 0 ? "2px" : "4px",
+		paddingRight: leftPercent + widthPercent < 100 ? "2px" : "4px",
+	};
 
-  // Custom style overrides
-  const customStyle: React.CSSProperties = {
-    top: `${top}px`,
-    height: `${height}px`,
-    left: `${leftPercent}%`,
-    width: `${widthPercent}%`,
-    paddingLeft: leftPercent > 0 ? '2px' : '4px',
-    paddingRight: leftPercent + widthPercent < 100 ? '2px' : '4px',
-  };
+	if (event.color && !event.hasConflict) {
+		customStyle.backgroundColor = event.color;
+	}
 
-  if (event.color && !event.hasConflict) {
-    customStyle.backgroundColor = event.color;
-  }
-
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            className={`
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<button
+						type="button"
+						className={`
         absolute rounded-md shadow-sm border
         transition-all duration-200 cursor-pointer
-        ${isDragging ? 'opacity-50 scale-95' : 'hover:shadow-md hover:scale-[1.02] hover:z-10'}
+        ${isDragging ? "opacity-50 scale-95" : "hover:shadow-md hover:scale-[1.02] hover:z-10"}
         ${bgColor} text-primary-foreground
-        ${event.hasConflict ? 'ring-2 ring-red-400 ring-offset-1' : ''}
+        ${event.hasConflict ? "ring-2 ring-red-400 ring-offset-1" : ""}
       `}
-            style={customStyle}
-            onPointerUp={(e) => {
-              e.stopPropagation();
-            }}
-            onClick={onClick}
-          >
-            <div className="p-2 h-full flex flex-col overflow-hidden">
-              {/* Conflict Warning */}
-              {event.hasConflict && <div className="text-xs font-bold mb-1">⚠️ Double Booking</div>}
+						style={customStyle}
+						onPointerUp={(e) => {
+							e.stopPropagation();
+						}}
+						onClick={onClick}
+					>
+						<div className="p-2 h-full flex flex-col overflow-hidden">
+							{/* Conflict Warning */}
+							{event.hasConflict && (
+								<div className="text-xs font-bold mb-1">⚠️ Double Booking</div>
+							)}
 
-              {/* Title */}
-              <div className="font-semibold text-sm leading-snug break-words">
-                {event.title}
-              </div>
+							{/* Title */}
+							<div className="font-semibold text-sm leading-snug break-words">
+								{event.title}
+							</div>
 
-              {/* Attendee */}
-              {event.attendee && (
-                <div className="text-xs text-primary-foreground/90 truncate mt-0.5">
-                  👤 {event.attendee}
-                </div>
-              )}
+							{/* Attendee */}
+							{event.attendee && (
+								<div className="text-xs text-primary-foreground/90 truncate mt-0.5">
+									👤 {event.attendee}
+								</div>
+							)}
 
-              {/* Time/Duration - Hidden for AllDay */}
-              {!event.isAllDay && (
-                <div className="flex items-center gap-1 text-[10px] opacity-90 mt-1">
-                  <span className="font-mono tabular-nums tracking-tight">
-                    {formatTime(event.startDate)}
-                  </span>
-                  {durationHours >= 0.5 && (
-                    <>
-                      <span>-</span>
-                      <span className="font-mono tabular-nums tracking-tight">
-                        {formatTime(event.endDate)}
-                      </span>
-                      <span className="ml-0.5 opacity-75">
-                        ({displayDuration})
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <div className="space-y-1">
-            {event.hasConflict && (
-              <p className="font-bold text-xs text-red-600">⚠️ Double Booking</p>
-            )}
-            <p className="font-semibold text-xs">{event.title}</p>
-            {event.attendee && <p className="text-xs">With: {event.attendee}</p>}
-            <p className="text-xs">
-              {startTime} - {endTime} ({durationHours}h)
-            </p>
-            {event.note && (
-              <p className="text-[10px] text-muted-foreground max-w-[180px] break-words">
-                {event.note}
-              </p>
-            )}
-            {event.description && (
-              <p className="text-[10px] text-muted-foreground max-w-[180px] break-words italic">
-                {event.description}
-              </p>
-            )}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+							{/* Time/Duration - Hidden for AllDay */}
+							{!event.isAllDay && (
+								<div className="flex items-center gap-1 text-[10px] opacity-90 mt-1">
+									<span className="font-mono tabular-nums tracking-tight">
+										{formatTime(event.startDate)}
+									</span>
+									{durationHours >= 0.5 && (
+										<>
+											<span>-</span>
+											<span className="font-mono tabular-nums tracking-tight">
+												{formatTime(event.endDate)}
+											</span>
+											<span className="ml-0.5 opacity-75">
+												({displayDuration})
+											</span>
+										</>
+									)}
+								</div>
+							)}
+						</div>
+					</button>
+				</TooltipTrigger>
+				<TooltipContent side="right">
+					<div className="space-y-1">
+						{event.hasConflict && (
+							<p className="font-bold text-xs text-red-600">⚠️ Double Booking</p>
+						)}
+						<p className="font-semibold text-xs">{event.title}</p>
+						{event.attendee && (
+							<p className="text-xs">With: {event.attendee}</p>
+						)}
+						<p className="text-xs">
+							{startTime} - {endTime} ({durationHours}h)
+						</p>
+						{event.note && (
+							<p className="text-[10px] text-muted-foreground max-w-[180px] break-words">
+								{event.note}
+							</p>
+						)}
+						{event.description && (
+							<p className="text-[10px] text-muted-foreground max-w-[180px] break-words italic">
+								{event.description}
+							</p>
+						)}
+					</div>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
 }

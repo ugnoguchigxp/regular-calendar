@@ -1,13 +1,13 @@
-export { formatDuration, parseDuration } from './formatDuration';
 export {
-    mergeEvents,
-    resolveEventOwnerId,
-    cleanEventId,
-    parseAttendeeNames,
-    formatEventTitleWithAttendees
-} from './eventHelpers';
+	cleanEventId,
+	formatEventTitleWithAttendees,
+	mergeEvents,
+	parseAttendeeNames,
+	resolveEventOwnerId,
+} from "./eventHelpers";
+export { formatDuration, parseDuration } from "./formatDuration";
 export {
-    transformBookingsToEvents,
-    type BookingData,
-    type ResourceAvailabilityResponse
-} from './transformBookings';
+	type BookingData,
+	type ResourceAvailabilityResponse,
+	transformBookingsToEvents,
+} from "./transformBookings";

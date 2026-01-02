@@ -1,7 +1,7 @@
-export { createScheduleApiClient } from './scheduleApiClient';
+export { createScheduleApiClient } from "./scheduleApiClient";
 export type {
-    ScheduleApiClient,
-    ConfigResponse,
-    EventData,
-    ResourceAvailabilityParams
-} from './types';
+	ConfigResponse,
+	EventData,
+	ResourceAvailabilityParams,
+	ScheduleApiClient,
+} from "./types";

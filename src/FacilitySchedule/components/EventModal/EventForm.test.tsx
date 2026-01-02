@@ -1,131 +1,134 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { EventForm } from './EventForm';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { EventForm } from "./EventForm";
 
 const mockUseResourceAvailability = vi.fn();
 const mockUseScheduleConflict = vi.fn();
 const mockUseAttendeeManagement = vi.fn();
 
-vi.mock('../../hooks/useResourceAvailability', () => ({
-    useResourceAvailability: (args: unknown) => mockUseResourceAvailability(args),
+vi.mock("../../hooks/useResourceAvailability", () => ({
+	useResourceAvailability: (args: unknown) => mockUseResourceAvailability(args),
 }));
 
-vi.mock('../../hooks/useScheduleConflict', () => ({
-    useScheduleConflict: (args: unknown) => mockUseScheduleConflict(args),
+vi.mock("../../hooks/useScheduleConflict", () => ({
+	useScheduleConflict: (args: unknown) => mockUseScheduleConflict(args),
 }));
 
-vi.mock('../../hooks/useAttendeeManagement', () => ({
-    useAttendeeManagement: (args: unknown) => mockUseAttendeeManagement(args),
+vi.mock("../../hooks/useAttendeeManagement", () => ({
+	useAttendeeManagement: (args: unknown) => mockUseAttendeeManagement(args),
 }));
 
-vi.mock('@/components/ui/KeypadModal', () => ({
-    KeypadModal: () => null,
+vi.mock("@/components/ui/KeypadModal", () => ({
+	KeypadModal: () => null,
 }));
 
 const resources = [
-    {
-        id: 'r1',
-        name: 'Room 1',
-        order: 1,
-        isAvailable: true,
-        groupId: 'g1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
+	{
+		id: "r1",
+		name: "Room 1",
+		order: 1,
+		isAvailable: true,
+		groupId: "g1",
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
 ];
 
 const groups = [
-    {
-        id: 'g1',
-        name: 'Group A',
-        displayMode: 'grid',
-        dimension: 1,
-        resources,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
+	{
+		id: "g1",
+		name: "Group A",
+		displayMode: "grid",
+		dimension: 1,
+		resources,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
 ];
 
 const events = [
-    {
-        id: 'e1',
-        resourceId: 'r1',
-        groupId: 'g1',
-        title: 'Existing',
-        attendee: '[]',
-        startDate: new Date('2024-01-10T08:00:00Z'),
-        endDate: new Date('2024-01-10T09:00:00Z'),
-        status: 'booked',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
+	{
+		id: "e1",
+		resourceId: "r1",
+		groupId: "g1",
+		title: "Existing",
+		attendee: "[]",
+		startDate: new Date("2024-01-10T08:00:00Z"),
+		endDate: new Date("2024-01-10T09:00:00Z"),
+		status: "booked",
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	},
 ];
 
-describe('EventForm', () => {
-    beforeEach(() => {
-        mockUseResourceAvailability.mockReturnValue({
-            availableResources: resources,
-            resourceNames: ['Room 1'],
-            getDisplayName: (id: string) => (id === 'r1' ? 'Room 1' : ''),
-        });
+describe("EventForm", () => {
+	beforeEach(() => {
+		mockUseResourceAvailability.mockReturnValue({
+			availableResources: resources,
+			resourceNames: ["Room 1"],
+			getDisplayName: (id: string) => (id === "r1" ? "Room 1" : ""),
+		});
 
-        mockUseScheduleConflict.mockReturnValue({
-            resourceId: 'r1',
-            existingSchedule: events[0],
-            newSchedule: {},
-            conflictType: 'overlap',
-        });
+		mockUseScheduleConflict.mockReturnValue({
+			resourceId: "r1",
+			existingSchedule: events[0],
+			newSchedule: {},
+			conflictType: "overlap",
+		});
 
-        mockUseAttendeeManagement.mockReturnValue({
-            parseAttendees: () => [],
-            processAttendeesForSubmit: () => ({
-                finalAttendees: [{ name: 'Guest', type: 'external' }],
-                shouldDelete: false,
-            }),
-        });
-    });
+		mockUseAttendeeManagement.mockReturnValue({
+			parseAttendees: () => [],
+			processAttendeesForSubmit: () => ({
+				finalAttendees: [{ name: "Guest", type: "external" }],
+				shouldDelete: false,
+			}),
+		});
+	});
 
-    it('submits valid form data and shows conflict warning', async () => {
-        const user = userEvent.setup();
-        const onSubmit = vi.fn();
+	it("submits valid form data and shows conflict warning", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
 
-        render(
-            <EventForm
-                resources={resources}
-                groups={groups}
-                events={events}
-                defaultResourceId="r1"
-                onSubmit={onSubmit}
-                onCancel={vi.fn()}
-            />
-        );
+		render(
+			<EventForm
+				resources={resources}
+				groups={groups}
+				events={events}
+				defaultResourceId="r1"
+				onSubmit={onSubmit}
+				onCancel={vi.fn()}
+			/>,
+		);
 
-        await user.type(screen.getByPlaceholderText('name_placeholder'), 'John Doe');
+		await user.type(
+			screen.getByPlaceholderText("name_placeholder"),
+			"John Doe",
+		);
 
-        await user.click(screen.getByRole('button', { name: /save_button/i }));
-        expect(onSubmit).toHaveBeenCalled();
-        expect(screen.getByText('Conflict Detected')).toBeInTheDocument();
-    });
+		await user.click(screen.getByRole("button", { name: /save_button/i }));
+		expect(onSubmit).toHaveBeenCalled();
+		expect(screen.getByText("Conflict Detected")).toBeInTheDocument();
+	});
 
-    it('renders read-only resource and calls delete in edit mode', async () => {
-        const user = userEvent.setup();
-        const onDelete = vi.fn();
+	it("renders read-only resource and calls delete in edit mode", async () => {
+		const user = userEvent.setup();
+		const onDelete = vi.fn();
 
-        render(
-            <EventForm
-                event={events[0]}
-                resources={resources}
-                groups={groups}
-                events={events}
-                readOnlyResource
-                onSubmit={vi.fn()}
-                onCancel={vi.fn()}
-                onDelete={onDelete}
-            />
-        );
+		render(
+			<EventForm
+				event={events[0]}
+				resources={resources}
+				groups={groups}
+				events={events}
+				readOnlyResource
+				onSubmit={vi.fn()}
+				onCancel={vi.fn()}
+				onDelete={onDelete}
+			/>,
+		);
 
-        expect(screen.getByText('Room 1')).toBeInTheDocument();
-        await user.click(screen.getByRole('button', { name: /delete_button/i }));
-        expect(onDelete).toHaveBeenCalled();
-    });
+		expect(screen.getByText("Room 1")).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: /delete_button/i }));
+		expect(onDelete).toHaveBeenCalled();
+	});
 });

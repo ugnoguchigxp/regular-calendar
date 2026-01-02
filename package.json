@@ -1,118 +1,118 @@
 {
-    "name": "regular-calendar",
-    "version": "0.0.1",
-    "description": "A generic, high-performance facility schedule management component for React. Designed to be domain-agnostic, customizable, and easy to integrate with any backend.",
-    "type": "module",
-    "keywords": [
-        "react",
-        "calendar",
-        "schedule",
-        "scheduler",
-        "facility",
-        "booking",
-        "resource-management",
-        "drag-and-drop",
-        "typescript"
-    ],
-    "author": "ugnoguchigxp (Yuji Noguchi)",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/ugnoguchigxp/regular-calendar.git"
-    },
-    "homepage": "https://wysiwyg-doc.com/",
-    "bugs": {
-        "url": "https://github.com/ugnoguchigxp/regular-calendar/issues"
-    },
-    "engines": {
-        "node": ">=18.0.0"
-    },
-    "workspaces": [
-        ".",
-        "examples/*"
-    ],
-    "sideEffects": [
-        "*.css"
-    ],
-    "main": "dist/index.js",
-    "module": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs"
-        },
-        "./styles": "./dist/index.css",
-        "./tailwind-preset": "./tailwind.preset.js"
-    },
-    "files": [
-        "dist",
-        "tailwind.preset.js"
-    ],
-    "scripts": {
-        "build": "tsc -p tsconfig.build.json && vite build",
-        "type-check": "tsc --noEmit",
-        "lint": "biome check .",
-        "format": "biome format --write .",
-        "test": "vitest --run",
-        "test:ui": "vitest --ui",
-        "test:run": "vitest run",
-        "test:coverage": "vitest run --coverage",
-        "prepublishOnly": "npm run test:run && npm run build"
-    },
-    "peerDependencies": {
-        "@gxp/design-system": "*",
-        "date-fns": "^3.0.0 || ^4.0.0",
-        "i18next": ">= 23.0.0",
-        "react": "^18.0.0 || ^19.0.0",
-        "react-dom": "^18.0.0 || ^19.0.0",
-        "react-i18next": ">= 13.0.0"
-    },
-    "peerDependenciesMeta": {
-        "@gxp/design-system": {
-            "optional": true
-        }
-    },
-    "dependencies": {
-        "@dnd-kit/core": "^6.3.1",
-        "@dnd-kit/modifiers": "^9.0.0",
-        "@dnd-kit/sortable": "^10.0.0",
-        "@dnd-kit/utilities": "^3.2.2",
-        "@hookform/resolvers": "^3.3.4",
-        "@radix-ui/react-checkbox": "^1.3.3",
-        "@radix-ui/react-dialog": "^1.1.15",
-        "@radix-ui/react-popover": "^1.1.15",
-        "@radix-ui/react-slot": "^1.2.4",
-        "class-variance-authority": "^0.7.1",
-        "clsx": "^2.1.1",
-        "lucide-react": "^0.562.0",
-        "react-day-picker": "^9.13.0",
-        "react-hook-form": "^7.51.3",
-        "tailwind-merge": "^3.4.0",
-        "tailwindcss-animate": "^1.0.7",
-        "zod": "^3.22.4"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "^2.3.8",
-        "@tailwindcss/postcss": "^4.1.18",
-        "@testing-library/dom": "^10.0.0",
-        "@testing-library/jest-dom": "^6.9.1",
-        "@testing-library/react": "^15.0.0",
-        "@testing-library/user-event": "^14.5.2",
-        "@types/node": "^24.10.2",
-        "@types/react": "^19.2.7",
-        "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^5.1.2",
-        "@vitest/coverage-istanbul": "^3.2.4",
-        "@vitest/ui": "^3.2.4",
-        "autoprefixer": "^10.4.22",
-        "jsdom": "^24.0.0",
-        "postcss": "^8.5.4",
-        "tailwindcss": "^4.1.17",
-        "typescript": "^5.9.2",
-        "vite": "^7.2.7",
-        "vite-plugin-dts": "^4.3.0",
-        "vitest": "^3.2.4"
-    }
+	"name": "regular-calendar",
+	"version": "0.0.1",
+	"description": "A generic, high-performance facility schedule management component for React. Designed to be domain-agnostic, customizable, and easy to integrate with any backend.",
+	"type": "module",
+	"keywords": [
+		"react",
+		"calendar",
+		"schedule",
+		"scheduler",
+		"facility",
+		"booking",
+		"resource-management",
+		"drag-and-drop",
+		"typescript"
+	],
+	"author": "ugnoguchigxp (Yuji Noguchi)",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ugnoguchigxp/regular-calendar.git"
+	},
+	"homepage": "https://wysiwyg-doc.com/",
+	"bugs": {
+		"url": "https://github.com/ugnoguchigxp/regular-calendar/issues"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"workspaces": [
+		".",
+		"examples/*"
+	],
+	"sideEffects": [
+		"*.css"
+	],
+	"main": "dist/index.js",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
+		"./styles": "./dist/index.css",
+		"./tailwind-preset": "./tailwind.preset.js"
+	},
+	"files": [
+		"dist",
+		"tailwind.preset.js"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json && vite build",
+		"type-check": "tsc --noEmit",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"test": "vitest --run",
+		"test:ui": "vitest --ui",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"prepublishOnly": "npm run test:run && npm run build"
+	},
+	"peerDependencies": {
+		"@gxp/design-system": "*",
+		"date-fns": "^3.0.0 || ^4.0.0",
+		"i18next": ">= 23.0.0",
+		"react": "^18.0.0 || ^19.0.0",
+		"react-dom": "^18.0.0 || ^19.0.0",
+		"react-i18next": ">= 13.0.0"
+	},
+	"peerDependenciesMeta": {
+		"@gxp/design-system": {
+			"optional": true
+		}
+	},
+	"dependencies": {
+		"@dnd-kit/core": "^6.3.1",
+		"@dnd-kit/modifiers": "^9.0.0",
+		"@dnd-kit/sortable": "^10.0.0",
+		"@dnd-kit/utilities": "^3.2.2",
+		"@hookform/resolvers": "^3.3.4",
+		"@radix-ui/react-checkbox": "^1.3.3",
+		"@radix-ui/react-dialog": "^1.1.15",
+		"@radix-ui/react-popover": "^1.1.15",
+		"@radix-ui/react-slot": "^1.2.4",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"lucide-react": "^0.562.0",
+		"react-day-picker": "^9.13.0",
+		"react-hook-form": "^7.51.3",
+		"tailwind-merge": "^3.4.0",
+		"tailwindcss-animate": "^1.0.7",
+		"zod": "^3.22.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.8",
+		"@tailwindcss/postcss": "^4.1.18",
+		"@testing-library/dom": "^10.0.0",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^15.0.0",
+		"@testing-library/user-event": "^14.5.2",
+		"@types/node": "^24.10.2",
+		"@types/react": "^19.2.7",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^5.1.2",
+		"@vitest/coverage-istanbul": "^3.2.4",
+		"@vitest/ui": "^3.2.4",
+		"autoprefixer": "^10.4.22",
+		"jsdom": "^24.0.0",
+		"postcss": "^8.5.4",
+		"tailwindcss": "^4.1.17",
+		"typescript": "^5.9.2",
+		"vite": "^7.2.7",
+		"vite-plugin-dts": "^4.3.0",
+		"vitest": "^3.2.4"
+	}
 }
