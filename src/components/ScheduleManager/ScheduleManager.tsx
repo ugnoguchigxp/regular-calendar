@@ -17,6 +17,7 @@ export function ScheduleManager({
 	onEventDelete,
 	onToast,
 	customFields,
+	personnel,
 	currentUserId,
 	i18n: _i18n,
 }: ScheduleManagerProps) {
@@ -97,6 +98,8 @@ export function ScheduleManager({
 				enablePersistence={true}
 				defaultView="week"
 				storageKey="regular-calendar-view"
+				currentUserId={currentUserId}
+				resources={resources}
 			/>
 
 			<DefaultEventModal
@@ -113,6 +116,7 @@ export function ScheduleManager({
 				resources={resources}
 				groups={groups}
 				events={events}
+				personnel={personnel}
 				currentUserId={currentUserId}
 				customFields={customFields}
 			/>

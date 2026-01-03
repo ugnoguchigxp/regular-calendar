@@ -1,5 +1,8 @@
 import "./index.css";
 
+export * from "./components/EventModal";
+export { EventForm } from "./components/EventModal/EventForm";
+export * from "./components/EventModal/EventModal";
 // Facility Schedule Manager
 export * from "./components/FacilityScheduleManager/FacilityScheduleManager";
 export * from "./components/FacilitySettings/FacilityStructureSettings";
@@ -15,7 +18,6 @@ export { Button, buttonVariants } from "./components/ui/Button";
 export { Checkbox } from "./components/ui/Checkbox";
 export { DateDisplay } from "./components/ui/DateDisplay";
 export * from "./components/ui/DatePicker";
-export { EditableSelect } from "./components/ui/EditableSelect";
 export {
 	Form,
 	FormControl,
@@ -46,9 +48,6 @@ export type {
 	ScheduleApiClient,
 	ScheduleContextType,
 } from "./contexts/types";
-export * from "./FacilitySchedule/components/EventModal";
-export { EventForm } from "./FacilitySchedule/components/EventModal/EventForm";
-export * from "./FacilitySchedule/components/EventModal/EventModal";
 export * from "./FacilitySchedule/FacilitySchedule";
 export * from "./FacilitySchedule/FacilitySchedule.schema";
 export * from "./FacilitySchedule/hooks/useAttendeeManagement";

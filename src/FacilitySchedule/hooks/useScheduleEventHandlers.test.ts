@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { EventFormData } from "../components/EventModal/EventForm";
+import type { EventFormData } from "../../components/EventModal/EventForm";
 import type { ScheduleEvent } from "../FacilitySchedule.schema";
 import { useScheduleEventHandlers } from "./useScheduleEventHandlers";
 

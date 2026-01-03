@@ -3,8 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Icons } from "@/components/ui/Icons";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/components/ui/utils";
-import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
-import type { AttendeeInfo } from "../../FacilitySchedule.schema";
+import type { AttendeeInfo } from "../../FacilitySchedule/FacilitySchedule.schema";
+import type { Personnel } from "../../PersonnelPanel/PersonnelPanel.schema";
 
 interface AttendeeInputProps {
 	value: AttendeeInfo[];
@@ -12,6 +12,7 @@ interface AttendeeInputProps {
 	personnel: Personnel[];
 	placeholder?: string;
 	className?: string;
+	disabled?: boolean;
 }
 
 export function AttendeeInput({
@@ -20,6 +21,7 @@ export function AttendeeInput({
 	personnel,
 	placeholder,
 	className,
+	disabled = false,
 }: AttendeeInputProps) {
 	const [open, setOpen] = useState(false);
 	const [inputValue, setInputValue] = useState("");
@@ -121,7 +123,7 @@ export function AttendeeInput({
 	return (
 		<div
 			className={cn(
-				"flex flex-wrap gap-[var(--ui-space-2)] p-[var(--ui-space-2)] border rounded-md bg-background focus-within:ring-2 ring-ring ring-offset-2 border-input",
+				"flex flex-wrap items-center gap-ui px-ui py-[calc(var(--ui-component-padding-y)/2)] border rounded-md bg-background focus-within:ring-2 ring-ring ring-offset-2 border-input min-h-ui",
 				className,
 			)}
 		>
@@ -135,16 +137,18 @@ export function AttendeeInput({
 					className="flex items-center gap-[var(--ui-space-1)] bg-secondary text-secondary-foreground px-[var(--ui-space-2)] py-[var(--ui-space-1)] rounded text-sm group"
 				>
 					<span>{attendee.name}</span>
-					<button
-						type="button"
-						onClick={(e) => {
-							e.stopPropagation();
-							removeAttendee(index);
-						}}
-						className="text-muted-foreground group-hover:text-destructive transition-colors"
-					>
-						<Icons.X className="h-[var(--ui-space-3)] w-[var(--ui-space-3)]" />
-					</button>
+					{!disabled && (
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								removeAttendee(index);
+							}}
+							className="text-muted-foreground group-hover:text-destructive transition-colors"
+						>
+							<Icons.X className="h-[var(--ui-space-3)] w-[var(--ui-space-3)]" />
+						</button>
+					)}
 				</div>
 			))}
 
@@ -159,7 +163,11 @@ export function AttendeeInput({
 					}}
 					onBlur={handleBlur}
 					placeholder={value.length === 0 ? placeholder : ""}
-					className="border-0 focus-visible:ring-0 px-[var(--ui-space-0)] h-auto py-[var(--ui-space-1)] shadow-none bg-transparent"
+					disabled={disabled}
+					className={cn(
+						"border-0 focus-visible:ring-0 px-[var(--ui-space-0)] h-auto py-[var(--ui-space-1)] shadow-none bg-transparent",
+						disabled && "cursor-not-allowed text-muted-foreground",
+					)}
 					autoComplete="off"
 				/>
 
@@ -170,7 +178,7 @@ export function AttendeeInput({
 								type="button"
 								key={p.id}
 								className={cn(
-									"px-[var(--ui-space-3)] py-[var(--ui-space-2)] text-sm cursor-pointer flex justify-between items-center",
+									"px-ui py-ui text-sm cursor-pointer flex justify-between items-center",
 									index === activeIndex
 										? "bg-accent text-accent-foreground"
 										: "hover:bg-accent hover:text-accent-foreground",

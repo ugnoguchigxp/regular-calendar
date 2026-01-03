@@ -73,7 +73,7 @@ vi.mock("./components/MonthView/MonthView", () => ({
 	MonthView: () => <div data-testid="month-view" />,
 }));
 
-vi.mock("./components/EventModal/EventModal", () => ({
+vi.mock("../components/EventModal/EventModal", () => ({
 	EventModal: () => <div data-testid="event-modal" />,
 }));
 

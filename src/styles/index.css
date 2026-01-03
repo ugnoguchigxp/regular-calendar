@@ -125,4 +125,16 @@ textarea {
 	.h-ui {
 		height: var(--ui-component-height);
 	}
+
+	.min-h-ui {
+		min-height: var(--ui-component-height);
+	}
+
+	.h-ui-icon {
+		height: var(--ui-icon-size);
+	}
+
+	.w-ui-icon {
+		width: var(--ui-icon-size);
+	}
 }

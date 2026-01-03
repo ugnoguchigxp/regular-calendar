@@ -7,7 +7,6 @@ import {
 } from "react";
 import { useScheduleContext } from "../../contexts/ScheduleContext";
 import type { ResourceAvailabilityResponse } from "../../contexts/types";
-import { EventModal } from "../../FacilitySchedule/components/EventModal/EventModal";
 import { FacilitySchedule } from "../../FacilitySchedule/FacilitySchedule";
 import type {
 	EventFormData,
@@ -15,6 +14,7 @@ import type {
 	ViewMode,
 } from "../../FacilitySchedule/FacilitySchedule.schema";
 import { transformBookingsToEvents } from "../../utils/transformHelpers";
+import { EventModal } from "../EventModal/EventModal";
 
 export interface FacilityScheduleManagerSettings {
 	weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -55,6 +55,9 @@ export function FacilityScheduleManager({
 	const [viewMode, setViewMode] = useState<ViewMode>("day");
 	const [localEvents, setLocalEvents] = useState<ScheduleEvent[]>([]);
 	const [isFetching, setIsFetching] = useState(false);
+	const [resourceAvailability, setResourceAvailability] = useState<
+		{ resourceId: string; isAvailable: boolean }[]
+	>([]);
 
 	// Fetch data based on current view
 	const fetchData = useCallback(async () => {
@@ -155,6 +158,29 @@ export function FacilityScheduleManager({
 		[deleteEvent, fetchData],
 	);
 
+	const handleAvailabilityRequest = useCallback(
+		async (criteria: { startDate: Date; endDate: Date }) => {
+			// In DayView, we want to check availability for the specific time range.
+			// fetchResourceAvailability is designed to fetch for a whole view,
+			// but we can use it to get latest status.
+			try {
+				const results = await fetchResourceAvailability(
+					criteria.startDate,
+					"day",
+				);
+				setResourceAvailability(
+					results.map((r) => ({
+						resourceId: r.resourceId,
+						isAvailable: r.isAvailable,
+					})),
+				);
+			} catch (err) {
+				console.error("Failed to fetch specific availability", err);
+			}
+		},
+		[fetchResourceAvailability],
+	);
+
 	// Wrap Standard EventModal
 	const WrappedEventModal = useMemo(() => {
 		return (props: ComponentProps<typeof EventModal>) => (
@@ -163,9 +189,16 @@ export function FacilityScheduleManager({
 				currentUserId={effectiveUserId}
 				personnel={personnel}
 				readOnlyResource={true}
+				resourceAvailability={resourceAvailability}
+				onAvailabilityRequest={handleAvailabilityRequest}
 			/>
 		);
-	}, [effectiveUserId, personnel]);
+	}, [
+		effectiveUserId,
+		personnel,
+		resourceAvailability,
+		handleAvailabilityRequest,
+	]);
 
 	if (error)
 		return (
@@ -178,10 +211,11 @@ export function FacilityScheduleManager({
 
 	// Merge API settings with local settings
 	const mergedSettings = {
+		// Use API settings as base, then override with local props
 		...apiSettings,
-		weekStartsOn: settings.weekStartsOn,
-		startTime: settings.businessHoursStart,
-		endTime: settings.businessHoursEnd,
+		weekStartsOn: settings.weekStartsOn ?? apiSettings.weekStartsOn,
+		startTime: settings.businessHoursStart ?? apiSettings.startTime,
+		endTime: settings.businessHoursEnd ?? apiSettings.endTime,
 	};
 
 	return (

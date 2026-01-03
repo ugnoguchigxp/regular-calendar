@@ -7,6 +7,7 @@ import {
 } from "../../constants/calendarConstants";
 import type {
 	FacilityScheduleSettings,
+	Resource,
 	ScheduleEvent,
 } from "../../RegularCalendar.schema";
 import {
@@ -23,6 +24,8 @@ interface DayViewProps {
 	settings: FacilityScheduleSettings;
 	onTimeSlotClick?: (date: Date, timeSlot: string) => void;
 	onEventClick?: (event: ScheduleEvent) => void;
+	currentUserId?: string;
+	resources?: Resource[];
 }
 
 export function DayView({
@@ -31,6 +34,8 @@ export function DayView({
 	settings,
 	onTimeSlotClick,
 	onEventClick,
+	currentUserId,
+	resources,
 }: DayViewProps) {
 	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30; // Fallback to 30 min
@@ -202,6 +207,8 @@ export function DayView({
 								event={event}
 								position={position}
 								onEventClick={onEventClick}
+								currentUserId={currentUserId}
+								resources={resources}
 							/>
 						))}
 					</div>

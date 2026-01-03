@@ -21,6 +21,7 @@ interface MonthViewProps {
 	settings: FacilityScheduleSettings;
 	onDateClick?: (date: Date) => void;
 	onEventClick?: (event: ScheduleEvent) => void;
+	currentUserId?: string;
 }
 
 export function MonthView({
@@ -29,6 +30,7 @@ export function MonthView({
 	settings,
 	onDateClick,
 	onEventClick,
+	currentUserId,
 }: MonthViewProps) {
 	const { t } = useAppTranslation();
 	const weekStart = settings.weekStartsOn ?? 1;
@@ -123,6 +125,7 @@ export function MonthView({
 												key={event.id}
 												event={event}
 												onClick={onEventClick}
+												currentUserId={currentUserId}
 											/>
 										))}
 										{dayEvents.length > 3 && (

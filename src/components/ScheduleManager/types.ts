@@ -1,15 +1,11 @@
 import type {
 	CustomField,
+	Personnel,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
 } from "../../FacilitySchedule/FacilitySchedule.schema";
 export type { CustomField };
-
-export interface CustomFieldOption {
-	value: string;
-	label: string;
-}
 
 export interface CustomFieldOption {
 	value: string;
@@ -36,6 +32,7 @@ export interface ScheduleManagerProps {
 	onEventDelete: (eventId: string) => Promise<void>;
 	onToast?: (message: string, type: "success" | "error") => void;
 	customFields?: CustomField[];
+	personnel?: Personnel[];
 	currentUserId?: string;
 	i18n?: {
 		locale?: string;

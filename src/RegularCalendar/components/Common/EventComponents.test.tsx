@@ -99,7 +99,7 @@ describe("EventComponents", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Only me")).toBeInTheDocument();
+		expect(screen.queryByText("Only me")).not.toBeInTheDocument();
 	});
 
 	it("renders month event time label for timed and all-day events", () => {
@@ -150,6 +150,7 @@ describe("EventComponents", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Only me")).toBeInTheDocument();
+		expect(screen.queryByText("Only me")).not.toBeInTheDocument();
+		expect(screen.queryByText(/with /i)).not.toBeInTheDocument();
 	});
 });

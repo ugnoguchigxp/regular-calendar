@@ -5,9 +5,8 @@
  */
 
 import { useAppTranslation } from "@/utils/i18n";
+import { EventModal } from "../components/EventModal/EventModal";
 import { DayView } from "./components/DayView/DayView";
-
-import { EventModal } from "./components/EventModal/EventModal";
 import { MonthView } from "./components/MonthView/MonthView";
 import { ScheduleHeader } from "./components/ScheduleHeader";
 import { WeekView } from "./components/WeekView/WeekView";

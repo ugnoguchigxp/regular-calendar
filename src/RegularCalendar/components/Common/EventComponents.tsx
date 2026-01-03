@@ -4,7 +4,6 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import type React from "react";
-import { useAppTranslation } from "@/utils/i18n";
 import type { ScheduleEvent } from "../../RegularCalendar.schema";
 
 // Helper to get location string
@@ -38,29 +37,47 @@ interface EventItemProps {
 	column?: number; // 0-indexed column position for overlapping events
 	totalColumns?: number; // Total columns in overlap group
 	onEventClick?: (event: ScheduleEvent) => void;
+	currentUserId?: string;
+	resources?: { id: string; name: string }[];
 }
 
-// Helper to get display attendee
 const getDisplayAttendee = (
 	attendee: string | null | undefined,
 	fallbackLabel: string,
+	currentUserId?: string,
 ): string => {
 	if (!attendee || attendee === "[]" || attendee === "") return fallbackLabel;
 	try {
-		const parsed = JSON.parse(attendee);
+		const parsed =
+			typeof attendee === "string" ? JSON.parse(attendee) : attendee;
 		if (Array.isArray(parsed)) {
-			const names = parsed
+			const filtered = parsed.filter((p) => {
+				if (typeof p !== "object" || p === null) return false;
+				// Filter out self
+				if (
+					currentUserId &&
+					"personnelId" in p &&
+					p.personnelId === currentUserId
+				) {
+					return false;
+				}
+				return true;
+			});
+
+			const names = filtered
 				.map((p) => {
-					if (typeof p !== "object" || p === null) return null;
-					if (!("name" in p)) return null;
 					const name = (p as { name?: unknown }).name;
 					return typeof name === "string" ? name : null;
 				})
 				.filter((name): name is string => Boolean(name));
+
 			if (names.length > 0) return names.join(", ");
+			// If all filtered out (self only), return empty or fallback?
+			// User said "自分は表示しなくていい", so empty is better.
+			return "";
 		}
 	} catch {}
-	return attendee;
+	return typeof attendee === "string" ? attendee : "";
 };
 
 export const EventItem: React.FC<EventItemProps> = ({
@@ -69,8 +86,9 @@ export const EventItem: React.FC<EventItemProps> = ({
 	column = 0,
 	totalColumns = 1,
 	onEventClick,
+	currentUserId,
+	resources = [],
 }) => {
-	const { t } = useAppTranslation();
 	// Note: Drag functionality depends on DndContext being present in parent
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: event.id,
@@ -84,12 +102,11 @@ export const EventItem: React.FC<EventItemProps> = ({
 	};
 
 	const title = event.title;
-	const locationText = getEventLocation(event);
-	// Use helper to allow "Only me" display
-	const displayAttendee = getDisplayAttendee(
-		event.attendee,
-		t("attendee_self"),
-	);
+	const displayAttendee = getDisplayAttendee(event.attendee, "", currentUserId);
+
+	// Resolve resource name from ID or fallback to locationText
+	const resource = resources.find((r) => r.id === event.resourceId);
+	const resourceName = resource?.name || getEventLocation(event);
 
 	// Calculate width and left position for overlapping events
 	const widthPercent = 100 / totalColumns;
@@ -111,7 +128,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 			}}
 			className={`
         absolute rounded px-[var(--ui-space-1)] py-[var(--ui-space-1)] text-sm cursor-pointer
-        transition-all select-none
+        transition-all select-none flex flex-col items-start text-left
         active:scale-95
         ${isDragging ? "opacity-50" : "hover:shadow-md"}
       `}
@@ -126,10 +143,16 @@ export const EventItem: React.FC<EventItemProps> = ({
 				zIndex: isDragging ? 50 : 10 + column,
 			}}
 		>
-			<div className="font-medium truncate text-xs">{title}</div>
-			<div className="text-[10px] opacity-90 truncate">{displayAttendee}</div>
-			{position.height > 60 && locationText && (
-				<div className="text-[10px] opacity-90 truncate">{locationText}</div>
+			<div className="font-medium truncate text-xs w-full">{title}</div>
+			{displayAttendee !== "" && (
+				<div className="text-[10px] opacity-90 truncate w-full">
+					{displayAttendee}
+				</div>
+			)}
+			{resourceName !== "" && (
+				<div className="text-[10px] opacity-90 truncate w-full">
+					{resourceName}
+				</div>
 			)}
 		</button>
 	);
@@ -141,6 +164,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 interface MonthEventItemProps {
 	event: ScheduleEvent;
 	onClick?: (event: ScheduleEvent) => void;
+	currentUserId?: string;
 }
 
 export const MonthEventItem: React.FC<MonthEventItemProps> = ({
@@ -180,32 +204,40 @@ export const MonthEventItem: React.FC<MonthEventItemProps> = ({
  */
 interface EventDragOverlayProps {
 	event: ScheduleEvent;
+	currentUserId?: string;
+	resources?: { id: string; name: string }[];
 }
 
 export const EventDragOverlay: React.FC<EventDragOverlayProps> = ({
 	event,
+	currentUserId,
+	resources = [],
 }) => {
-	const { t } = useAppTranslation();
 	const title = event.title;
-	const locationText = getEventLocation(event);
-	const selfLabel = t("attendee_self");
-	const displayAttendee = getDisplayAttendee(event.attendee, selfLabel);
-	const isSelfOnly = displayAttendee === selfLabel;
+	const displayAttendee = getDisplayAttendee(event.attendee, "", currentUserId);
+	const resource = resources.find((r) => r.id === event.resourceId);
+	const resourceName = resource?.name || getEventLocation(event);
 
 	return (
 		<div
-			className="rounded px-[var(--ui-space-2)] py-[var(--ui-space-2)] text-sm shadow-lg min-h-[var(--ui-space-11)] flex flex-col justify-center"
+			className="rounded px-[var(--ui-space-2)] py-[var(--ui-space-2)] text-sm shadow-lg min-h-[var(--ui-space-11)] flex flex-col items-start text-left"
 			style={{
 				backgroundColor: event.color || "#3b82f6",
 				color: "white",
 				width: "200px",
 			}}
 		>
-			<div className="font-medium">{title}</div>
-			<div className="text-xs opacity-90">
-				{isSelfOnly ? displayAttendee : `with ${displayAttendee}`}
-			</div>
-			{locationText && <div className="text-sm opacity-90">{locationText}</div>}
+			<div className="font-medium w-full">{title}</div>
+			{displayAttendee !== "" && (
+				<div className="text-xs opacity-90 w-full text-left">
+					with {displayAttendee}
+				</div>
+			)}
+			{resourceName !== "" && (
+				<div className="text-sm opacity-90 w-full text-left">
+					{resourceName}
+				</div>
+			)}
 		</div>
 	);
 };

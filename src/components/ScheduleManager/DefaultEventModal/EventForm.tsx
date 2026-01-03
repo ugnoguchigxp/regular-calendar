@@ -1,16 +1,16 @@
 import type { ControllerRenderProps, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type {
+	Personnel,
 	Resource,
-	ResourceGroup,
 	ScheduleConflict,
 } from "../../../FacilitySchedule/FacilitySchedule.schema";
 import { formatCalendarDate } from "../../../utils/dateFormats";
 import { formatIsoDateTime, formatIsoTime } from "../../../utils/dateUtils";
+import { AttendeeInput } from "../../EventModal/AttendeeInput";
 import { Button } from "../../ui/Button";
 import { Checkbox } from "../../ui/Checkbox";
 import { DatePicker } from "../../ui/DatePicker";
-import { EditableSelect } from "../../ui/EditableSelect";
 import {
 	Form,
 	FormControl,
@@ -44,11 +44,12 @@ interface EventFormProps {
 	displayValue: string;
 	availableResources: Resource[];
 	resourceDisplayNames: Map<string, string>;
-	groups: ResourceGroup[];
 	conflict?: ScheduleConflict | null;
 	setIsTimeModalOpen: (open: boolean) => void;
 	customFields?: CustomField[];
 	readOnlyResource?: boolean;
+	personnel?: Personnel[];
+	currentUserId?: string;
 }
 
 export function EventForm({
@@ -63,11 +64,12 @@ export function EventForm({
 	displayValue,
 	availableResources,
 	resourceDisplayNames,
-	groups,
 	conflict,
 	setIsTimeModalOpen,
 	customFields = [],
 	readOnlyResource = false,
+	personnel = [],
+	currentUserId,
 }: EventFormProps) {
 	const { t, i18n } = useTranslation();
 
@@ -120,22 +122,29 @@ export function EventForm({
 						field,
 					}: {
 						field: ControllerRenderProps<EventFormValues, "attendee">;
-					}) => (
-						<FormItem>
-							<FormLabel>
-								{t("attendee_label", "Attendee")}{" "}
-								<span className="text-red-500">*</span>
-							</FormLabel>
-							<FormControl>
-								<Input
-									{...field}
-									placeholder={t("attendee_placeholder", "Enter attendee name")}
-									disabled={!canEdit}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
+					}) => {
+						// Suggest relevant personnel (excluding self)
+						const suggestions = personnel.filter((p) => p.id !== currentUserId);
+
+						return (
+							<FormItem>
+								<FormLabel>{t("attendee_label", "Attendee")}</FormLabel>
+								<FormControl>
+									<AttendeeInput
+										value={field.value || []}
+										onChange={field.onChange}
+										personnel={suggestions}
+										placeholder={t(
+											"attendee_placeholder",
+											"Enter attendee names",
+										)}
+										disabled={!canEdit}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						);
+					}}
 				/>
 
 				{/* Resource Selection */}
@@ -148,13 +157,10 @@ export function EventForm({
 						field: ControllerRenderProps<EventFormValues, "resourceId">;
 					}) => (
 						<FormItem>
-							<FormLabel>
-								{t("resource_label", "Resource")}{" "}
-								<span className="text-red-500">*</span>
-							</FormLabel>
+							<FormLabel>{t("resource_label", "Resource")}</FormLabel>
 							{readOnlyResource ? (
 								<>
-									<div className="p-[var(--ui-space-2)] bg-muted rounded-md text-sm border border-input">
+									<div className="px-ui py-ui bg-muted rounded-md text-sm border border-input min-h-ui flex items-center">
 										{displayValue ||
 											t("resource_placeholder", "Select a resource")}
 									</div>
@@ -162,20 +168,34 @@ export function EventForm({
 								</>
 							) : (
 								<FormControl>
-									<EditableSelect
-										value={displayValue}
-										onChange={(val) => {
-											const match = availableResources.find((r) => {
-												const g = groups.find((g) => g.id === r.groupId);
-												const d = g ? `${r.name} (${g.name})` : r.name;
-												return d === val;
-											});
-											field.onChange(match ? match.id : val);
-										}}
-										options={Array.from(resourceDisplayNames.values())}
-										placeholder={t("resource_placeholder", "Select a resource")}
+									<Select
+										onValueChange={field.onChange}
+										value={field.value}
 										disabled={!canEdit}
-									/>
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue
+													placeholder={t(
+														"resource_placeholder",
+														"Select a resource",
+													)}
+												>
+													{field.value
+														? resourceDisplayNames.get(field.value) ||
+															field.value
+														: null}
+												</SelectValue>
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{availableResources.map((r) => (
+												<SelectItem key={r.id} value={r.id}>
+													{resourceDisplayNames.get(r.id) || r.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
 								</FormControl>
 							)}
 							<FormMessage />
@@ -262,7 +282,7 @@ export function EventForm({
 							{!isAllDay ? (
 								<Input
 									value={formatIsoTime(new Date(startDateVal))}
-									readOnly={!canEdit}
+									readOnly
 									className="w-full cursor-pointer py-ui"
 									onClick={() => canEdit && setIsTimeModalOpen(true)}
 									tabIndex={-1}

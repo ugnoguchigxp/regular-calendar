@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type {
+	AttendeeInfo,
+	Personnel,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
@@ -16,8 +18,8 @@ import type { CustomField } from "../types";
  */
 const baseEventFormSchema = z.object({
 	title: z.string().min(1, "Event name is required"),
-	attendee: z.string().min(1, "Attendee name is required"),
-	resourceId: z.string().min(1, "Resource is required"),
+	attendee: z.array(z.any()), // Array of AttendeeInfo
+	resourceId: z.string().optional(),
 	startDate: z.string().min(1, "Start date is required"),
 	durationHours: z.number().min(0.25).max(24),
 	status: z.string().optional(),
@@ -86,6 +88,7 @@ export interface UseEventFormOptions {
 	defaultResourceId?: string;
 	defaultStartTime?: Date;
 	resources: Resource[];
+	personnel?: Personnel[];
 	customFields?: CustomField[];
 	currentUserId?: string;
 }
@@ -95,9 +98,10 @@ export interface UseEventFormReturn {
 	isEditMode: boolean;
 	startDateVal: string;
 	durationVal: number;
-	resourceIdVal: string;
+	resourceIdVal?: string;
 	isAllDay: boolean;
 	endDateDisplay: Date;
+	personnel: Personnel[];
 }
 
 /**
@@ -109,8 +113,9 @@ export function useEventForm({
 	defaultResourceId,
 	defaultStartTime,
 	resources,
+	personnel = [],
 	customFields = [],
-	currentUserId: _currentUserId,
+	currentUserId,
 }: UseEventFormOptions): UseEventFormReturn {
 	const isEditMode = !!event;
 
@@ -120,9 +125,37 @@ export function useEventForm({
 	);
 
 	const defaultValues = useMemo(() => {
+		const getStringProp = (
+			obj: Record<string, unknown> | undefined,
+			key: string,
+		): string | undefined => {
+			const val = obj?.[key];
+			return typeof val === "string" ? val : undefined;
+		};
+
+		// Helper to transform attendee JSON string to AttendeeInfo array (excluding self)
+		const formatAttendeeForForm = (
+			attendee: string | undefined,
+			userId: string | undefined,
+		): AttendeeInfo[] => {
+			if (!attendee) return [];
+			try {
+				const parsed = JSON.parse(attendee);
+				if (Array.isArray(parsed)) {
+					return parsed.filter((p) => !userId || p.personnelId !== userId);
+				}
+			} catch {
+				// Not JSON
+			}
+			return [];
+		};
+
 		const baseDefaults = {
-			title: event?.title || "",
-			attendee: event?.attendee || "",
+			title:
+				getStringProp(event?.extendedProps, "originalTitle") ||
+				event?.title ||
+				"",
+			attendee: formatAttendeeForForm(event?.attendee, currentUserId),
 			resourceId:
 				event?.resourceId || defaultResourceId || resources[0]?.id || "",
 			startDate: formatIsoDateTime(
@@ -150,12 +183,32 @@ export function useEventForm({
 		});
 
 		return { ...baseDefaults, ...customDefaults };
-	}, [event, defaultResourceId, defaultStartTime, resources, customFields]);
+	}, [
+		event,
+		defaultResourceId,
+		defaultStartTime,
+		resources,
+		customFields,
+		currentUserId,
+	]);
 
 	const form = useForm<EventFormValues>({
 		resolver: zodResolver(schema),
 		defaultValues,
 	});
+
+	// Identity key for the current edit session
+	const resetKey = useMemo(() => {
+		if (event?.id) return `edit-${event.id}`;
+		if (defaultStartTime) return `create-${defaultStartTime.getTime()}`;
+		return "create-new";
+	}, [event?.id, defaultStartTime]);
+
+	// Reset form when the target event or selection changes
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Only reset when identification changes
+	useEffect(() => {
+		form.reset(defaultValues);
+	}, [resetKey]);
 
 	const startDateVal = form.watch("startDate");
 	const durationVal = form.watch("durationHours");
@@ -179,6 +232,7 @@ export function useEventForm({
 		resourceIdVal,
 		isAllDay,
 		endDateDisplay,
+		personnel,
 	};
 }
 
@@ -277,8 +331,59 @@ export function prepareEventFormData(
 		}
 	});
 
+	// Transform form attendee array back to JSON string
+	const parseAttendeeFromForm = (
+		formAttendees: AttendeeInfo[],
+		originalAttendee: string | undefined,
+		userId: string | undefined,
+	): string => {
+		const newAttendees: Record<string, unknown>[] = [
+			...(formAttendees as unknown as Record<string, unknown>[]),
+		];
+
+		// Try to restore original self object if it existed
+		if (userId) {
+			let selfObj = null;
+			if (originalAttendee) {
+				try {
+					const parsed = JSON.parse(originalAttendee);
+					if (Array.isArray(parsed)) {
+						selfObj = parsed.find((p) => p.personnelId === userId);
+					}
+				} catch {}
+			}
+
+			// If not found in original, but we are the current user, add default self object
+			if (!selfObj) {
+				// For John Doe demo
+				if (userId === "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d") {
+					selfObj = {
+						name: "John Doe",
+						personnelId: userId,
+						type: "personnel",
+					};
+				} else {
+					selfObj = { name: "Self", personnelId: userId, type: "personnel" };
+				}
+			}
+
+			if (selfObj) {
+				newAttendees.unshift(selfObj as unknown as Record<string, unknown>);
+			}
+		}
+
+		return JSON.stringify(newAttendees);
+	};
+
+	const attendee = parseAttendeeFromForm(
+		data.attendee,
+		event?.attendee,
+		currentUserId,
+	);
+
 	return {
 		...data,
+		attendee,
 		startDate: start,
 		endDate: end,
 		extendedProps,

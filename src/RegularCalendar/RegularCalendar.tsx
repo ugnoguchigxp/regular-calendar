@@ -11,6 +11,7 @@ import { MonthView } from "./components/MonthView/MonthView";
 import { WeekView } from "./components/WeekView/WeekView";
 import type {
 	FacilityScheduleSettings,
+	Resource,
 	ScheduleEvent,
 	ViewMode,
 } from "./RegularCalendar.schema";
@@ -46,6 +47,12 @@ export interface RegularCalendarProps {
 	enablePersistence?: boolean;
 	storageKey?: string;
 	storage?: StorageAdapter;
+
+	// User Identity
+	currentUserId?: string;
+
+	// Resources for resolving names
+	resources?: Resource[];
 }
 
 export function RegularCalendar({
@@ -66,6 +73,8 @@ export function RegularCalendar({
 	enablePersistence = false,
 	storageKey = "regular-calendar-view",
 	storage = defaultStorage,
+	currentUserId,
+	resources = [],
 }: RegularCalendarProps) {
 	const { t } = useAppTranslation();
 
@@ -205,6 +214,8 @@ export function RegularCalendar({
 						settings={settings}
 						onEventClick={onEventClick}
 						onTimeSlotClick={handleTimeSlotClick}
+						currentUserId={currentUserId}
+						resources={resources}
 					/>
 				)}
 
@@ -215,6 +226,8 @@ export function RegularCalendar({
 						settings={settings}
 						onEventClick={onEventClick}
 						onTimeSlotClick={handleTimeSlotClick}
+						currentUserId={currentUserId}
+						resources={resources}
 					/>
 				)}
 
@@ -225,6 +238,7 @@ export function RegularCalendar({
 						settings={settings}
 						onEventClick={onEventClick}
 						onDateClick={handleDayClick}
+						currentUserId={currentUserId}
 					/>
 				)}
 			</div>

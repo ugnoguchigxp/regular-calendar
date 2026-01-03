@@ -9,7 +9,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { EditableSelect } from "@/components/ui/EditableSelect";
 import {
 	Form,
 	FormControl,
@@ -32,18 +31,18 @@ import { Textarea } from "@/components/ui/Textarea";
 import { formatCalendarDate } from "@/utils/dateFormats";
 import { formatIsoDateTime } from "@/utils/dateUtils";
 import { useAppTranslation } from "@/utils/i18n";
-import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
 import type {
 	CustomField,
 	EventFormData,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
-} from "../../FacilitySchedule.schema";
-import { useAttendeeManagement } from "../../hooks/useAttendeeManagement";
+} from "../../FacilitySchedule/FacilitySchedule.schema";
+import { useAttendeeManagement } from "../../FacilitySchedule/hooks/useAttendeeManagement";
 // Import new hooks
-import { useResourceAvailability } from "../../hooks/useResourceAvailability";
-import { useScheduleConflict } from "../../hooks/useScheduleConflict";
+import { useResourceAvailability } from "../../FacilitySchedule/hooks/useResourceAvailability";
+import { useScheduleConflict } from "../../FacilitySchedule/hooks/useScheduleConflict";
+import type { Personnel } from "../../PersonnelPanel/PersonnelPanel.schema";
 import { AttendeeInput } from "./AttendeeInput";
 
 // Helper for duration formatting
@@ -66,7 +65,7 @@ const getStringProp = (
 // Base Schema
 const baseEventSchema = z.object({
 	title: z.string().min(1, "required"),
-	attendee: z.string(),
+	attendee: z.string().optional(),
 	resourceId: z.string().optional(),
 	startDate: z.string().min(1, "required"),
 	durationHours: z.number().min(0.25).max(24),
@@ -210,18 +209,17 @@ export function EventForm({
 	}
 
 	// Use new hooks
-	const { availableResources, resourceNames, getDisplayName } =
-		useResourceAvailability({
-			resources,
-			groups,
-			events,
-			timeRange: {
-				start: new Date(startDateVal),
-				end: endDateDisplay,
-			},
-			currentEventId: event?.id,
-			externalAvailability: resourceAvailability,
-		});
+	const { availableResources, getDisplayName } = useResourceAvailability({
+		resources,
+		groups,
+		events,
+		timeRange: {
+			start: new Date(startDateVal),
+			end: endDateDisplay,
+		},
+		currentEventId: event?.id,
+		externalAvailability: resourceAvailability,
+	});
 
 	// Trigger external availability check when date/duration changes
 	useEffect(() => {
@@ -379,25 +377,32 @@ export function EventForm({
 								<FormLabel>{t("resource_label")}</FormLabel>
 								{readOnlyResource ? (
 									<>
-										<div className="p-[var(--ui-space-2)] bg-muted rounded-md text-sm border border-input">
+										<div className="px-ui py-ui bg-muted rounded-md text-sm border border-input min-h-ui flex items-center">
 											{displayValue || t("resource_placeholder")}
 										</div>
 										<input type="hidden" {...field} />
 									</>
 								) : (
 									<FormControl>
-										<EditableSelect
-											value={displayValue || ""}
-											onChange={(val) => {
-												const match = availableResources.find((r) => {
-													const displayName = getDisplayName(r.id);
-													return displayName === val;
-												});
-												field.onChange(match ? match.id : val);
-											}}
-											options={resourceNames}
-											placeholder={t("resource_placeholder")}
-										/>
+										<Select
+											onValueChange={field.onChange}
+											value={(field.value as string) || ""}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder={t("resource_placeholder")}>
+														{displayValue}
+													</SelectValue>
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{availableResources.map((r) => (
+													<SelectItem key={r.id} value={r.id}>
+														{getDisplayName(r.id)}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
 									</FormControl>
 								)}
 								<FormMessage />

@@ -10,6 +10,7 @@ import {
 } from "../../constants/calendarConstants";
 import type {
 	FacilityScheduleSettings,
+	Resource,
 	ScheduleEvent,
 } from "../../RegularCalendar.schema";
 import {
@@ -28,6 +29,8 @@ interface WeekViewProps {
 	settings: FacilityScheduleSettings;
 	onTimeSlotClick?: (date: Date, timeSlot: string) => void;
 	onEventClick?: (event: ScheduleEvent) => void;
+	currentUserId?: string;
+	resources?: Resource[];
 }
 
 export function WeekView({
@@ -36,6 +39,8 @@ export function WeekView({
 	settings,
 	onTimeSlotClick,
 	onEventClick,
+	currentUserId,
+	resources,
 }: WeekViewProps) {
 	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30;
@@ -290,6 +295,8 @@ export function WeekView({
 												column={column}
 												totalColumns={totalColumns}
 												onEventClick={onEventClick}
+												currentUserId={currentUserId}
+												resources={resources}
 											/>
 										),
 									)}

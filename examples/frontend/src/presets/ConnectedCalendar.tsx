@@ -30,6 +30,7 @@ export function ConnectedCalendar({
 		createEvent,
 		updateEvent,
 		deleteEvent,
+		personnel,
 	} = useScheduleContext();
 
 	const allEvents = useMemo(
@@ -77,6 +78,7 @@ export function ConnectedCalendar({
 			onEventUpdate={handleUpdate}
 			onEventDelete={handleDelete}
 			currentUserId={currentUserId}
+			personnel={personnel}
 		/>
 	);
 }

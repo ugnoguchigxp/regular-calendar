@@ -6,15 +6,15 @@ const mockUseResourceAvailability = vi.fn();
 const mockUseScheduleConflict = vi.fn();
 const mockUseAttendeeManagement = vi.fn();
 
-vi.mock("../../hooks/useResourceAvailability", () => ({
+vi.mock("../../FacilitySchedule/hooks/useResourceAvailability", () => ({
 	useResourceAvailability: (args: unknown) => mockUseResourceAvailability(args),
 }));
 
-vi.mock("../../hooks/useScheduleConflict", () => ({
+vi.mock("../../FacilitySchedule/hooks/useScheduleConflict", () => ({
 	useScheduleConflict: (args: unknown) => mockUseScheduleConflict(args),
 }));
 
-vi.mock("../../hooks/useAttendeeManagement", () => ({
+vi.mock("../../FacilitySchedule/hooks/useAttendeeManagement", () => ({
 	useAttendeeManagement: (args: unknown) => mockUseAttendeeManagement(args),
 }));
 

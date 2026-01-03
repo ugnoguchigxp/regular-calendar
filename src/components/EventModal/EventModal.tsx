@@ -5,14 +5,14 @@
 import React from "react";
 import { ConfirmModal, Modal } from "@/components/ui/Modal";
 import { useAppTranslation } from "@/utils/i18n";
-import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
 import type {
 	CustomField,
 	EventFormData,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
-} from "../../FacilitySchedule.schema";
+} from "../../FacilitySchedule/FacilitySchedule.schema";
+import type { Personnel } from "../../PersonnelPanel/PersonnelPanel.schema";
 
 import { EventForm } from "./EventForm";
 

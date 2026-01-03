@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
+	Personnel,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
@@ -34,6 +35,7 @@ interface DefaultEventModalProps {
 	onSave: (data: SMEventFormData) => void;
 	onDelete?: (eventId: string) => void;
 	currentUserId?: string;
+	personnel?: Personnel[];
 	customFields?: CustomField[];
 }
 
@@ -50,6 +52,7 @@ export function DefaultEventModal({
 	onDelete,
 	readOnlyResource = false,
 	currentUserId,
+	personnel,
 	customFields = [],
 }: DefaultEventModalProps) {
 	const { t, i18n } = useTranslation();
@@ -63,11 +66,13 @@ export function DefaultEventModal({
 		resourceIdVal,
 		isAllDay,
 		endDateDisplay,
+		personnel: formPersonnel,
 	} = useEventForm({
 		event,
 		defaultResourceId,
 		defaultStartTime,
 		resources,
+		personnel,
 		customFields,
 		currentUserId,
 	});
@@ -194,11 +199,12 @@ export function DefaultEventModal({
 					displayValue={displayValue}
 					availableResources={availableResources}
 					resourceDisplayNames={resourceDisplayNames}
-					groups={groups}
 					conflict={conflict}
 					setIsTimeModalOpen={setIsTimeModalOpen}
 					customFields={customFields}
 					readOnlyResource={readOnlyResource}
+					personnel={formPersonnel}
+					currentUserId={currentUserId}
 				/>
 			</div>
 

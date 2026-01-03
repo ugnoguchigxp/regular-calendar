@@ -145,6 +145,9 @@ const initialEvents = [
 		endDate: `${todayStr}T13:00:00`,
 		status: "booked",
 		isAllDay: true, // Add explicit AllDay event
+		extendedProps: {
+			originalTitle: "Morning Session",
+		},
 	},
 	{
 		id: "e2",
@@ -156,6 +159,9 @@ const initialEvents = [
 		endDate: `${todayStr}T15:30:00`,
 		status: "booked",
 		isAllDay: false,
+		extendedProps: {
+			originalTitle: "Afternoon Checkup",
+		},
 	},
 ];
 
@@ -342,6 +348,7 @@ export async function seed(db: any) {
 				extendedProps: {
 					usage: evt.type,
 					ownerId: johnDoe.id,
+					originalTitle: evt.title,
 				},
 			});
 		});
@@ -406,6 +413,7 @@ export async function seed(db: any) {
 				extendedProps: {
 					usage: "Meeting",
 					ownerId: selectedAttendees[0].id, // First person is owner
+					originalTitle: title,
 				},
 			});
 		}
@@ -469,6 +477,7 @@ export async function seed(db: any) {
 				extendedProps: {
 					usage: resourceId ? "Meeting" : "Event",
 					ownerId: person.id,
+					originalTitle: title,
 				},
 			});
 		}
