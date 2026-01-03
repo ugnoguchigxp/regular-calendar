@@ -6,8 +6,7 @@
  */
 
 import { useCallback, useState } from "react";
-import type { EventFormData } from "../FacilitySchedule.schema";
-import type { ScheduleEvent } from "../FacilitySchedule.schema";
+import type { EventFormData, ScheduleEvent } from "../FacilitySchedule.schema";
 
 export interface UseScheduleEventHandlersOptions {
 	onEventCreate?: (data: EventFormData) => void;

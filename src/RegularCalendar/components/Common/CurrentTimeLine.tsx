@@ -56,14 +56,14 @@ export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
 		<>
 			{/* Current Time Dot */}
 			<div
-				className={`${relative ? "absolute" : "fixed"} left-0 w-2 h-2 bg-red-500 rounded-full -translate-x-1`}
+				className={`${relative ? "absolute" : "fixed"} left-[var(--ui-space-0)] w-[var(--ui-space-2)] h-[var(--ui-space-2)] bg-red-500 rounded-full -translate-x-[var(--ui-space-1)]`}
 				style={{ top: `${position}px`, zIndex: 20 }}
 				aria-hidden="true"
 				title={`Current time: ${now.toLocaleTimeString()}`}
 			/>
 			{/* Current Time Line */}
 			<div
-				className={`${relative ? "absolute" : "fixed"} left-0 right-0 h-0.5 bg-red-500`}
+				className={`${relative ? "absolute" : "fixed"} left-[var(--ui-space-0)] right-[var(--ui-space-0)] h-[var(--ui-space-0-5)] bg-red-500`}
 				style={{ top: `${position}px`, zIndex: 20 }}
 				aria-hidden="true"
 			/>

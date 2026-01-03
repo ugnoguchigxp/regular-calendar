@@ -195,11 +195,11 @@ export function FacilityStructureSettings({
 						{t("facility_settings_title")}
 					</h2>
 					<Button variant="ghost" size="icon" onClick={onClose}>
-						<Icons.X className="h-4 w-4" />
+						<Icons.X className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 					</Button>
 				</div>
 
-				<div className="flex-1 overflow-y-auto p-6">
+				<div className="flex-1 overflow-y-auto p-[var(--ui-space-6)]">
 					{/* Add Room Section Header */}
 					<div
 						style={{
@@ -211,12 +211,12 @@ export function FacilityStructureSettings({
 							paddingBottom: "16px",
 						}}
 					>
-						<h3 className="text-md font-medium text-muted-foreground m-0">
+						<h3 className="text-md font-medium text-muted-foreground m-[var(--ui-space-0)]">
 							{t("facility_label_group_name")}s &{" "}
 							{t("facility_label_resource_name")}s
 						</h3>
 						<Button onClick={handleCreateGroup}>
-							<Icons.Plus className="h-4 w-4 mr-2" />
+							<Icons.Plus className="h-[var(--ui-space-4)] w-[var(--ui-space-4)] mr-[var(--ui-space-2)]" />
 							{t("facility_action_add_group")}
 						</Button>
 					</div>
@@ -267,7 +267,7 @@ export function FacilityStructureSettings({
 												size="icon"
 												onClick={() => handleStartEditGroup(group)}
 											>
-												<Icons.Edit className="h-4 w-4" />
+												<Icons.Edit className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 											</Button>
 											<Button
 												variant="ghost"
@@ -275,7 +275,7 @@ export function FacilityStructureSettings({
 												className="text-destructive"
 												onClick={() => handleDeleteGroupConfirm(group.id)}
 											>
-												<Icons.Trash className="h-4 w-4" />
+												<Icons.Trash className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 											</Button>
 										</div>
 									</>
@@ -326,10 +326,10 @@ export function FacilityStructureSettings({
 													<Button
 														size="icon"
 														variant="ghost"
-														className="h-6 w-6"
+														className="h-[var(--ui-space-6)] w-[var(--ui-space-6)]"
 														onClick={() => setEditingResourceId(null)}
 													>
-														<Icons.X className="h-3 w-3" />
+														<Icons.X className="h-[var(--ui-space-3)] w-[var(--ui-space-3)]" />
 													</Button>
 												</div>
 											) : (
@@ -342,20 +342,20 @@ export function FacilityStructureSettings({
 													<Button
 														variant="ghost"
 														size="icon"
-														className="h-6 w-6 opacity-50 hover:opacity-100"
+														className="h-[var(--ui-space-6)] w-[var(--ui-space-6)] opacity-50 hover:opacity-100"
 														onClick={() => handleStartEditResource(resource)}
 													>
-														<Icons.Edit className="h-3 w-3" />
+														<Icons.Edit className="h-[var(--ui-space-3)] w-[var(--ui-space-3)]" />
 													</Button>
 													<Button
 														variant="ghost"
 														size="icon"
-														className="h-6 w-6 text-destructive opacity-50 hover:opacity-100"
+														className="h-[var(--ui-space-6)] w-[var(--ui-space-6)] text-destructive opacity-50 hover:opacity-100"
 														onClick={() =>
 															handleDeleteResourceConfirm(resource.id)
 														}
 													>
-														<Icons.Trash className="h-3 w-3" />
+														<Icons.Trash className="h-[var(--ui-space-3)] w-[var(--ui-space-3)]" />
 													</Button>
 												</>
 											)}
@@ -366,7 +366,7 @@ export function FacilityStructureSettings({
 									size="sm"
 									onClick={() => handleCreateResource(group.id)}
 								>
-									<Icons.Plus className="h-3 w-3 mr-1" />
+									<Icons.Plus className="h-[var(--ui-space-3)] w-[var(--ui-space-3)] mr-[var(--ui-space-1)]" />
 									{t("facility_action_add_resource")}
 								</Button>
 							</div>

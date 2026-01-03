@@ -184,10 +184,10 @@ export function ResourceColumn({
 	}
 
 	return (
-		<div className="flex-1 min-w-[90px] border-r border-border hover:bg-muted/5 flex flex-col">
+		<div className="flex-1 min-w-[var(--ui-space-22-5)] border-r border-border hover:bg-muted/5 flex flex-col">
 			{/* Header */}
 			{/* Header - Auto height */}
-			<div className="h-14 border-b border-border bg-background flex items-center justify-center sticky top-0 z-20 shrink-0 py-2">
+			<div className="h-[var(--ui-space-14)] border-b border-border bg-background flex items-center justify-center sticky top-[var(--ui-space-0)] z-20 shrink-0 py-[var(--ui-space-2)]">
 				<div className="text-center relative">
 					<div className="font-semibold text-sm">{resource.name}</div>
 					<div className="text-xs text-muted-foreground">
@@ -199,7 +199,7 @@ export function ResourceColumn({
 					<Button
 						type="button"
 						variant="ghost"
-						className="sr-only focus:not-sr-only focus:absolute focus:right-2 focus:top-2"
+						className="sr-only focus:not-sr-only focus:absolute focus:right-[var(--ui-space-2)] focus:top-[var(--ui-space-2)]"
 						onClick={(event) => {
 							event.stopPropagation();
 							triggerColumnClickFromHeader();
@@ -217,7 +217,7 @@ export function ResourceColumn({
 				onPointerUp={handleColumnClick}
 			>
 				{/* Grid Lines Background */}
-				<div className="absolute inset-0 z-0 pointer-events-none flex flex-col">
+				<div className="absolute inset-[var(--ui-space-0)] z-0 pointer-events-none flex flex-col">
 					{hours.map((hour) => (
 						<div
 							key={hour}

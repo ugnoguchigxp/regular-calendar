@@ -5,9 +5,9 @@ import { DatePicker } from "./DatePicker";
 type MockCalendarSelect =
 	| Date
 	| {
-		from: Date;
-		to: Date;
-	};
+			from: Date;
+			to: Date;
+	  };
 
 vi.mock("./Calendar", () => ({
 	Calendar: ({
@@ -23,9 +23,9 @@ vi.mock("./Calendar", () => ({
 				onSelect?.(
 					mode === "range"
 						? {
-							from: new Date("2024-02-01T00:00:00Z"),
-							to: new Date("2024-02-03T00:00:00Z"),
-						}
+								from: new Date("2024-02-01T00:00:00Z"),
+								to: new Date("2024-02-03T00:00:00Z"),
+							}
 						: new Date("2024-01-10T00:00:00Z"),
 				)
 			}
@@ -79,9 +79,7 @@ describe("DatePicker", () => {
 			screen.getByRole("button", { name: /Feb 1, 2024/i }),
 		).toBeInTheDocument();
 
-		await user.click(
-			screen.getByRole("button", { name: /Feb 1, 2024/i }),
-		);
+		await user.click(screen.getByRole("button", { name: /Feb 1, 2024/i }));
 		await user.click(screen.getByRole("button", { name: "Pick" }));
 
 		expect(onRangeChange).toHaveBeenCalledWith([

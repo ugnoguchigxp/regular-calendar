@@ -1,3 +1,8 @@
+import * as React from "react";
+import { buttonVariants } from "@/components/ui/Button";
+import { Icons } from "@/components/ui/Icons";
+import { cn } from "@/components/ui/utils";
+import { formatCalendarDate } from "@/utils/dateFormats";
 import {
 	addMonths,
 	eachDayOfInterval,
@@ -10,12 +15,6 @@ import {
 	startOfWeek,
 	subMonths,
 } from "@/utils/dateUtils";
-import { Icons } from "@/components/ui/Icons";
-import * as React from "react";
-
-import { buttonVariants } from "@/components/ui/Button";
-import { cn } from "@/components/ui/utils";
-import { formatCalendarDate } from "@/utils/dateFormats";
 
 export type DateRange = {
 	from: Date | undefined;
@@ -28,18 +27,16 @@ export type CalendarProps = {
 	// Single mode
 	mode?: "single" | "range";
 	selected?: Date | DateRange | undefined;
-	onSelect?: (
-		date: any, // Relaxing type here to accommodate both signatures for now, but internal logic handles it
-	) => void;
+	onSelect?: (date: Date | DateRange | null | undefined) => void;
 	disabled?:
-	| boolean
-	| Date
-	| Date[]
-	| ((date: Date) => boolean)
-	// react-day-picker style modifiers
-	| { before: Date }
-	| { after: Date }
-	| { before?: Date; after?: Date }[];
+		| boolean
+		| Date
+		| Date[]
+		| ((date: Date) => boolean)
+		// react-day-picker style modifiers
+		| { before: Date }
+		| { after: Date }
+		| { before?: Date; after?: Date }[];
 	numberOfMonths?: number;
 	defaultMonth?: Date;
 	showOutsideDays?: boolean; // kept for API compat, always true in this impl
@@ -81,7 +78,7 @@ export function Calendar({
 		// Single Date
 		if (disabled instanceof Date) return isSameDay(date, disabled);
 		// Function
-		if (typeof disabled === 'function') return disabled(date);
+		if (typeof disabled === "function") return disabled(date);
 		return false;
 	};
 
@@ -110,7 +107,11 @@ export function Calendar({
 			const range = selected as DateRange;
 			if (range.from && isSameDay(date, range.from)) isRangeStart = true;
 			if (range.to && isSameDay(date, range.to)) isRangeEnd = true;
-			if (range.from && range.to && isWithinInterval(date, { start: range.from, end: range.to })) {
+			if (
+				range.from &&
+				range.to &&
+				isWithinInterval(date, { start: range.from, end: range.to })
+			) {
 				isRangeMiddle = true;
 			}
 		}
@@ -118,12 +119,18 @@ export function Calendar({
 		return cn(
 			buttonVariants({ variant: "ghost" }),
 			"p-ui font-normal aria-selected:opacity-100",
-			isSelected(date) && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-			isRangeMiddle && !isRangeStart && !isRangeEnd && "bg-accent text-accent-foreground rounded-none",
-			isRangeStart && "bg-primary text-primary-foreground rounded-l-md rounded-r-none",
-			isRangeEnd && "bg-primary text-primary-foreground rounded-l-none rounded-r-md",
+			isSelected(date) &&
+				"bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+			isRangeMiddle &&
+				!isRangeStart &&
+				!isRangeEnd &&
+				"bg-accent text-accent-foreground rounded-none",
+			isRangeStart &&
+				"bg-primary text-primary-foreground rounded-l-md rounded-r-none",
+			isRangeEnd &&
+				"bg-primary text-primary-foreground rounded-l-none rounded-r-md",
 			// Single selection style
-			(mode === "single" && isSelected(date)) && "rounded-md",
+			mode === "single" && isSelected(date) && "rounded-md",
 			!isSameMonth(date, currentMonth) && "text-muted-foreground opacity-50",
 			isDisabled(date) && "text-muted-foreground opacity-50 cursor-not-allowed",
 		);
@@ -180,7 +187,7 @@ export function Calendar({
 					onClick={prevMonth}
 					className={cn(
 						buttonVariants({ variant: "outline" }),
-						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground"
+						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
 					)}
 				>
 					<Icons.ChevronLeft className="h-ui-icon w-ui-icon" strokeWidth={3} />
@@ -197,7 +204,7 @@ export function Calendar({
 					onClick={nextMonth}
 					className={cn(
 						buttonVariants({ variant: "outline" }),
-						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground"
+						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
 					)}
 				>
 					<Icons.ChevronRight className="h-ui-icon w-ui-icon" strokeWidth={3} />
@@ -205,20 +212,20 @@ export function Calendar({
 			</div>
 
 			{/* Grid */}
-			<table className="w-full border-collapse space-y-1">
+			<table className="w-full border-collapse space-y-[var(--ui-space-1)]">
 				<thead>
 					<tr>
 						{eachDayOfInterval({
 							start: startOfWeek(currentMonth),
 							end: endOfWeek(startOfWeek(currentMonth)),
-						}).map((day, i) => {
+						}).map((day) => {
 							const dayOfWeek = day.getDay();
 							const isSunday = dayOfWeek === 0;
 							const isSaturday = dayOfWeek === 6;
 
 							return (
 								<th
-									key={i}
+									key={day.getTime()}
 									className={cn(
 										"rounded-md font-normal text-[0.8rem]",
 										isSunday && "text-red-500",
@@ -236,22 +243,33 @@ export function Calendar({
 				</thead>
 				<tbody>
 					{/* Days - split into weeks */}
-					{Array.from({ length: Math.ceil(days.length / 7) }).map((_, weekIndex) => (
-						<tr key={weekIndex} className="w-full">
-							{days.slice(weekIndex * 7, (weekIndex + 1) * 7).map((date, dayIndex) => (
-								<td key={dayIndex} className="p-0 text-center relative focus-within:relative">
-									<button
-										type="button"
-										onClick={() => handleDateClick(date)}
-										className={getDayClass(date)}
-										disabled={isDisabled(date)}
-									>
-										{formatCalendarDate(date, locale, "day")}
-									</button>
-								</td>
-							))}
-						</tr>
-					))}
+					{Array.from({ length: Math.ceil(days.length / 7) }).map(
+						(_, weekIndex) => {
+							const weekDays = days.slice(weekIndex * 7, (weekIndex + 1) * 7);
+							return (
+								<tr
+									key={weekDays[0]?.getTime() || weekIndex}
+									className="w-full"
+								>
+									{weekDays.map((date) => (
+										<td
+											key={date.getTime()}
+											className="p-[var(--ui-space-0)] text-center relative focus-within:relative"
+										>
+											<button
+												type="button"
+												onClick={() => handleDateClick(date)}
+												className={getDayClass(date)}
+												disabled={isDisabled(date)}
+											>
+												{formatCalendarDate(date, locale, "day")}
+											</button>
+										</td>
+									))}
+								</tr>
+							);
+						},
+					)}
 				</tbody>
 			</table>
 		</div>

@@ -66,8 +66,8 @@ export const TooltipContent = ({
 	return (
 		<div
 			className={cn(
-				"absolute z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-				"hidden group-hover:block w-max max-w-xs bottom-full mb-2 left-1/2 -translate-x-1/2",
+				"absolute z-50 overflow-hidden rounded-md border bg-popover px-[var(--ui-space-3)] py-[var(--ui-space-1-5)] text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-[var(--ui-space-2)] data-[side=left]:slide-in-from-right-[var(--ui-space-2)] data-[side=right]:slide-in-from-left-[var(--ui-space-2)] data-[side=top]:slide-in-from-bottom-[var(--ui-space-2)]",
+				"hidden group-hover:block w-max max-w-xs bottom-full mb-[var(--ui-space-2)] left-[var(--ui-space-1)]/2 -translate-x-[var(--ui-space-1)]/2",
 				className,
 			)}
 			{...props}

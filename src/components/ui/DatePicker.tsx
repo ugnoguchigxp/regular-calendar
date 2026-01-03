@@ -1,10 +1,10 @@
 import { Icons } from "@/components/ui/Icons";
+import { formatCalendarDate } from "@/utils/dateFormats";
 import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "./Button";
 import { Calendar, type DateRange } from "./Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
 import { cn } from "./utils";
-import { formatCalendarDate } from "@/utils/dateFormats";
 
 interface DatePickerBaseProps {
 	className?: string;
@@ -61,6 +61,7 @@ export function DatePicker(props: DatePickerProps) {
 	const singleDate = !selectsRange ? (props.value ?? props.date) : undefined;
 
 	// Handler for Single Mode
+	// biome-ignore lint/suspicious/noExplicitAny: onSelect callback accepts both Date and DateRange for flexibility
 	const handleSingleSelect = (date: any) => {
 		const selectedDate = date as Date | undefined;
 		if (selectsRange) return;
@@ -78,18 +79,22 @@ export function DatePicker(props: DatePickerProps) {
 	// Determine state for Range Mode
 	const rangeDate: DateRange | undefined = selectsRange
 		? {
-			from: props.startDate ?? undefined,
-			to: props.endDate ?? undefined,
-		}
+				from: props.startDate ?? undefined,
+				to: props.endDate ?? undefined,
+			}
 		: undefined;
 
 	// Handler for Range Mode
+	// biome-ignore lint/suspicious/noExplicitAny: onSelect callback accepts both Date and DateRange for flexibility
 	const handleRangeSelect = (range: any) => {
 		const selectedRange = range as DateRange | undefined;
 		if (!selectsRange) return;
 
 		if (props.onRangeChange) {
-			props.onRangeChange([selectedRange?.from ?? null, selectedRange?.to ?? null]);
+			props.onRangeChange([
+				selectedRange?.from ?? null,
+				selectedRange?.to ?? null,
+			]);
 		}
 	};
 
@@ -98,8 +103,6 @@ export function DatePicker(props: DatePickerProps) {
 		...(minDate ? [{ before: minDate }] : []),
 		...(maxDate ? [{ after: maxDate }] : []),
 	];
-
-
 
 	// Determine display text
 	let displayText = resolvedLabel;
@@ -130,7 +133,7 @@ export function DatePicker(props: DatePickerProps) {
 					{displayText}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align="start">
+			<PopoverContent className="w-auto p-[var(--ui-space-0)]" align="start">
 				{selectsRange ? (
 					<Calendar
 						mode="range"

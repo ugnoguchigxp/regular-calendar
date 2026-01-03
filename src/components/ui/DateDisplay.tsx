@@ -5,9 +5,9 @@
  */
 
 import React from "react";
+import { formatCalendarDate } from "@/utils/dateFormats";
 import { useAppTranslation } from "@/utils/i18n";
 import { cn } from "./Button"; // Reusing cn utility
-import { formatCalendarDate } from "@/utils/dateFormats";
 
 interface DateDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
 	date: Date;
@@ -23,14 +23,14 @@ interface DateDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
 	 * - compact: 11/27(木) / 27 Thu (multiline in orig, but simplified here)
 	 */
 	format?:
-	| "full"
-	| "date"
-	| "weekday"
-	| "weekdayShort"
-	| "yearMonth"
-	| "monthDay"
-	| "monthDayShort"
-	| "compact";
+		| "full"
+		| "date"
+		| "weekday"
+		| "weekdayShort"
+		| "yearMonth"
+		| "monthDay"
+		| "monthDayShort"
+		| "compact";
 
 	// Legacy props for compatibility (now handled or ignored safely)
 	variant?: string; // Mapped to format if possible

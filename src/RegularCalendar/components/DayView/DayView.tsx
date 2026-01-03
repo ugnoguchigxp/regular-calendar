@@ -35,10 +35,12 @@ export function DayView({
 	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30; // Fallback to 30 min
 	const startHour = Number(
-		settings.startTime?.split(":")[0] || DEFAULT_VIEW_HOURS.start,
+		(settings.startTime || settings.businessHoursStart)?.split(":")[0] ||
+			DEFAULT_VIEW_HOURS.start,
 	);
 	const endHour = Number(
-		settings.endTime?.split(":")[0] || DEFAULT_VIEW_HOURS.end,
+		(settings.endTime || settings.businessHoursEnd)?.split(":")[0] ||
+			DEFAULT_VIEW_HOURS.end,
 	);
 
 	const timeSlots = useMemo(
@@ -47,8 +49,8 @@ export function DayView({
 	);
 
 	const dayEvents = useMemo(
-		() => getEventsForDate(events, currentDate),
-		[events, currentDate],
+		() => getEventsForDate(events, currentDate, startHour, endHour),
+		[events, currentDate, startHour, endHour],
 	);
 
 	const { allDayEvents, timeEvents } = useMemo(() => {
@@ -101,7 +103,7 @@ export function DayView({
 		<div className="flex flex-col h-full bg-background text-foreground">
 			{/* Date Header */}
 			<div
-				className={`border-b border-border p-2 sticky top-0 z-10 text-center ${
+				className={`border-b border-border p-[var(--ui-space-2)] sticky top-[var(--ui-space-0)] z-10 text-center ${
 					isToday ? "bg-muted/50" : "bg-muted/40"
 				}`}
 				style={{ paddingRight: scrollbarPadding || undefined }}
@@ -110,7 +112,7 @@ export function DayView({
 					<DateDisplay date={currentDate} format="weekday" />
 				</div>
 				<div
-					className={`text-xl font-bold mt-1 ${isToday ? "text-primary" : ""}`}
+					className={`text-xl font-bold mt-[var(--ui-space-1)] ${isToday ? "text-primary" : ""}`}
 				>
 					{currentDate.getDate()}
 				</div>
@@ -119,22 +121,22 @@ export function DayView({
 			{/* All Day Events Row - Only shown if there are allDay events */}
 			{allDayEvents.length > 0 && (
 				<div
-					className="flex border-b border-border bg-muted/20 sticky top-[52px] z-10"
+					className="flex border-b border-border bg-muted/20 sticky top-[var(--ui-space-13)] z-10"
 					style={{ paddingRight: scrollbarPadding || undefined }}
 				>
-					<div className="w-16 flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-1">
+					<div className="w-[var(--ui-space-16)] flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-[var(--ui-space-1)]">
 						<span className="text-[9px] text-muted-foreground">
 							{t("all_day")}
 						</span>
 					</div>
-					<div className="flex-1 p-0.5 min-w-0">
-						<div className="flex flex-col gap-0.5">
+					<div className="flex-1 p-[var(--ui-space-0-5)] min-w-[var(--ui-space-0)]">
+						<div className="flex flex-col gap-[var(--ui-space-0-5)]">
 							{allDayEvents.map((event) => (
 								<button
 									key={event.id}
 									type="button"
 									className={`
-                                        text-[9px] px-1 py-0.5 rounded w-full text-left truncate leading-tight
+                                        text-[9px] px-[var(--ui-space-1)] py-[var(--ui-space-0-5)] rounded w-full text-left truncate leading-tight
                                         bg-primary text-primary-foreground
                                         hover:brightness-110 transition-colors
                                     `}
@@ -160,18 +162,18 @@ export function DayView({
 						minHeight: `${(((endHour - startHour) * 60) / timeInterval) * TIME_SLOT_HEIGHT}px`,
 					}}
 				>
-					<div className="w-16 flex-shrink-0 bg-background sticky left-0 z-20">
+					<div className="w-[var(--ui-space-16)] flex-shrink-0 bg-background sticky left-[var(--ui-space-0)] z-20">
 						{timeSlots.map((timeSlot) => (
 							<div
 								key={timeSlot}
-								className="border-b border-border text-xs text-muted-foreground p-1 text-right pr-2"
+								className="border-b border-border text-xs text-muted-foreground p-0 flex items-center justify-end pr-[var(--ui-space-2)] box-border"
 								style={{ height: `${TIME_SLOT_HEIGHT}px` }}
 							>
 								{timeSlot}
 							</div>
 						))}
 					</div>
-					<div className="flex-1 relative border-l border-border min-w-[200px]">
+					<div className="flex-1 relative border-l border-border min-w-[var(--ui-space-50)]">
 						<CurrentTimeLine
 							interval={timeInterval}
 							isToday={isToday}
@@ -187,7 +189,7 @@ export function DayView({
 								key={timeSlot}
 								type="button"
 								onClick={() => onTimeSlotClick?.(currentDate, timeSlot)}
-								className="border-b border-border cursor-pointer transition-colors hover:bg-muted/30 w-full text-left"
+								className="border-b border-border cursor-pointer transition-colors hover:bg-muted/30 w-full text-left p-0 m-0 block box-border"
 								style={{ height: `${TIME_SLOT_HEIGHT}px` }}
 								aria-label={`Time slot ${timeSlot}`}
 							/>

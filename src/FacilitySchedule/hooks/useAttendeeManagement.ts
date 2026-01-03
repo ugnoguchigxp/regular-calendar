@@ -109,7 +109,6 @@ export function useAttendeeManagement({
 			// Logic removed: previously deleted event if attendees were empty in edit mode.
 			// Now we allow empty attendees.
 
-
 			// Create Mode: Ensure current user is included if creating
 			if (!isEditMode && currentUserId && personnel) {
 				const isMeIncluded = finalAttendeeList.some(

@@ -20,7 +20,14 @@ export const AttendeeInfoSchema = z.object({
 export interface CustomField {
 	name: string;
 	label: string;
-	type: "text" | "textarea" | "number" | "date" | "select" | "boolean" | "checkbox";
+	type:
+		| "text"
+		| "textarea"
+		| "number"
+		| "date"
+		| "select"
+		| "boolean"
+		| "checkbox";
 	options?: { label: string; value: string }[]; // For select
 	required?: boolean;
 	defaultValue?: unknown;

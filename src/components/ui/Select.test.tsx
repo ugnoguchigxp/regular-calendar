@@ -25,9 +25,7 @@ describe("Select", () => {
 			</Select>,
 		);
 
-		expect(
-			screen.getByRole("button", { name: "a" }),
-		).toHaveTextContent("a");
+		expect(screen.getByRole("button", { name: "a" })).toHaveTextContent("a");
 
 		await user.click(screen.getByRole("button", { name: "a" }));
 		expect(screen.getAllByText("Alpha").length).toBeGreaterThan(0);

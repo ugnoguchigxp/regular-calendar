@@ -111,9 +111,11 @@ const Modal = React.memo(
 						// biome-ignore lint/a11y/useSemanticElements: Header wraps controls; button semantics would be invalid.
 						<div
 							className={cn(
-								"flex flex-col space-y-1.5 border-b border-border bg-card/50 flex-shrink-0",
+								"flex flex-col space-y-[var(--ui-space-1-5)] border-b border-border bg-card/50 flex-shrink-0",
 								draggable && "cursor-move",
-								props.noPadding ? "p-1" : "p-[var(--ui-component-padding-y)]",
+								props.noPadding
+									? "p-[var(--ui-space-1)]"
+									: "p-[var(--ui-component-padding-y)]",
 							)}
 							role="button"
 							tabIndex={0}
@@ -134,8 +136,8 @@ const Modal = React.memo(
 								>
 									{title || "Dialog"}
 								</DialogPrimitive.Title>
-								<DialogPrimitive.Close className="rounded-full p-1 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-accent focus:outline-none disabled:pointer-events-none cursor-pointer">
-									<Icons.X className="h-5 w-5 text-foreground" />
+								<DialogPrimitive.Close className="rounded-full p-[var(--ui-space-1)] opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-accent focus:outline-none disabled:pointer-events-none cursor-pointer">
+									<Icons.X className="h-[var(--ui-space-5)] w-[var(--ui-space-5)] text-foreground" />
 									<span className="sr-only">Close</span>
 								</DialogPrimitive.Close>
 							</div>
@@ -165,7 +167,9 @@ const Modal = React.memo(
 						id="modal-content"
 						className={cn(
 							"flex-1 overflow-y-auto",
-							props.noPadding ? "p-0" : "p-[var(--ui-modal-padding)]",
+							props.noPadding
+								? "p-[var(--ui-space-0)]"
+								: "p-[var(--ui-modal-padding)]",
 							contentClassName,
 						)}
 					>
@@ -175,7 +179,7 @@ const Modal = React.memo(
 					{footer && (
 						<div
 							className={cn(
-								"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 bg-background flex-shrink-0",
+								"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-[var(--ui-space-2)] bg-background flex-shrink-0",
 								"p-[var(--ui-component-padding-y)]",
 								footerClassName,
 							)}
@@ -196,39 +200,39 @@ const Modal = React.memo(
 						<DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
 					)}
 					<DialogPrimitive.Portal>
-						<DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+						<DialogPrimitive.Overlay className="fixed inset-[var(--ui-space-0)] z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
 						<DialogPrimitive.Content
 							ref={ref}
 							className={cn(
-								"fixed z-50 flex flex-col gap-0 bg-background",
+								"fixed z-50 flex flex-col gap-[var(--ui-space-0)] bg-background",
 								!draggable && "duration-200",
 								!draggable &&
-								"data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+									"data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
 								!draggable &&
-								"bottom-0 left-0 right-0 w-full h-[90vh] rounded-t-xl border-t border-border",
+									"bottom-[var(--ui-space-0)] left-[var(--ui-space-0)] right-[var(--ui-space-0)] w-full h-[var(--ui-space-90vh)] rounded-t-xl border-t border-border",
 								!draggable &&
-								"data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+									"data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
 								draggable &&
-								"left-[50%] top-[50%] h-auto max-h-[90vh] w-[90vw] max-w-lg rounded-md border border-border",
+									"left-[var(--ui-space-50pct)] top-[var(--ui-space-50pct)] h-auto max-h-[var(--ui-space-90vh)] w-[var(--ui-space-90vw)] max-w-lg rounded-md border border-border",
 								!draggable &&
-								"sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-md sm:border sm:border-border",
+									"sm:left-[var(--ui-space-50pct)] sm:top-[var(--ui-space-50pct)] sm:bottom-auto sm:right-auto sm:h-auto sm:max-h-[var(--ui-space-90vh)] sm:max-w-lg sm:rounded-md sm:border sm:border-border",
 								!draggable &&
-								"sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
+									"sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
 								!draggable &&
-								"sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%]",
+									"sm:data-[state=closed]:slide-out-to-left-[var(--ui-space-50pct)] sm:data-[state=closed]:slide-out-to-top-[var(--ui-space-48pct)]",
 								!draggable &&
-								"sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]",
+									"sm:data-[state=open]:slide-in-from-left-[var(--ui-space-50pct)] sm:data-[state=open]:slide-in-from-top-[var(--ui-space-48pct)]",
 								className,
 							)}
 							style={
 								draggable
 									? {
-										transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
-										cursor: isDragging ? "grabbing" : undefined,
-									}
+											transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
+											cursor: isDragging ? "grabbing" : undefined,
+										}
 									: {
-										transform: "translate(-50%, -50%)",
-									}
+											transform: "translate(-50%, -50%)",
+										}
 							}
 						>
 							{modalContent}
@@ -260,7 +264,7 @@ export function ConfirmModal({
 			{/* Description is handled by Modal props if passed, ensuring compatibility */}
 			{/* If children were used in original ConfirmModal, they are now description */}
 			{/* But EventModal doesn't use children for ConfirmModal, just title/description */}
-			<div className="flex justify-end gap-2 p-[var(--ui-component-padding-y)]">
+			<div className="flex justify-end gap-[var(--ui-space-2)] p-[var(--ui-component-padding-y)]">
 				<Button
 					variant="outline"
 					onClick={() => props.onClose?.() || props.onOpenChange?.(false)}

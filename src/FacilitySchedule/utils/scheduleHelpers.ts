@@ -1,3 +1,4 @@
+import { formatCalendarDate } from "@/utils/dateFormats";
 import {
 	addDays,
 	areIntervalsOverlapping,
@@ -8,7 +9,6 @@ import {
 	startOfMonth,
 	startOfWeek,
 } from "@/utils/dateUtils";
-import { formatCalendarDate } from "@/utils/dateFormats";
 import type {
 	Resource,
 	ScheduleConflict,
@@ -98,7 +98,6 @@ export function getEventDuration(event: ScheduleEvent): number {
 	const durationMs = event.endDate.getTime() - event.startDate.getTime();
 	return durationMs / (1000 * 60 * 60);
 }
-
 
 // ... (existing imports/code)
 

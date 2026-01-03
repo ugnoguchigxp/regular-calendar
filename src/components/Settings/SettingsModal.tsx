@@ -52,17 +52,17 @@ export function SettingsModal({
 	];
 
 	return (
-		<div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+		<div className="fixed inset-[var(--ui-space-0)] z-[9999] flex items-center justify-center bg-black/50 p-[var(--ui-space-4)]">
 			<button
 				type="button"
 				aria-label={t("close")}
 				onClick={onClose}
-				className="absolute inset-0 border-none bg-transparent p-0 m-0 w-full h-full cursor-default"
+				className="absolute inset-[var(--ui-space-0)] border-none bg-transparent p-[var(--ui-space-0)] m-[var(--ui-space-0)] w-full h-full cursor-default"
 			/>
-			<div className="relative z-10 w-full max-w-[500px] max-h-[90vh] overflow-y-auto rounded-lg border border-border bg-background text-foreground shadow-xl p-6">
+			<div className="relative z-10 w-full max-w-[var(--ui-space-125)] max-h-[var(--ui-space-90vh)] overflow-y-auto rounded-lg border border-border bg-background text-foreground shadow-xl p-[var(--ui-space-6)]">
 				{/* Header */}
-				<div className="flex items-center justify-between border-b border-border pb-4 mb-6">
-					<h2 className="m-0 text-xl font-bold">
+				<div className="flex items-center justify-between border-b border-border pb-[var(--ui-space-4)] mb-[var(--ui-space-6)]">
+					<h2 className="m-[var(--ui-space-0)] text-xl font-bold">
 						{t("settings_title")}
 					</h2>
 					<Button variant="ghost" size="icon" onClick={onClose}>
@@ -71,9 +71,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Language (New) */}
-				<div className="mb-6">
-					<div className="block mb-2 text-sm font-bold">{t("settings_language")}</div>
-					<div className="flex flex-wrap gap-2">
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_language")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
 						{(["ja", "en"] as const).map((lang) => (
 							<Button
 								key={lang}
@@ -87,15 +89,18 @@ export function SettingsModal({
 				</div>
 
 				{/* TimeZone (New) */}
-				<div className="mb-6">
-					<label htmlFor="settings-timezone" className="block mb-2 text-sm font-bold">
+				<div className="mb-[var(--ui-space-6)]">
+					<label
+						htmlFor="settings-timezone"
+						className="block mb-[var(--ui-space-2)] text-sm font-bold"
+					>
 						TimeZone
 					</label>
 					<select
 						id="settings-timezone"
 						value={settings.timeZone || "Asia/Tokyo"}
 						onChange={(e) => update({ timeZone: e.target.value })}
-						className="h-ui w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+						className="h-ui w-full rounded-md border border-input bg-background px-[var(--ui-space-3)] py-[var(--ui-space-1)] text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 					>
 						<option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
 						<option value="UTC">UTC</option>
@@ -106,9 +111,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Theme */}
-				<div className="mb-6">
-					<div className="block mb-2 text-sm font-bold">{t("settings_theme")}</div>
-					<div className="flex flex-wrap gap-2">
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_theme")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
 						{(["light", "dark"] as const).map((theme) => (
 							<Button
 								key={theme}
@@ -122,9 +129,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Density */}
-				<div className="mb-6">
-					<div className="block mb-2 text-sm font-bold">{t("settings_density")}</div>
-					<div className="flex flex-wrap gap-2">
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_density")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
 						{(["compact", "normal", "spacious"] as const).map((density) => (
 							<Button
 								key={density}
@@ -142,8 +151,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Border Radius */}
-				<div className="mb-6">
-					<label htmlFor="settings-radius" className="block mb-2 text-sm font-bold">
+				<div className="mb-[var(--ui-space-6)]">
+					<label
+						htmlFor="settings-radius"
+						className="block mb-[var(--ui-space-2)] text-sm font-bold"
+					>
 						{t("settings_radius")}: {settings.borderRadius}px
 					</label>
 					<input
@@ -158,8 +170,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Font Size */}
-				<div className="mb-6">
-					<label htmlFor="settings-font-size" className="block mb-2 text-sm font-bold">
+				<div className="mb-[var(--ui-space-6)]">
+					<label
+						htmlFor="settings-font-size"
+						className="block mb-[var(--ui-space-2)] text-sm font-bold"
+					>
 						{t("settings_font_size")}: {settings.fontSize}px
 					</label>
 					<input
@@ -174,8 +189,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Week Start */}
-				<div className="mb-6">
-					<label htmlFor="settings-week-start" className="block mb-2 text-sm font-bold">
+				<div className="mb-[var(--ui-space-6)]">
+					<label
+						htmlFor="settings-week-start"
+						className="block mb-[var(--ui-space-2)] text-sm font-bold"
+					>
 						{t("settings_week_start")}
 					</label>
 					<select
@@ -184,7 +202,7 @@ export function SettingsModal({
 						onChange={(e) =>
 							update({ weekStartsOn: Number(e.target.value) as 0 | 1 })
 						}
-						className="h-ui w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+						className="h-ui w-full rounded-md border border-input bg-background px-[var(--ui-space-3)] py-[var(--ui-space-1)] text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 					>
 						<option value={0}>{t("option_sunday")}</option>
 						<option value={1}>{t("option_monday")}</option>
@@ -192,13 +210,15 @@ export function SettingsModal({
 				</div>
 
 				{/* Business Hours */}
-				<div className="mb-6">
-					<div className="block mb-2 text-sm font-bold">{t("settings_business_hours")}</div>
-					<div className="flex items-center gap-2">
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_business_hours")}
+					</div>
+					<div className="flex items-center gap-[var(--ui-space-2)]">
 						<select
 							value={settings.businessHoursStart}
 							onChange={(e) => update({ businessHoursStart: e.target.value })}
-							className="h-ui flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+							className="h-ui flex-1 rounded-md border border-input bg-background px-[var(--ui-space-3)] py-[var(--ui-space-1)] text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 						>
 							{HOURS.map((h) => (
 								<option key={h} value={h}>
@@ -210,7 +230,7 @@ export function SettingsModal({
 						<select
 							value={settings.businessHoursEnd}
 							onChange={(e) => update({ businessHoursEnd: e.target.value })}
-							className="h-ui flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+							className="h-ui flex-1 rounded-md border border-input bg-background px-[var(--ui-space-3)] py-[var(--ui-space-1)] text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 						>
 							{HOURS.map((h) => (
 								<option key={h} value={h}>
@@ -222,9 +242,11 @@ export function SettingsModal({
 				</div>
 
 				{/* Closed Days */}
-				<div className="mb-6">
-					<div className="block mb-2 text-sm font-bold">{t("settings_closed_days")}</div>
-					<div className="flex flex-wrap gap-2">
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_closed_days")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
 						{daysShort.map((day, index) => (
 							<Button
 								key={day}
@@ -240,7 +262,7 @@ export function SettingsModal({
 										: [...settings.closedDays, index];
 									update({ closedDays: newDays });
 								}}
-								className="w-10 h-10 p-0"
+								className="w-[var(--ui-space-10)] h-[var(--ui-space-10)] p-[var(--ui-space-0)]"
 							>
 								{day}
 							</Button>
@@ -250,7 +272,7 @@ export function SettingsModal({
 
 				{/* Reset Button (Optional) */}
 				{onResetSettings && (
-					<div className="mt-8 border-t border-border pt-4">
+					<div className="mt-[var(--ui-space-8)] border-t border-border pt-[var(--ui-space-4)]">
 						<Button
 							variant="outline"
 							className="w-full text-destructive hover:bg-destructive/10 hover:border-destructive h-ui"
@@ -261,6 +283,6 @@ export function SettingsModal({
 					</div>
 				)}
 			</div>
-		</div >
+		</div>
 	);
 }

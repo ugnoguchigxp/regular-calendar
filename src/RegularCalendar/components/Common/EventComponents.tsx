@@ -110,7 +110,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 				}
 			}}
 			className={`
-        absolute rounded px-1 py-1 text-sm cursor-pointer
+        absolute rounded px-[var(--ui-space-1)] py-[var(--ui-space-1)] text-sm cursor-pointer
         transition-all select-none
         active:scale-95
         ${isDragging ? "opacity-50" : "hover:shadow-md"}
@@ -163,13 +163,14 @@ export const MonthEventItem: React.FC<MonthEventItemProps> = ({
 		<button
 			type="button"
 			onClick={handleClick}
-			className="w-full text-left text-sm px-2 py-1 mb-0.5 rounded truncate cursor-pointer active:scale-95 transition-transform select-none border-0 min-h-[28px] flex items-center"
+			className="w-full text-left text-sm px-[var(--ui-space-2)] py-[var(--ui-space-1)] mb-[var(--ui-space-0-5)] rounded truncate cursor-pointer active:scale-95 transition-transform select-none border-0 min-h-[var(--ui-space-7)] flex items-center"
 			style={{
 				backgroundColor: event.color || "#3b82f6",
 				color: "white",
 			}}
 		>
-			<span className="font-medium mr-1">{timeStr}</span> {title}
+			<span className="font-medium mr-[var(--ui-space-1)]">{timeStr}</span>{" "}
+			{title}
 		</button>
 	);
 };
@@ -193,7 +194,7 @@ export const EventDragOverlay: React.FC<EventDragOverlayProps> = ({
 
 	return (
 		<div
-			className="rounded px-2 py-2 text-sm shadow-lg min-h-[44px] flex flex-col justify-center"
+			className="rounded px-[var(--ui-space-2)] py-[var(--ui-space-2)] text-sm shadow-lg min-h-[var(--ui-space-11)] flex flex-col justify-center"
 			style={{
 				backgroundColor: event.color || "#3b82f6",
 				color: "white",

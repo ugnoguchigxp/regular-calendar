@@ -18,13 +18,13 @@ export function TimeGrid({
 	return (
 		<div className="flex flex-col border-r border-border h-full bg-background">
 			{/* Header Placeholder (sticky) */}
-			<div className="h-14 border-b border-border bg-background sticky top-0 z-30" />
+			<div className="h-[var(--ui-space-14)] border-b border-border bg-background sticky top-[var(--ui-space-0)] z-30" />
 
 			{/* Time Slots */}
 			{hours.map((hour) => (
 				<div
 					key={hour}
-					className="border-b border-border flex items-start justify-end pe-2 py-1 text-xs text-muted-foreground font-medium"
+					className="border-b border-border flex items-start justify-end pe-2 py-[var(--ui-space-1)] text-xs text-muted-foreground font-medium"
 					style={{ height: `${slotHeight}px` }}
 				>
 					{hour}:00

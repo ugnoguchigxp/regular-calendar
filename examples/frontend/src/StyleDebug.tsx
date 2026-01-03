@@ -25,14 +25,14 @@ export function StyleDebug() {
 	}, []);
 
 	return (
-		<div className="fixed bottom-4 right-4 p-4 bg-white border border-red-500 shadow-xl z-50 text-black text-sm font-mono opacity-90">
-			<h3 className="font-bold border-b border-gray-300 mb-2">
+		<div className="fixed bottom-[var(--ui-space-4)] right-[var(--ui-space-4)] p-[var(--ui-space-4)] bg-white border border-red-500 shadow-xl z-50 text-black text-sm font-mono opacity-90">
+			<h3 className="font-bold border-b border-gray-300 mb-[var(--ui-space-2)]">
 				Style Debugger
 			</h3>
 
 			<div
 				ref={ref}
-				className="bg-primary text-primary-foreground rounded-lg p-2 mb-2 text-base"
+				className="bg-primary text-primary-foreground rounded-lg p-[var(--ui-space-2)] mb-[var(--ui-space-2)] text-base"
 			>
 				Sample Element (bg-primary, rounded-lg)
 			</div>
@@ -50,7 +50,7 @@ export function StyleDebug() {
 				<span className="text-gray-500">Active --ui-height:</span>
 				<span>{computed.uiHeight || "undefined"}</span>
 
-				<hr className="col-span-2 my-1 border-gray-200" />
+				<hr className="col-span-2 my-[var(--ui-space-1)] border-gray-200" />
 
 				<span className="text-gray-500">Computed Radius:</span>
 				<span
@@ -70,7 +70,7 @@ export function StyleDebug() {
 				<span>{computed.fontSize}</span>
 			</div>
 
-			<div className="mt-2 text-xs text-gray-500">
+			<div className="mt-[var(--ui-space-2)] text-xs text-gray-500">
 				If Computed Radius is distinct from var, Tailwind config is ignored.
 			</div>
 
@@ -90,7 +90,7 @@ Computed Font: ${computed.fontSize}
 					navigator.clipboard.writeText(report);
 					alert("Copied to clipboard!");
 				}}
-				className="mt-3 w-full bg-white text-gray-800 border border-gray-300 py-1 px-2 rounded hover:bg-gray-100 text-xs shadow-sm"
+				className="mt-[var(--ui-space-3)] w-full bg-white text-gray-800 border border-gray-300 py-[var(--ui-space-1)] px-[var(--ui-space-2)] rounded hover:bg-gray-100 text-xs shadow-sm"
 			>
 				Copy Report for Prompt
 			</button>

@@ -21,7 +21,7 @@ describe("Button", () => {
 		render(<Button size="sm">Small</Button>);
 
 		expect(screen.getByRole("button")).toHaveClass("text-xs");
-		expect(screen.getByRole("button")).toHaveClass("py-1");
+		expect(screen.getByRole("button")).toHaveClass("py-[var(--ui-space-1)]");
 	});
 
 	it("should render loading state", () => {
@@ -94,15 +94,15 @@ describe("Button", () => {
 		render(<Button variant="fab">FAB</Button>);
 
 		expect(screen.getByRole("button")).toHaveClass("rounded-full");
-		expect(screen.getByRole("button")).toHaveClass("h-14");
-		expect(screen.getByRole("button")).toHaveClass("w-14");
+		expect(screen.getByRole("button")).toHaveClass("h-[var(--ui-space-14)]");
+		expect(screen.getByRole("button")).toHaveClass("w-[var(--ui-space-14)]");
 	});
 
 	it("should handle circle variant", () => {
 		render(<Button size="circle">Circle</Button>);
 
 		expect(screen.getByRole("button")).toHaveClass("rounded-full");
-		expect(screen.getByRole("button")).toHaveClass("p-2");
+		expect(screen.getByRole("button")).toHaveClass("p-[var(--ui-space-2)]");
 		expect(screen.getByRole("button")).toHaveClass("aspect-square");
 	});
 
@@ -153,6 +153,6 @@ describe("Button", () => {
 		render(<Button icon={Icons.Check}></Button>);
 
 		const iconElement = screen.getByRole("button").querySelector("svg");
-		expect(iconElement).not.toHaveClass("mr-2");
+		expect(iconElement).not.toHaveClass("mr-[var(--ui-space-2)]");
 	});
 });

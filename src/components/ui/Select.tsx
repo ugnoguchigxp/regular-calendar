@@ -127,12 +127,14 @@ export const SelectContent = React.forwardRef<
 		<div
 			ref={ref}
 			className={cn(
-				"absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80 w-full mt-1",
+				"absolute z-50 min-w-[var(--ui-space-32)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80 w-full mt-[var(--ui-space-1)]",
 				className,
 			)}
 			{...props}
 		>
-			<div className="p-1 max-h-60 overflow-y-auto">{children}</div>
+			<div className="p-[var(--ui-space-1)] max-h-[var(--ui-space-60)] overflow-y-auto">
+				{children}
+			</div>
 		</div>
 	);
 });
@@ -163,7 +165,7 @@ export const SelectItem = React.forwardRef<
 			ref={ref}
 			type="button"
 			className={cn(
-				"relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+				"relative flex w-full cursor-default select-none items-center rounded-sm py-[var(--ui-space-1-5)] pl-[var(--ui-space-8)] pr-[var(--ui-space-2)] text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
 				isSelected ? "bg-accent/50" : "",
 				className,
 			)}
@@ -173,8 +175,10 @@ export const SelectItem = React.forwardRef<
 			}}
 			{...props}
 		>
-			<span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-				{isSelected && <span className="h-2 w-2 rounded-full bg-current" />}
+			<span className="absolute left-[var(--ui-space-2)] flex h-[var(--ui-space-3-5)] w-[var(--ui-space-3-5)] items-center justify-center">
+				{isSelected && (
+					<span className="h-[var(--ui-space-2)] w-[var(--ui-space-2)] rounded-full bg-current" />
+				)}
 			</span>
 			<span className="truncate">{children}</span>
 		</button>

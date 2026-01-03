@@ -3,10 +3,10 @@
  * Heatmap based on booking density
  */
 
-import { addDays } from "@/utils/dateUtils";
 import { useMemo } from "react";
 import { DateDisplay } from "@/components/ui/DateDisplay";
 import { PercentFormat } from "@/components/ui/PercentFormat";
+import { addDays } from "@/utils/dateUtils";
 import { useAppTranslation } from "@/utils/i18n";
 import type {
 	FacilityScheduleSettings,
@@ -143,7 +143,7 @@ export function MonthView({
 						<h2 className="text-lg font-semibold">
 							<DateDisplay date={month} format="yearMonth" />
 						</h2>
-						<div className="flex items-center gap-4 mt-2">
+						<div className="flex items-center gap-[var(--ui-space-4)] mt-[var(--ui-space-2)]">
 							<div className="text-sm text-muted-foreground">
 								Resources: {filteredResources.length} / Utilization:{" "}
 								<PercentFormat
@@ -160,14 +160,14 @@ export function MonthView({
 			</div>
 
 			{/* Grid */}
-			<div className="w-full p-4 overflow-y-auto">
+			<div className="w-full p-[var(--ui-space-4)] overflow-y-auto">
 				<div className="w-full">
 					{/* Headers */}
-					<div className="grid grid-cols-7 gap-1 mb-1">
+					<div className="grid grid-cols-7 gap-[var(--ui-space-1)] mb-[var(--ui-space-1)]">
 						{weekdayHeaders.map((day) => (
 							<div
 								key={day}
-								className="text-center font-semibold text-sm text-foreground py-2"
+								className="text-center font-semibold text-sm text-foreground py-[var(--ui-space-2)]"
 							>
 								{day}
 							</div>
@@ -176,13 +176,13 @@ export function MonthView({
 
 					{/* Days */}
 					<div
-						className="grid gap-1"
+						className="grid gap-[var(--ui-space-1)]"
 						style={{ gridTemplateRows: `repeat(${weeks.length}, 1fr)` }}
 					>
 						{weeks.map((week) => (
 							<div
 								key={week[0]?.toISOString() ?? "empty-week"}
-								className="grid grid-cols-7 gap-1"
+								className="grid grid-cols-7 gap-[var(--ui-space-1)]"
 							>
 								{week.map((day) => {
 									const dayKey = day.toISOString().split("T")[0] || "";

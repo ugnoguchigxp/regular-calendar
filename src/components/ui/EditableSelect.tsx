@@ -1,5 +1,5 @@
-import { Icons } from "@/components/ui/Icons";
 import * as React from "react";
+import { Icons } from "@/components/ui/Icons";
 import {
 	type SelectItemVariants,
 	type SelectTriggerVariants,
@@ -113,7 +113,10 @@ export const EditableSelect = React.forwardRef<
 
 		return (
 			<fieldset
-				className={cn("relative border-0 p-0 m-0", className)}
+				className={cn(
+					"relative border-0 p-[var(--ui-space-0)] m-[var(--ui-space-0)]",
+					className,
+				)}
 				ref={containerRef}
 				onBlur={(e) => {
 					if (!e.currentTarget.contains(e.relatedTarget as Node)) {
@@ -140,7 +143,7 @@ export const EditableSelect = React.forwardRef<
 						placeholder={placeholder}
 						disabled={disabled}
 						className={cn(
-							"w-full bg-transparent border-none text-foreground text-left appearance-none focus:outline-none p-0 m-0",
+							"w-full bg-transparent border-none text-foreground text-left appearance-none focus:outline-none p-[var(--ui-space-0)] m-[var(--ui-space-0)]",
 							"placeholder:text-muted-foreground",
 						)}
 						onFocus={() => setIsOpen(true)}
@@ -155,16 +158,14 @@ export const EditableSelect = React.forwardRef<
 						tabIndex={-1}
 						aria-label="Toggle options"
 					>
-						<Icons.ChevronDown
-							className={cn("h-ui-icon w-ui-icon")}
-						/>
+						<Icons.ChevronDown className={cn("h-ui-icon w-ui-icon")} />
 					</button>
 				</div>
 
 				{isOpen && (
 					<div
 						ref={listRef}
-						className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-background border border-border rounded-md shadow-lg scrollbar-thin"
+						className="absolute z-50 w-full mt-[var(--ui-space-1)] max-h-[var(--ui-space-60)] overflow-y-auto bg-background border border-border rounded-md shadow-lg scrollbar-thin"
 					>
 						{options.map((option, index) => (
 							<button

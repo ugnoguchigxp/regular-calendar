@@ -1,9 +1,9 @@
 import * as React from "react";
+import { formatCalendarDate } from "@/utils/dateFormats";
 import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "./Button";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
 import { cn } from "./utils";
-import { formatCalendarDate } from "@/utils/dateFormats";
 
 interface MonthYearPickerProps {
 	date: Date;
@@ -91,20 +91,20 @@ export function MonthYearPicker({
 			<PopoverTrigger asChild>
 				<button
 					type="button"
-					className="cursor-pointer hover:bg-muted/50 rounded px-2 py-1 transition-colors"
+					className="cursor-pointer hover:bg-muted/50 rounded px-[var(--ui-space-2)] py-[var(--ui-space-1)] transition-colors"
 				>
 					{children}
 				</button>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align="start">
-				<div className="flex h-[300px]">
+			<PopoverContent className="w-auto p-[var(--ui-space-0)]" align="start">
+				<div className="flex h-[var(--ui-space-75)]">
 					{/* Left: Year List (3 columns) */}
 					<div
-						className="w-[200px] h-full border-r border-border overflow-y-auto relative"
+						className="w-[var(--ui-space-50)] h-full border-r border-border overflow-y-auto relative"
 						ref={handleScrollContainerRef}
 						style={{ scrollbarWidth: "thin" }}
 					>
-						<div className="p-ui-gap grid grid-cols-3 gap-1">
+						<div className="p-ui-gap grid grid-cols-3 gap-[var(--ui-space-1)]">
 							{years.map((y) => (
 								<Button
 									key={y}
@@ -115,7 +115,7 @@ export function MonthYearPicker({
 										e.preventDefault();
 										setYear(y);
 									}}
-									className="w-full justify-center font-normal px-0"
+									className="w-full justify-center font-normal px-[var(--ui-space-0)]"
 								>
 									{y}
 								</Button>
@@ -124,15 +124,19 @@ export function MonthYearPicker({
 					</div>
 
 					{/* Right: Month Grid */}
-					<div className="w-[240px] p-ui flex flex-col">
-						<div className="text-center font-bold mb-2">
+					<div className="w-[var(--ui-space-60)] p-ui flex flex-col">
+						<div className="text-center font-bold mb-[var(--ui-space-2)]">
 							{formatCalendarDate(new Date(year, 0, 1), locale, "year")}
 						</div>
-						<div className="grid grid-cols-3 gap-2">
+						<div className="grid grid-cols-3 gap-[var(--ui-space-2)]">
 							{months.map((m) => {
 								const isCurrent =
 									m === date.getMonth() && year === date.getFullYear();
-								const monthLabel = formatCalendarDate(new Date(year, m, 1), locale, "monthShort");
+								const monthLabel = formatCalendarDate(
+									new Date(year, m, 1),
+									locale,
+									"monthShort",
+								);
 								return (
 									<Button
 										key={m}

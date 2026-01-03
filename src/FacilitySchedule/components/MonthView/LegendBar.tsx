@@ -13,13 +13,16 @@ export function LegendBar() {
 	];
 
 	return (
-		<div className="flex items-center justify-center gap-4 py-3 border-t border-border bg-background">
+		<div className="flex items-center justify-center gap-[var(--ui-space-4)] py-[var(--ui-space-3)] border-t border-border bg-background">
 			<span className="text-sm text-gray-600">予約密度:</span>
-			<div className="flex items-center gap-1">
+			<div className="flex items-center gap-[var(--ui-space-1)]">
 				{levels.map((level, index) => (
-					<div key={level.label} className="flex flex-col items-center gap-1">
+					<div
+						key={level.label}
+						className="flex flex-col items-center gap-[var(--ui-space-1)]"
+					>
 						<div
-							className="w-8 h-8 border border-gray-300"
+							className="w-[var(--ui-space-8)] h-[var(--ui-space-8)] border border-gray-300"
 							style={{
 								backgroundColor:
 									level.opacity === 0

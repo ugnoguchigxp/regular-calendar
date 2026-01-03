@@ -43,7 +43,7 @@ export function ScheduleEventCard({
 		Math.round(
 			((event.endDate.getTime() - event.startDate.getTime()) /
 				(1000 * 60 * 60)) *
-			10,
+				10,
 		) / 10;
 
 	// Determine styling
@@ -97,10 +97,12 @@ export function ScheduleEventCard({
 						}}
 						onClick={onClick}
 					>
-						<div className="p-2 h-full flex flex-col items-start justify-start overflow-hidden">
+						<div className="p-[var(--ui-space-2)] h-full flex flex-col items-start justify-start overflow-hidden">
 							{/* Conflict Warning */}
 							{event.hasConflict && (
-								<div className="text-xs font-bold mb-1">⚠️ Double Booking</div>
+								<div className="text-xs font-bold mb-[var(--ui-space-1)]">
+									⚠️ Double Booking
+								</div>
 							)}
 
 							{/* Title */}
@@ -110,14 +112,14 @@ export function ScheduleEventCard({
 
 							{/* Attendee */}
 							{event.attendee && (
-								<div className="text-xs text-primary-foreground/90 truncate mt-0.5">
+								<div className="text-xs text-primary-foreground/90 truncate mt-[var(--ui-space-0-5)]">
 									👤 {event.attendee}
 								</div>
 							)}
 
 							{/* Time/Duration - Hidden for AllDay */}
 							{!event.isAllDay && (
-								<div className="flex items-center gap-1 text-[10px] opacity-90 mt-1">
+								<div className="flex items-center gap-[var(--ui-space-1)] text-[10px] opacity-90 mt-[var(--ui-space-1)]">
 									<span className="font-mono tabular-nums tracking-tight">
 										{formatTime(event.startDate)}
 									</span>
@@ -127,7 +129,7 @@ export function ScheduleEventCard({
 											<span className="font-mono tabular-nums tracking-tight">
 												{formatTime(event.endDate)}
 											</span>
-											<span className="ml-0.5 opacity-75">
+											<span className="ml-[var(--ui-space-0-5)] opacity-75">
 												({displayDuration})
 											</span>
 										</>
@@ -138,7 +140,7 @@ export function ScheduleEventCard({
 					</button>
 				</TooltipTrigger>
 				<TooltipContent>
-					<div className="space-y-1">
+					<div className="space-y-[var(--ui-space-1)]">
 						{event.hasConflict && (
 							<p className="font-bold text-xs text-red-600">⚠️ Double Booking</p>
 						)}
@@ -150,12 +152,12 @@ export function ScheduleEventCard({
 							{startTime} - {endTime} ({durationHours}h)
 						</p>
 						{event.note && (
-							<p className="text-[10px] text-muted-foreground max-w-[180px] break-words">
+							<p className="text-[10px] text-muted-foreground max-w-[var(--ui-space-45)] break-words">
 								{event.note}
 							</p>
 						)}
 						{event.description && (
-							<p className="text-[10px] text-muted-foreground max-w-[180px] break-words italic">
+							<p className="text-[10px] text-muted-foreground max-w-[var(--ui-space-45)] break-words italic">
 								{event.description}
 							</p>
 						)}

@@ -40,7 +40,7 @@ export function DayCell({
 		<button
 			type="button"
 			className={`
-        border border-border rounded-md p-2 min-h-[100px] cursor-pointer text-left
+        border border-border rounded-md p-[var(--ui-space-2)] min-h-[var(--ui-space-25)] cursor-pointer text-left
         transition-all hover:shadow-md
         ${!isCurrentMonth ? "opacity-50" : ""}
         ${isClosedDay ? "bg-muted" : "bg-card"}
@@ -53,14 +53,14 @@ export function DayCell({
 			onClick={onClick}
 		>
 			{/* 日付 */}
-			<div className="flex items-center justify-between mb-2">
+			<div className="flex items-center justify-between mb-[var(--ui-space-2)]">
 				<span
 					className={`text-sm font-semibold ${!isCurrentMonth ? "text-muted-foreground" : textColorClass}`}
 				>
 					{day}
 				</span>
 				{isClosedDay && (
-					<span className="text-xs px-1.5 py-0.5 rounded bg-theme-warning text-white font-medium">
+					<span className="text-xs px-[var(--ui-space-1-5)] py-[var(--ui-space-0-5)] rounded bg-theme-warning text-white font-medium">
 						定休日
 					</span>
 				)}
@@ -68,7 +68,7 @@ export function DayCell({
 
 			{/* 予約情報 */}
 			{!isClosedDay && (
-				<div className="space-y-1">
+				<div className="space-y-[var(--ui-space-1)]">
 					<div className={`text-xs ${subTextColorClass}`}>
 						{bookedCount}/{maxSlots}
 					</div>

@@ -99,7 +99,9 @@ describe("CurrentTimeLine", () => {
 			/>,
 		);
 
-		const line = container.querySelector(".bg-red-500.h-0\\.5") as HTMLElement;
+		const line = container.querySelector(
+			'[class*="bg-red-500"][class*="h-[var(--ui-space-0-5)]"]',
+		) as HTMLElement;
 		expect(line).toHaveClass("absolute");
 	});
 
@@ -114,7 +116,9 @@ describe("CurrentTimeLine", () => {
 			/>,
 		);
 
-		const line = container.querySelector(".bg-red-500.h-0\\.5") as HTMLElement;
+		const line = container.querySelector(
+			'[class*="bg-red-500"][class*="h-[var(--ui-space-0-5)]"]',
+		) as HTMLElement;
 		expect(line).toHaveClass("fixed");
 	});
 

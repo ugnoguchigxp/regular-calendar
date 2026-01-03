@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 export const selectTriggerVariants = cva(
 	[
-		"w-full inline-flex items-center justify-between gap-2 whitespace-nowrap",
+		"w-full inline-flex items-center justify-between gap-[var(--ui-space-2)] whitespace-nowrap",
 		"rounded-[calc(var(--radius,0.5rem)-2px)]",
 		"border border-solid border-border",
 		"bg-background text-foreground",
@@ -18,9 +18,9 @@ export const selectTriggerVariants = cva(
 				ghost: "bg-transparent border-transparent shadow-none",
 			},
 			size: {
-				sm: "px-ui py-1 text-sm",
+				sm: "px-ui py-[var(--ui-space-1)] text-sm",
 				md: "px-ui py-ui text-ui min-h-ui-touch",
-				lg: "px-5 py-3 text-lg",
+				lg: "px-[var(--ui-space-5)] py-[var(--ui-space-3)] text-lg",
 			},
 		},
 		defaultVariants: {
@@ -45,9 +45,9 @@ export const selectItemVariants = cva(
 				check: "",
 			},
 			size: {
-				sm: "py-1.5 text-sm",
+				sm: "py-[var(--ui-space-1-5)] text-sm",
 				md: "h-auto text-ui py-ui",
-				lg: "py-3 text-lg",
+				lg: "py-[var(--ui-space-3)] text-lg",
 			},
 			padding: {
 				plain: "px-ui",

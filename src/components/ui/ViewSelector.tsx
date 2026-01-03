@@ -19,7 +19,9 @@ export function ViewSelector<T extends string = string>({
 	className,
 }: ViewSelectorProps<T>) {
 	return (
-		<div className={`flex bg-muted p-[calc(var(--ui-gap-base)/2)] rounded-md ${className || ""}`}>
+		<div
+			className={`flex bg-muted p-[calc(var(--ui-gap-base)/2)] rounded-md ${className || ""}`}
+		>
 			{options.map((option) => (
 				<Button
 					key={option.value}

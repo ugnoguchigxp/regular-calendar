@@ -109,7 +109,7 @@ export function FacilitySchedule({
 			{/* Content */}
 			<div className="flex-1 overflow-hidden relative">
 				{isLoading && (
-					<div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center">
+					<div className="absolute inset-[var(--ui-space-0)] bg-background/50 z-10 flex items-center justify-center">
 						{t("loading")}...
 					</div>
 				)}

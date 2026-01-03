@@ -5,10 +5,10 @@
  * Max 4 events per cell
  */
 
-import { addDays } from "@/utils/dateUtils";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/Button";
 import { DateDisplay } from "@/components/ui/DateDisplay";
+import { addDays } from "@/utils/dateUtils";
 import { WEEK_VIEW } from "../../constants";
 import type {
 	FacilityScheduleSettings,
@@ -124,7 +124,7 @@ export function WeekView({
 								<DateDisplay date={weekDays[6]} variant="monthDay" />
 							)}
 						</h2>
-						<div className="text-sm text-muted-foreground mt-1">
+						<div className="text-sm text-muted-foreground mt-[var(--ui-space-1)]">
 							Events: {weekEvents.length} / Resources: {resources.length}
 						</div>
 					</div>
@@ -135,9 +135,9 @@ export function WeekView({
 			<div className="flex-1 overflow-y-auto">
 				<div className="flex flex-col">
 					{/* Header Row (Resources) */}
-					<div className="flex border-b border-border bg-background sticky top-0 z-20">
+					<div className="flex border-b border-border bg-background sticky top-[var(--ui-space-0)] z-20">
 						<div
-							className="flex-shrink-0 border-r border-border px-1 py-2"
+							className="flex-shrink-0 border-r border-border px-[var(--ui-space-1)] py-[var(--ui-space-2)]"
 							style={{ width: `${WEEK_VIEW.DATE_COLUMN_WIDTH}px` }}
 						>
 							{/* Corner */}
@@ -147,7 +147,7 @@ export function WeekView({
 							return (
 								<div
 									key={resource.id}
-									className="flex-1 border-r border-border px-1 py-2 text-center overflow-hidden min-w-[80px]"
+									className="flex-1 border-r border-border px-[var(--ui-space-1)] py-[var(--ui-space-2)] text-center overflow-hidden min-w-[var(--ui-space-20)]"
 								>
 									<div
 										className="font-semibold text-xs leading-tight truncate"
@@ -194,7 +194,7 @@ export function WeekView({
 							>
 								{/* Date Cell */}
 								<div
-									className={`flex-shrink-0 border-r border-border px-1 py-2 flex items-center justify-center ${dateCellBgClass}`}
+									className={`flex-shrink-0 border-r border-border px-[var(--ui-space-1)] py-[var(--ui-space-2)] flex items-center justify-center ${dateCellBgClass}`}
 									style={{
 										width: `${WEEK_VIEW.DATE_COLUMN_WIDTH}px`,
 										height: `${WEEK_VIEW.DAY_CELL_HEIGHT}px`,
@@ -205,7 +205,9 @@ export function WeekView({
 											<DateDisplay date={day} variant="compact" />
 										</div>
 										{isClosed && (
-											<div className="text-[10px] text-warning mt-1">Off</div>
+											<div className="text-[10px] text-warning mt-[var(--ui-space-1)]">
+												Off
+											</div>
 										)}
 									</div>
 								</div>
@@ -220,7 +222,7 @@ export function WeekView({
 									return (
 										<div
 											key={resource.id}
-											className={`relative flex-1 border-r border-border p-0.5 ${scheduleCellBgClass} ${scheduleCellInteractiveClass} transition-colors overflow-hidden min-w-[80px]`}
+											className={`relative flex-1 border-r border-border p-[var(--ui-space-0-5)] ${scheduleCellBgClass} ${scheduleCellInteractiveClass} transition-colors overflow-hidden min-w-[var(--ui-space-20)]`}
 											style={{
 												height: `${WEEK_VIEW.DAY_CELL_HEIGHT}px`,
 											}}
@@ -234,7 +236,7 @@ export function WeekView({
 												<Button
 													type="button"
 													variant="ghost"
-													className="sr-only focus:not-sr-only focus:absolute focus:right-1 focus:top-1"
+													className="sr-only focus:not-sr-only focus:absolute focus:right-[var(--ui-space-1)] focus:top-[var(--ui-space-1)]"
 													onClick={(event) => {
 														event.stopPropagation();
 														onEmptySlotClick?.(resource.id, day);
@@ -243,7 +245,7 @@ export function WeekView({
 													Add
 												</Button>
 											)}
-											<div className="flex flex-col gap-0 h-full overflow-hidden">
+											<div className="flex flex-col gap-[var(--ui-space-0)] h-full overflow-hidden">
 												{cellEvents
 													.slice(0, WEEK_VIEW.MAX_VISIBLE_EVENTS)
 													.map((event) => {
@@ -267,7 +269,7 @@ export function WeekView({
 															<button
 																key={event.id}
 																type="button"
-																className={`${bgColor} text-primary-foreground px-1.5 py-0.5 rounded text-sm cursor-pointer hover:brightness-110 transition-colors text-left leading-normal truncate w-full mb-0.5`}
+																className={`${bgColor} text-primary-foreground px-[var(--ui-space-1-5)] py-[var(--ui-space-0-5)] rounded text-sm cursor-pointer hover:brightness-110 transition-colors text-left leading-normal truncate w-full mb-[var(--ui-space-0-5)]`}
 																style={customStyle}
 																onClick={(e) => {
 																	e.stopPropagation();

@@ -150,14 +150,14 @@ export function RegularCalendar({
 	return (
 		<div className={`flex flex-col h-full bg-background ${className}`}>
 			{/* Header */}
-			<header className="border-b border-border px-4 py-3 flex items-center justify-between gap-4">
-				<div className="flex items-center gap-2">
+			<header className="border-b border-border px-[var(--ui-space-4)] py-[var(--ui-space-3)] flex items-center justify-between gap-[var(--ui-space-4)]">
+				<div className="flex items-center gap-[var(--ui-space-2)]">
 					<Button
 						variant="outline"
 						size="icon"
 						onClick={() => handleDateNavigate("prev")}
 					>
-						<Icons.ChevronLeft className="h-4 w-4" />
+						<Icons.ChevronLeft className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 					</Button>
 					<Button variant="outline" onClick={handleToday}>
 						{t("today_button")}
@@ -167,16 +167,16 @@ export function RegularCalendar({
 						size="icon"
 						onClick={() => handleDateNavigate("next")}
 					>
-						<Icons.ChevronRight className="h-4 w-4" />
+						<Icons.ChevronRight className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 					</Button>
 
-					<span className="text-lg font-bold ml-2">
+					<span className="text-lg font-bold ml-[var(--ui-space-2)]">
 						<DateFormat date={currentDate} showSecondary showDayOfWeek />
 					</span>
 					{headerLeft}
 				</div>
 
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-[var(--ui-space-4)]">
 					<ViewSelector
 						currentView={viewMode}
 						onViewChange={handleViewChange}
@@ -193,7 +193,7 @@ export function RegularCalendar({
 			{/* Content */}
 			<div className="flex-1 overflow-hidden relative">
 				{isLoading && (
-					<div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center">
+					<div className="absolute inset-[var(--ui-space-0)] bg-background/50 z-10 flex items-center justify-center">
 						Loading...
 					</div>
 				)}

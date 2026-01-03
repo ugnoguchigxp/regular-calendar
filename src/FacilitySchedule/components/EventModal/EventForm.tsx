@@ -3,7 +3,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button";
@@ -29,23 +29,22 @@ import {
 	SelectValue,
 } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { formatCalendarDate } from "@/utils/dateFormats";
+import { formatIsoDateTime } from "@/utils/dateUtils";
 import { useAppTranslation } from "@/utils/i18n";
 import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
 import type {
+	CustomField,
+	EventFormData,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
-	CustomField,
-	EventFormData,
 } from "../../FacilitySchedule.schema";
 import { useAttendeeManagement } from "../../hooks/useAttendeeManagement";
-
 // Import new hooks
 import { useResourceAvailability } from "../../hooks/useResourceAvailability";
 import { useScheduleConflict } from "../../hooks/useScheduleConflict";
 import { AttendeeInput } from "./AttendeeInput";
-import { formatCalendarDate } from "@/utils/dateFormats";
-import { formatIsoDateTime } from "@/utils/dateUtils";
 
 // Helper for duration formatting
 const formatDuration = (hours: number) => {
@@ -82,7 +81,6 @@ const baseEventSchema = z.object({
 type BaseEventFormValues = z.infer<typeof baseEventSchema>;
 // Allow any extra fields for custom fields
 type EventFormValues = BaseEventFormValues & Record<string, unknown>;
-
 
 interface EventFormProps {
 	event?: ScheduleEvent;
@@ -173,10 +171,10 @@ export function EventForm({
 			),
 			durationHours: event
 				? Math.round(
-					((event.endDate.getTime() - event.startDate.getTime()) /
-						(1000 * 60 * 60)) *
-					100,
-				) / 100
+						((event.endDate.getTime() - event.startDate.getTime()) /
+							(1000 * 60 * 60)) *
+							100,
+					) / 100
 				: 1,
 			status: event?.status || "booked",
 			note: event?.note || "",
@@ -323,7 +321,7 @@ export function EventForm({
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(handleSubmit)}
-				className="space-y-4 text-foreground"
+				className="space-y-[var(--ui-space-4)] text-foreground"
 			>
 				{/* Title (Patient/User Name) */}
 				<FormField
@@ -381,7 +379,7 @@ export function EventForm({
 								<FormLabel>{t("resource_label")}</FormLabel>
 								{readOnlyResource ? (
 									<>
-										<div className="p-2 bg-muted rounded-md text-sm border border-input">
+										<div className="p-[var(--ui-space-2)] bg-muted rounded-md text-sm border border-input">
 											{displayValue || t("resource_placeholder")}
 										</div>
 										<input type="hidden" {...field} />
@@ -440,7 +438,7 @@ export function EventForm({
 											</SelectContent>
 										</Select>
 									) : field.type === "boolean" ? (
-										<div className="flex items-center space-x-2">
+										<div className="flex items-center space-x-[var(--ui-space-2)]">
 											<Checkbox
 												checked={!!formField.value}
 												onCheckedChange={formField.onChange}
@@ -470,7 +468,7 @@ export function EventForm({
 				))}
 
 				{/* Start Date & Time */}
-				<div className="space-y-4">
+				<div className="space-y-[var(--ui-space-4)]">
 					<div className="flex justify-between items-center">
 						<FormLabel>
 							{t("start_time_label")} <span className="text-red-500">*</span>
@@ -479,7 +477,7 @@ export function EventForm({
 							control={form.control}
 							name="isAllDay"
 							render={({ field }) => (
-								<FormItem className="flex flex-row items-center space-x-2 space-y-0">
+								<FormItem className="flex flex-row items-center space-x-[var(--ui-space-2)] space-y-[var(--ui-space-0)]">
 									<FormControl>
 										<Checkbox
 											checked={!!field.value}
@@ -497,7 +495,7 @@ export function EventForm({
 							)}
 						/>
 					</div>
-					<div className="flex gap-2 items-center">
+					<div className="flex gap-[var(--ui-space-2)] items-center">
 						<FormField
 							control={form.control}
 							name="startDate"
@@ -537,7 +535,7 @@ export function EventForm({
 													"time24",
 												)}
 												readOnly
-												className="cursor-pointer w-24"
+												className="cursor-pointer w-[var(--ui-space-24)]"
 												onClick={() => setIsTimeModalOpen(true)}
 												tabIndex={-1}
 											/>
@@ -556,18 +554,18 @@ export function EventForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>{t("duration_label")}</FormLabel>
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-[var(--ui-space-2)]">
 								<Select
 									onValueChange={(v) => field.onChange(Number(v))}
 									value={String(field.value)}
 									disabled={isAllDay}
 								>
 									<FormControl>
-										<SelectTrigger className="w-32">
+										<SelectTrigger className="w-[var(--ui-space-32)]">
 											<SelectValue />
 										</SelectTrigger>
 									</FormControl>
-									<SelectContent className="max-h-[200px]">
+									<SelectContent className="max-h-[var(--ui-space-50)]">
 										{[
 											0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75,
 											3, 3.5, 4, 4.5, 5, 6, 8,
@@ -583,10 +581,10 @@ export function EventForm({
 										End:{" "}
 										{!Number.isNaN(endDateDisplay.getTime())
 											? formatCalendarDate(
-												endDateDisplay,
-												i18n.language,
-												"time24",
-											)
+													endDateDisplay,
+													i18n.language,
+													"time24",
+												)
 											: t("event_form_end_time_placeholder")}
 									</span>
 								)}
@@ -597,8 +595,8 @@ export function EventForm({
 
 				{/* Conflict Warning */}
 				{conflict && (
-					<div className="p-4 bg-red-50 border border-red-500 rounded text-red-800 flex items-start gap-2">
-						<Icons.AlertTriangle className="w-5 h-5 flex-shrink-0" />
+					<div className="p-[var(--ui-space-4)] bg-red-50 border border-red-500 rounded text-red-800 flex items-start gap-[var(--ui-space-2)]">
+						<Icons.AlertTriangle className="w-[var(--ui-space-5)] h-[var(--ui-space-5)] flex-shrink-0" />
 						<div>
 							<strong className="block text-sm">Conflict Detected</strong>
 							<span className="text-xs">
@@ -627,7 +625,10 @@ export function EventForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>{t("status_label")}</FormLabel>
-							<Select onValueChange={field.onChange} value={field.value as string}>
+							<Select
+								onValueChange={field.onChange}
+								value={field.value as string}
+							>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue />
@@ -651,14 +652,19 @@ export function EventForm({
 						<FormItem>
 							<FormLabel>{t("note_label")}</FormLabel>
 							<FormControl>
-								<Textarea {...field} value={field.value as string || ""} placeholder="Add notes..." rows={2} />
+								<Textarea
+									{...field}
+									value={(field.value as string) || ""}
+									placeholder="Add notes..."
+									rows={2}
+								/>
 							</FormControl>
 						</FormItem>
 					)}
 				/>
 
 				{/* Action Buttons */}
-				<div className="flex gap-3 pt-4 border-t border-border">
+				<div className="flex gap-[var(--ui-space-3)] pt-[var(--ui-space-4)] border-t border-border">
 					{isEditMode && onDelete && (
 						<Button
 							type="button"

@@ -40,10 +40,12 @@ export function WeekView({
 	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30;
 	const startHour = Number(
-		settings.startTime?.split(":")[0] || DEFAULT_VIEW_HOURS.start,
+		(settings.startTime || settings.businessHoursStart)?.split(":")[0] ||
+			DEFAULT_VIEW_HOURS.start,
 	);
 	const endHour = Number(
-		settings.endTime?.split(":")[0] || DEFAULT_VIEW_HOURS.end,
+		(settings.endTime || settings.businessHoursEnd)?.split(":")[0] ||
+			DEFAULT_VIEW_HOURS.end,
 	);
 	const weekStart = settings.weekStartsOn ?? 1;
 
@@ -118,7 +120,7 @@ export function WeekView({
 	const weekEventsWithPosition = useMemo(() => {
 		return weekDates.map((date) => {
 			// Use TIMED events only
-			const dayEvents = getEventsForDate(timedEvents, date);
+			const dayEvents = getEventsForDate(timedEvents, date, startHour, endHour);
 			return {
 				date: date.toISOString(),
 				events: calculateEventsWithLayout(
@@ -129,16 +131,23 @@ export function WeekView({
 				),
 			};
 		});
-	}, [weekDates, timedEvents, timeInterval, startHour, settings.timeZone]);
+	}, [
+		weekDates,
+		timedEvents,
+		timeInterval,
+		startHour,
+		settings.timeZone,
+		endHour,
+	]);
 
 	return (
 		<div className="flex flex-col h-full bg-background text-foreground">
 			{/* Header - Date Row */}
 			<div
-				className="flex border-b border-border bg-muted/40 sticky top-0 z-30"
+				className="flex border-b border-border bg-muted/40 sticky top-[var(--ui-space-0)] z-30"
 				style={{ paddingRight: scrollbarPadding || undefined }}
 			>
-				<div className="w-16 flex-shrink-0 border-r border-border bg-background" />
+				<div className="w-[var(--ui-space-16)] flex-shrink-0 border-r border-border bg-background" />
 				{weekDates.map((date) => {
 					const isToday = date.toDateString() === todayString;
 					const isSelected = date.toDateString() === currentDate.toDateString();
@@ -147,7 +156,7 @@ export function WeekView({
 					return (
 						<div
 							key={date.toISOString()}
-							className={`flex-1 p-1 text-center border-r border-border last:border-r-0 transition-colors min-w-0
+							className={`flex-1 p-[var(--ui-space-1)] text-center border-r border-border last:border-r-0 transition-colors min-w-[var(--ui-space-0)]
                             ${isSelected ? "bg-primary/5" : ""}
                         `}
 						>
@@ -169,29 +178,34 @@ export function WeekView({
 			{/* All Day Events Row - Only shown if there are allDay events */}
 			{allDayEvents.length > 0 && (
 				<div
-					className="flex border-b border-border bg-muted/20 sticky top-[52px] z-30"
+					className="flex border-b border-border bg-muted/20 sticky top-[var(--ui-space-13)] z-30"
 					style={{ paddingRight: scrollbarPadding || undefined }}
 				>
-					<div className="w-16 flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-1">
+					<div className="w-[var(--ui-space-16)] flex-shrink-0 border-r border-border bg-background flex items-center justify-end pr-[var(--ui-space-1)]">
 						<span className="text-[9px] text-muted-foreground">
 							{t("all_day")}
 						</span>
 					</div>
 					{weekDates.map((date) => {
-						const dayAllDayEvents = getEventsForDate(allDayEvents, date);
+						const dayAllDayEvents = getEventsForDate(
+							allDayEvents,
+							date,
+							startHour,
+							endHour,
+						);
 
 						return (
 							<div
 								key={date.toISOString()}
-								className="flex-1 p-0.5 border-r border-border last:border-r-0 min-w-0"
+								className="flex-1 p-[var(--ui-space-0-5)] border-r border-border last:border-r-0 min-w-[var(--ui-space-0)]"
 							>
-								<div className="flex flex-col gap-0.5">
+								<div className="flex flex-col gap-[var(--ui-space-0-5)]">
 									{dayAllDayEvents.map((event) => (
 										<button
 											key={event.id}
 											type="button"
 											className={`
-                                                text-[9px] px-1 py-0.5 rounded w-full text-left truncate leading-tight
+                                                text-[9px] px-[var(--ui-space-1)] py-[var(--ui-space-0-5)] rounded w-full text-left truncate leading-tight
                                                 bg-primary text-primary-foreground
                                                 hover:brightness-110 transition-colors
                                             `}
@@ -217,13 +231,18 @@ export function WeekView({
 
 			{/* Grid */}
 			<div className="flex-1 overflow-y-auto relative" ref={scrollContainerRef}>
-				<div className="flex" style={{ minHeight: "600px" }}>
+				<div
+					className="flex"
+					style={{
+						minHeight: `${(((endHour - startHour) * 60) / timeInterval) * TIME_SLOT_HEIGHT}px`,
+					}}
+				>
 					{/* Time Column */}
-					<div className="w-16 flex-shrink-0 sticky left-0 z-20 bg-background border-r border-border">
+					<div className="w-[var(--ui-space-16)] flex-shrink-0 sticky left-[var(--ui-space-0)] z-20 bg-background border-r border-border">
 						{timeSlots.map((timeSlot) => (
 							<div
 								key={timeSlot}
-								className="border-b border-border text-xs text-muted-foreground p-1 text-right pr-2"
+								className="border-b border-border text-xs text-muted-foreground p-0 flex items-center justify-end pr-[var(--ui-space-2)] box-border"
 								style={{ height: `${TIME_SLOT_HEIGHT}px` }}
 							>
 								{timeSlot}
@@ -240,7 +259,7 @@ export function WeekView({
 							return (
 								<div
 									key={date.toISOString()}
-									className="flex-1 border-r border-border last:border-r-0 relative min-w-0"
+									className="flex-1 border-r border-border last:border-r-0 relative min-w-[var(--ui-space-0)]"
 								>
 									<CurrentTimeLine
 										interval={timeInterval}
@@ -256,7 +275,7 @@ export function WeekView({
 											key={`${date.toISOString()}-${timeSlot}`}
 											type="button"
 											onClick={() => onTimeSlotClick?.(date, timeSlot)}
-											className="border-b border-border cursor-pointer transition-colors hover:bg-muted/30 w-full text-left"
+											className="border-b border-border cursor-pointer transition-colors hover:bg-muted/30 w-full text-left p-0 m-0 block box-border"
 											style={{ height: `${TIME_SLOT_HEIGHT}px` }}
 											aria-label={`Time slot ${timeSlot}`}
 										/>

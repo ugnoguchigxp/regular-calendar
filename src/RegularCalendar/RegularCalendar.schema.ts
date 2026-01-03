@@ -80,6 +80,8 @@ export const FacilityScheduleSettingsSchema = z.object({
 	// Display
 	weekStartsOn: z.union([z.literal(0), z.literal(1)]),
 	timeZone: z.string().optional(),
+	businessHoursStart: z.string().optional(),
+	businessHoursEnd: z.string().optional(),
 
 	// Time slots
 	timeSlots: z.array(TimeSlotSchema).optional(),

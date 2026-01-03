@@ -39,17 +39,17 @@ export function PersonnelContextMenu({
 	return (
 		<div
 			ref={menuRef}
-			className="fixed bg-popover border border-border rounded-md shadow-lg py-1 z-50 min-w-[160px]"
+			className="fixed bg-popover border border-border rounded-md shadow-lg py-[var(--ui-space-1)] z-50 min-w-[var(--ui-space-40)]"
 			style={{ left: position.x, top: position.y }}
 		>
-			<div className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border">
+			<div className="px-[var(--ui-space-3)] py-[var(--ui-space-1-5)] text-xs text-muted-foreground border-b border-border">
 				{personnel.name}
 			</div>
 			{menuItems.map((item) => (
 				<button
 					key={item.priority}
 					type="button"
-					className={`w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2 transition-colors
+					className={`w-full px-[var(--ui-space-3)] py-[var(--ui-space-2)] text-left text-sm hover:bg-muted flex items-center gap-[var(--ui-space-2)] transition-colors
                         ${personnel.priority === item.priority ? "text-primary font-medium" : "text-foreground"}
                     `}
 					onClick={() => {

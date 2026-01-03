@@ -1,6 +1,6 @@
-import { Icons } from "@/components/ui/Icons";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Icons } from "@/components/ui/Icons";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/components/ui/utils";
 import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
@@ -121,7 +121,7 @@ export function AttendeeInput({
 	return (
 		<div
 			className={cn(
-				"flex flex-wrap gap-2 p-2 border rounded-md bg-background focus-within:ring-2 ring-ring ring-offset-2 border-input",
+				"flex flex-wrap gap-[var(--ui-space-2)] p-[var(--ui-space-2)] border rounded-md bg-background focus-within:ring-2 ring-ring ring-offset-2 border-input",
 				className,
 			)}
 		>
@@ -132,7 +132,7 @@ export function AttendeeInput({
 						attendee.email ??
 						`${attendee.type}-${attendee.name}`
 					}
-					className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded text-sm group"
+					className="flex items-center gap-[var(--ui-space-1)] bg-secondary text-secondary-foreground px-[var(--ui-space-2)] py-[var(--ui-space-1)] rounded text-sm group"
 				>
 					<span>{attendee.name}</span>
 					<button
@@ -143,12 +143,12 @@ export function AttendeeInput({
 						}}
 						className="text-muted-foreground group-hover:text-destructive transition-colors"
 					>
-						<Icons.X className="h-3 w-3" />
+						<Icons.X className="h-[var(--ui-space-3)] w-[var(--ui-space-3)]" />
 					</button>
 				</div>
 			))}
 
-			<div className="relative flex-1 min-w-[120px]">
+			<div className="relative flex-1 min-w-[var(--ui-space-30)]">
 				<Input
 					ref={inputRef}
 					value={inputValue}
@@ -159,18 +159,18 @@ export function AttendeeInput({
 					}}
 					onBlur={handleBlur}
 					placeholder={value.length === 0 ? placeholder : ""}
-					className="border-0 focus-visible:ring-0 px-0 h-auto py-1 shadow-none bg-transparent"
+					className="border-0 focus-visible:ring-0 px-[var(--ui-space-0)] h-auto py-[var(--ui-space-1)] shadow-none bg-transparent"
 					autoComplete="off"
 				/>
 
 				{open && filteredPersonnel.length > 0 && (
-					<div className="absolute top-full left-0 z-50 w-full min-w-[200px] mt-1 bg-popover text-popover-foreground border border-border rounded-md shadow-md overflow-hidden animate-in fade-in-0 zoom-in-95">
+					<div className="absolute top-full left-[var(--ui-space-0)] z-50 w-full min-w-[var(--ui-space-50)] mt-[var(--ui-space-1)] bg-popover text-popover-foreground border border-border rounded-md shadow-md overflow-hidden animate-in fade-in-0 zoom-in-95">
 						{filteredPersonnel.map((p, index) => (
 							<button
 								type="button"
 								key={p.id}
 								className={cn(
-									"px-3 py-2 text-sm cursor-pointer flex justify-between items-center",
+									"px-[var(--ui-space-3)] py-[var(--ui-space-2)] text-sm cursor-pointer flex justify-between items-center",
 									index === activeIndex
 										? "bg-accent text-accent-foreground"
 										: "hover:bg-accent hover:text-accent-foreground",
@@ -189,7 +189,7 @@ export function AttendeeInput({
 							>
 								<span className="font-medium">{p.name}</span>
 								{p.department && (
-									<span className="text-xs text-muted-foreground ml-2">
+									<span className="text-xs text-muted-foreground ml-[var(--ui-space-2)]">
 										{p.department}
 									</span>
 								)}

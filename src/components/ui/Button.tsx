@@ -5,7 +5,7 @@ import { Icons } from "./Icons";
 import { cn } from "./utils";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 min-w-0 overflow-hidden",
+	"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 min-w-[var(--ui-space-0)] overflow-hidden",
 	{
 		variants: {
 			variant: {
@@ -17,7 +17,7 @@ const buttonVariants = cva(
 				secondary:
 					"bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
 				ghost: "hover:bg-accent hover:text-accent-foreground",
-				link: "text-accent underline-offset-4 underline hover:text-accent/80 !h-auto !py-0",
+				link: "text-accent underline-offset-4 underline hover:text-accent/80 !h-auto !py-[var(--ui-space-0)]",
 				// Legacy/Custom Mappings
 				positive: "bg-chart-2 text-white shadow-sm hover:bg-chart-2/90",
 				warning: "bg-chart-3 text-white shadow-sm hover:bg-chart-3/90",
@@ -28,7 +28,7 @@ const buttonVariants = cva(
 				"outline-negative":
 					"border border-muted text-muted-foreground hover:bg-muted/10",
 				// Special
-				fab: "rounded-full h-14 w-14 p-0 shadow-lg hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90",
+				fab: "rounded-full h-[var(--ui-space-14)] w-[var(--ui-space-14)] p-[var(--ui-space-0)] shadow-lg hover:shadow-xl bg-primary text-primary-foreground hover:bg-primary/90",
 				"circle-help":
 					"bg-accent text-accent-foreground shadow-sm hover:bg-accent/90 rounded-full",
 				"circle-alert":
@@ -50,10 +50,10 @@ const buttonVariants = cva(
 			},
 			size: {
 				default: "px-ui-button py-ui text-ui min-h-ui-touch",
-				sm: "rounded-md px-3 py-1 text-xs",
-				lg: "rounded-md px-8 py-3",
+				sm: "rounded-md px-[var(--ui-space-3)] py-[var(--ui-space-1)] text-xs",
+				lg: "rounded-md px-[var(--ui-space-8)] py-[var(--ui-space-3)]",
 				icon: "p-ui min-h-ui-touch min-w-[var(--ui-touch-target-min)]",
-				circle: "rounded-full p-2 aspect-square",
+				circle: "rounded-full p-[var(--ui-space-2)] aspect-square",
 			},
 		},
 		defaultVariants: {
@@ -65,7 +65,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-	VariantProps<typeof buttonVariants> {
+		VariantProps<typeof buttonVariants> {
 	asChild?: boolean;
 	loading?: boolean;
 	success?: boolean;
@@ -113,7 +113,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			const label =
 				typeof children === "string" ? (
 					<span
-						className="min-w-0 flex-1 whitespace-nowrap"
+						className="min-w-[var(--ui-space-0)] flex-1 whitespace-nowrap"
 						title={isTruncated ? children : undefined}
 					>
 						{truncatedLabel}
@@ -123,8 +123,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				);
 
 			return (
-				<span className="flex min-w-0 items-center">
-					{Icon && <Icon className={cn("mr-2 h-ui-icon w-ui-icon", !children && "mr-0")} />}
+				<span className="flex min-w-[var(--ui-space-0)] items-center">
+					{Icon && (
+						<Icon
+							className={cn(
+								"mr-[var(--ui-space-2)] h-ui-icon w-ui-icon",
+								!children && "mr-[var(--ui-space-0)]",
+							)}
+						/>
+					)}
 					{label}
 				</span>
 			);

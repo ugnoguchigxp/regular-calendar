@@ -75,8 +75,8 @@ const KeypadModalLayout: React.FC<KeypadLayoutProps> = React.memo(
 			title={title}
 			onClose={onClose}
 		>
-			<div className="flex flex-col gap-4">
-				<div className="bg-card border-2 border-theme-text-primary rounded-lg p-[var(--ui-modal-padding)] min-h-[60px] flex items-center justify-center text-lg font-semibold text-foreground">
+			<div className="flex flex-col gap-[var(--ui-space-4)]">
+				<div className="bg-card border-2 border-theme-text-primary rounded-lg p-[var(--ui-modal-padding)] min-h-[var(--ui-space-15)] flex items-center justify-center text-lg font-semibold text-foreground">
 					{displayContent}
 				</div>
 				{errorMessage && (
@@ -113,7 +113,7 @@ const KeypadModalLayout: React.FC<KeypadLayoutProps> = React.memo(
 						⌫
 					</button>
 				</div>
-				<div className="grid grid-cols-2 gap-ui-gap mt-2">
+				<div className="grid grid-cols-2 gap-ui-gap mt-[var(--ui-space-2)]">
 					<button
 						type="button"
 						onClick={onClear}
@@ -375,7 +375,7 @@ export const KeypadModal: React.FC<UnifiedKeypadModalProps> = React.memo(
 		]);
 
 		const displayContent = isTimeVariant ? (
-			<div className="flex flex-col items-center justify-center gap-2 w-full">
+			<div className="flex flex-col items-center justify-center gap-[var(--ui-space-2)] w-full">
 				<span
 					style={{
 						fontSize: "24px",

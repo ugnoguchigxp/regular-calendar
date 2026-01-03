@@ -7,11 +7,11 @@ import { ConfirmModal, Modal } from "@/components/ui/Modal";
 import { useAppTranslation } from "@/utils/i18n";
 import type { Personnel } from "../../../PersonnelPanel/PersonnelPanel.schema";
 import type {
+	CustomField,
+	EventFormData,
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
-	CustomField,
-	EventFormData,
 } from "../../FacilitySchedule.schema";
 
 import { EventForm } from "./EventForm";
@@ -70,7 +70,7 @@ export function EventModal({
 	}>({
 		open: false,
 		title: "",
-		onConfirm: () => { },
+		onConfirm: () => {},
 	});
 
 	React.useEffect(() => {

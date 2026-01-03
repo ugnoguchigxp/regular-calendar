@@ -20,7 +20,9 @@ describe("utils", () => {
 		});
 
 		it("removes conflicting tailwind classes", () => {
-			expect(cn("px-2 px-4")).toBe("px-4");
+			expect(cn("px-[var(--ui-space-2)] px-[var(--ui-space-4)]")).toBe(
+				"px-[var(--ui-space-4)]",
+			);
 		});
 
 		it("handles undefined and null values", () => {
@@ -32,9 +34,9 @@ describe("utils", () => {
 		});
 
 		it("handles mixed input types", () => {
-			expect(cn("px-2", { py: true, py2: false }, ["text-sm"])).toBe(
-				"px-2 py text-sm",
-			);
+			expect(
+				cn("px-[var(--ui-space-2)]", { py: true, py2: false }, ["text-sm"]),
+			).toBe("px-[var(--ui-space-2)] py text-sm");
 		});
 	});
 });

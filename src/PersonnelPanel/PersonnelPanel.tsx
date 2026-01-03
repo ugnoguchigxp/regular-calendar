@@ -70,7 +70,7 @@ export function PersonnelPanel({
 			<button
 				key={p.id}
 				type="button"
-				className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer text-sm transition-colors ${
+				className={`flex items-center gap-[var(--ui-space-2)] px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] rounded cursor-pointer text-sm transition-colors ${
 					isSelected ? "border" : "hover:bg-muted/50 border border-transparent"
 				}`}
 				style={
@@ -87,13 +87,13 @@ export function PersonnelPanel({
 				{/* Color badge for selected */}
 				{isSelected && color ? (
 					<div
-						className="w-4 h-4 rounded-sm flex-shrink-0"
+						className="w-[var(--ui-space-4)] h-[var(--ui-space-4)] rounded-sm flex-shrink-0"
 						style={{ backgroundColor: color }}
 					/>
 				) : (
-					<div className="w-4 h-4 rounded border border-border flex-shrink-0" />
+					<div className="w-[var(--ui-space-4)] h-[var(--ui-space-4)] rounded border border-border flex-shrink-0" />
 				)}
-				<div className="flex-1 min-w-0">
+				<div className="flex-1 min-w-[var(--ui-space-0)]">
 					<div className="truncate font-medium">{p.name}</div>
 					<div className="truncate text-xs text-muted-foreground">
 						{p.department}
@@ -118,8 +118,8 @@ export function PersonnelPanel({
 			className={`flex flex-col h-full bg-background border-r border-border ${className}`}
 		>
 			{/* Header */}
-			<div className="p-2 border-b border-border">
-				<div className="text-sm font-semibold mb-2">
+			<div className="p-[var(--ui-space-2)] border-b border-border">
+				<div className="text-sm font-semibold mb-[var(--ui-space-2)]">
 					{t("personnel_list_title")}
 				</div>
 				<input
@@ -127,15 +127,15 @@ export function PersonnelPanel({
 					placeholder={t("personnel_search_placeholder")}
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+					className="w-full px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
 				/>
 			</div>
 
 			{/* List */}
-			<div className="flex-1 overflow-y-auto p-1">
+			<div className="flex-1 overflow-y-auto p-[var(--ui-space-1)]">
 				{groupedPersonnel.high.length > 0 && (
-					<div className="mb-2">
-						<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+					<div className="mb-[var(--ui-space-2)]">
+						<div className="px-[var(--ui-space-2)] py-[var(--ui-space-1)] text-xs font-semibold text-muted-foreground">
 							{t("personnel_priority_high")}
 						</div>
 						{groupedPersonnel.high.map(renderPersonnelItem)}
@@ -143,9 +143,9 @@ export function PersonnelPanel({
 				)}
 
 				{groupedPersonnel.normal.length > 0 && (
-					<div className="mb-2">
+					<div className="mb-[var(--ui-space-2)]">
 						{groupedPersonnel.high.length > 0 && (
-							<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+							<div className="px-[var(--ui-space-2)] py-[var(--ui-space-1)] text-xs font-semibold text-muted-foreground">
 								{t("personnel_priority_normal")}
 							</div>
 						)}
@@ -154,8 +154,8 @@ export function PersonnelPanel({
 				)}
 
 				{groupedPersonnel.low.length > 0 && (
-					<div className="mb-2">
-						<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+					<div className="mb-[var(--ui-space-2)]">
+						<div className="px-[var(--ui-space-2)] py-[var(--ui-space-1)] text-xs font-semibold text-muted-foreground">
 							{t("personnel_priority_low")}
 						</div>
 						{groupedPersonnel.low.map(renderPersonnelItem)}
@@ -163,14 +163,14 @@ export function PersonnelPanel({
 				)}
 
 				{filteredPersonnel.length === 0 && (
-					<div className="px-2 py-4 text-center text-sm text-muted-foreground">
+					<div className="px-[var(--ui-space-2)] py-[var(--ui-space-4)] text-center text-sm text-muted-foreground">
 						{t("personnel_no_results")}
 					</div>
 				)}
 			</div>
 
 			{/* Footer - Selection count */}
-			<div className="p-2 border-t border-border text-xs text-muted-foreground">
+			<div className="p-[var(--ui-space-2)] border-t border-border text-xs text-muted-foreground">
 				{selectedIds.length > 0
 					? t("personnel_selected_count", {
 							count: selectedIds.length,

@@ -91,7 +91,7 @@ export function ResizablePanel({
 			<button
 				type="button"
 				aria-label="Resize"
-				className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors z-10"
+				className="absolute right-[var(--ui-space-0)] top-[var(--ui-space-0)] bottom-[var(--ui-space-0)] w-[var(--ui-space-1)] cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors z-10"
 				onMouseDown={startResize}
 			/>
 		</div>

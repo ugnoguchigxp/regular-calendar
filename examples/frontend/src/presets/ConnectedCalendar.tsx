@@ -41,14 +41,16 @@ export function ConnectedCalendar({
 		...apiSettings,
 		defaultDuration: 30,
 		weekStartsOn: settings.weekStartsOn,
+		startTime: settings.businessHoursStart,
+		endTime: settings.businessHoursEnd,
 		businessHoursStart: settings.businessHoursStart,
 		businessHoursEnd: settings.businessHoursEnd,
 		timeZone: settings.timeZone,
 	}), [apiSettings, settings]);
 
-	if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
+	if (error) return <div className="p-[var(--ui-space-4)] text-red-500">Error: {error}</div>;
 	if (!apiSettings || loading)
-		return <div className="p-4">Loading schedule data...</div>;
+		return <div className="p-[var(--ui-space-4)]">Loading schedule data...</div>;
 
 	const handleUpdate = async (id: string, data: any) => {
 		// Restore real ID from event if needed (recurrence logic, etc.)

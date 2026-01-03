@@ -82,7 +82,7 @@ export function DayView({
 				<div className="flex" style={{ minHeight: `${gridHeight}px` }}>
 					{/* Time Column */}
 					<div
-						className="sticky left-0 z-30 bg-background"
+						className="sticky left-[var(--ui-space-0)] z-30 bg-background"
 						style={{ width: `${DAY_VIEW.TIME_COLUMN_WIDTH}px` }}
 					>
 						<TimeGrid

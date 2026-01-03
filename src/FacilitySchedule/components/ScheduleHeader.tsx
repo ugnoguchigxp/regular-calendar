@@ -44,15 +44,15 @@ export function ScheduleHeader({
 	const { t } = useAppTranslation();
 
 	return (
-		<header className="border-b border-border px-4 py-3 flex items-center justify-between gap-4">
-			<div className="flex items-center gap-2">
+		<header className="border-b border-border px-[var(--ui-space-4)] py-[var(--ui-space-3)] flex items-center justify-between gap-[var(--ui-space-4)]">
+			<div className="flex items-center gap-[var(--ui-space-2)]">
 				<Button
 					variant="outline"
 					size="icon"
 					onClick={() => onNavigate("prev")}
 					aria-label={t("previous")}
 				>
-					<Icons.ChevronLeft className="h-4 w-4" />
+					<Icons.ChevronLeft className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 				</Button>
 				<Button variant="outline" onClick={onToday}>
 					{t("today_button")}
@@ -63,23 +63,23 @@ export function ScheduleHeader({
 					onClick={() => onNavigate("next")}
 					aria-label={t("next")}
 				>
-					<Icons.ChevronRight className="h-4 w-4" />
+					<Icons.ChevronRight className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
 				</Button>
 
-				<span className="text-lg font-bold ml-2">
+				<span className="text-lg font-bold ml-[var(--ui-space-2)]">
 					<DateFormat date={currentDate} showSecondary showDayOfWeek />
 				</span>
 				{headerLeft}
 			</div>
 
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-[var(--ui-space-4)]">
 				{!hideGroupSelector && (
 					<Select
 						value={selectedGroupId ?? undefined}
 						onValueChange={onGroupChange}
 						disabled={isLoading || groups.length === 0}
 					>
-						<SelectTrigger className="w-[200px]">
+						<SelectTrigger className="w-[var(--ui-space-50)]">
 							<SelectValue placeholder="Select Group">
 								{groups.find((g) => g.id === selectedGroupId)?.name || ""}
 							</SelectValue>

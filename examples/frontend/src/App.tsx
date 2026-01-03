@@ -146,8 +146,8 @@ function AppContent() {
 
 	return (
 		<div className="h-screen flex flex-col bg-background text-foreground">
-			<nav className="p-4 border-b border-border flex gap-4 items-center">
-				<h2 className="m-0 mr-4 text-lg font-bold">{t("app_title")}</h2>
+			<nav className="p-[var(--ui-space-4)] border-b border-border flex gap-[var(--ui-space-4)] items-center">
+				<h2 className="m-[var(--ui-space-0)] mr-[var(--ui-space-4)] text-lg font-bold">{t("app_title")}</h2>
 
 				<Button
 					onClick={() => setActiveTab("facility")}

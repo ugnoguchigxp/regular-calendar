@@ -88,10 +88,47 @@ export const isCurrentTimeInRange = (
 export const getEventsForDate = (
 	events: ScheduleEvent[],
 	date: Date,
+	startHour = 8,
+	endHour = 20,
 ): ScheduleEvent[] => {
+	const dayStart = new Date(date);
+	dayStart.setHours(0, 0, 0, 0);
+
+	const dayEnd = new Date(date);
+	dayEnd.setHours(23, 59, 59, 999);
+
+	// If endHour > 24, we need to include events from early morning of the next day
+	const businessDayEnd = new Date(date);
+	businessDayEnd.setHours(0, 0, 0, 0);
+	businessDayEnd.setMinutes(endHour * 60);
+
 	return events.filter((event) => {
-		const eventDate = new Date(event.startDate);
-		return eventDate.toDateString() === date.toDateString();
+		const eventStart = new Date(event.startDate);
+
+		// 1. Event starts on this calendar day
+		const startsOnDay =
+			eventStart.getTime() >= dayStart.getTime() &&
+			eventStart.getTime() <= dayEnd.getTime();
+
+		// 2. Event is within business hours (could be early morning of next calendar day)
+		const isWithinBusinessHours =
+			eventStart.getTime() >= dayStart.getTime() + startHour * 60 * 60 * 1000 &&
+			eventStart.getTime() < businessDayEnd.getTime();
+
+		// Special case: Event at 01:00 is part of previous day if endHour > 24
+		if (endHour > 24) {
+			const calendarNextDayStart = new Date(dayStart);
+			calendarNextDayStart.setDate(dayStart.getDate() + 1);
+
+			if (
+				eventStart.getTime() >= calendarNextDayStart.getTime() &&
+				eventStart.getTime() < businessDayEnd.getTime()
+			) {
+				return true;
+			}
+		}
+
+		return startsOnDay && isWithinBusinessHours;
 	});
 };
 
@@ -191,7 +228,13 @@ export const calculateEventPosition = (
 	const hourHeight = TIME_SLOT_HEIGHT * slotsPerHour;
 
 	const baseMinutes = startHour * 60;
-	const relativeStartMinutes = startTotalMinutes - baseMinutes;
+	let relativeStartMinutes = startTotalMinutes - baseMinutes;
+
+	// If start time is before startHour but it's actually early morning of "business day"
+	// (e.g. settings 05:00 - 29:00, and event is at 01:00)
+	if (relativeStartMinutes < 0) {
+		relativeStartMinutes += 24 * 60;
+	}
 
 	const top = (relativeStartMinutes / 60) * hourHeight;
 	const height = (durationMinutes / 60) * hourHeight;

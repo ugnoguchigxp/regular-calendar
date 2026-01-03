@@ -61,7 +61,7 @@ export function MonthView({
 				{displayDayNames.map((day) => (
 					<div
 						key={day}
-						className="p-3 text-center text-sm font-medium text-muted-foreground border-r border-border last:border-r-0"
+						className="p-[var(--ui-space-3)] text-center text-sm font-medium text-muted-foreground border-r border-border last:border-r-0"
 					>
 						{day}
 					</div>
@@ -70,7 +70,7 @@ export function MonthView({
 
 			{/* Grid */}
 			<div
-				className="flex-1 grid gap-0"
+				className="flex-1 grid gap-[var(--ui-space-0)]"
 				style={{ gridTemplateRows: `repeat(${calendarGrid.length}, 1fr)` }}
 			>
 				{calendarGrid.map((week) => (
@@ -99,25 +99,25 @@ export function MonthView({
 								>
 									<button
 										type="button"
-										className="absolute inset-0 z-0"
+										className="absolute inset-[var(--ui-space-0)] z-0"
 										aria-label={t("day_cell") ?? "Day cell"}
 										onClick={() => onDateClick?.(date)}
 									/>
 									<div
-										className={`text-sm font-medium mb-1 flex justify-between items-center
+										className={`text-sm font-medium mb-[var(--ui-space-1)] flex justify-between items-center
                                         ${getDateClasses(date, isSelected)}
                                      `}
 									>
 										<span
 											className={`
-                                            ${isToday ? "bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center" : ""}
+                                            ${isToday ? "bg-primary text-primary-foreground rounded-full w-[var(--ui-space-6)] h-[var(--ui-space-6)] flex items-center justify-center" : ""}
                                          `}
 										>
 											{date.getDate()}
 										</span>
 									</div>
 
-									<div className="space-y-1 overflow-hidden flex-1 relative z-10">
+									<div className="space-y-[var(--ui-space-1)] overflow-hidden flex-1 relative z-10">
 										{dayEvents.slice(0, 3).map((event) => (
 											<MonthEventItem
 												key={event.id}

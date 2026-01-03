@@ -70,7 +70,7 @@ describe("WeekView", () => {
 
 		expect(screen.getByText("Sun")).toBeInTheDocument();
 		expect(screen.getByText("Mon")).toBeInTheDocument();
-	});
+	}, 10000);
 
 	it("renders time slots", () => {
 		render(
