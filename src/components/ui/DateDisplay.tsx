@@ -7,6 +7,7 @@
 import React from "react";
 import { useAppTranslation } from "@/utils/i18n";
 import { cn } from "./Button"; // Reusing cn utility
+import { formatCalendarDate } from "@/utils/dateFormats";
 
 interface DateDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
 	date: Date;
@@ -22,14 +23,14 @@ interface DateDisplayProps extends React.HTMLAttributes<HTMLSpanElement> {
 	 * - compact: 11/27(木) / 27 Thu (multiline in orig, but simplified here)
 	 */
 	format?:
-		| "full"
-		| "date"
-		| "weekday"
-		| "weekdayShort"
-		| "yearMonth"
-		| "monthDay"
-		| "monthDayShort"
-		| "compact";
+	| "full"
+	| "date"
+	| "weekday"
+	| "weekdayShort"
+	| "yearMonth"
+	| "monthDay"
+	| "monthDayShort"
+	| "compact";
 
 	// Legacy props for compatibility (now handled or ignored safely)
 	variant?: string; // Mapped to format if possible
@@ -78,95 +79,26 @@ export const DateDisplay: React.FC<DateDisplayProps> = React.memo(
 			format === "full" && isDisplayFormat(variant) ? variant : format;
 
 		const formatDate = (): string => {
-			switch (effectiveFormat) {
-				case "weekday":
-					return date.toLocaleDateString(locale, { weekday: "long" });
-
-				case "weekdayShort":
-					return date.toLocaleDateString(locale, { weekday: "short" });
-
-				case "yearMonth":
-					if (lang === "ja") {
-						return `${date.getFullYear()}年${date.getMonth() + 1}月`;
-					}
-					return date.toLocaleDateString(locale, {
-						year: "numeric",
-						month: "long",
-					});
-
-				case "monthDay":
-					if (lang === "ja") {
-						return `${date.getMonth() + 1}月${date.getDate()}日`;
-					}
-					return date.toLocaleDateString(locale, {
-						day: "numeric",
-						month: "long",
-					});
-
-				case "monthDayShort": {
-					if (lang === "ja") {
-						const weekdayShort = date.toLocaleDateString(locale, {
-							weekday: "short",
-						});
-						return `${date.getMonth() + 1}/${date.getDate()} (${weekdayShort})`;
-					}
-					const monthShort = date.toLocaleDateString(locale, {
-						month: "short",
-					});
-					const weekdayShort = date.toLocaleDateString(locale, {
-						weekday: "short",
-					});
-					return `${date.getDate()} ${monthShort} (${weekdayShort})`;
-				}
-
-				case "compact": {
-					if (lang === "ja") {
-						const weekdayShort = date.toLocaleDateString(locale, {
-							weekday: "short",
-						});
-						// Note: keeping it inline for span compatibility, original had \n
-						return `${date.getMonth() + 1}/${date.getDate()} (${weekdayShort})`;
-					}
-					const weekdayShort = date.toLocaleDateString(locale, {
-						weekday: "short",
-					});
-					return `${date.getDate()} ${weekdayShort}`;
-				}
-
-				case "date":
-					if (lang === "ja") {
-						return date.toLocaleDateString(locale, {
-							year: "numeric",
-							month: "long",
-							day: "numeric",
-						});
-					}
-					return date.toLocaleDateString(locale, {
-						day: "numeric",
-						month: "long",
-						year: "numeric",
-					});
-
-				default:
-					// full
-					if (lang === "ja") {
-						const dateStr = date.toLocaleDateString(locale, {
-							year: "numeric",
-							month: "long",
-							day: "numeric",
-						});
-						const weekday = date.toLocaleDateString(locale, {
-							weekday: "long",
-						});
-						return `${dateStr}（${weekday}）`;
-					}
-					return date.toLocaleDateString(locale, {
-						weekday: "long",
-						day: "numeric",
-						month: "long",
-						year: "numeric",
-					});
+			// Direct mapping for supported types including composites
+			if (
+				effectiveFormat === "full" ||
+				effectiveFormat === "yearMonth" ||
+				effectiveFormat === "monthDay" ||
+				effectiveFormat === "monthDayShort" ||
+				effectiveFormat === "compact" ||
+				effectiveFormat === "weekday" ||
+				effectiveFormat === "weekdayShort"
+			) {
+				return formatCalendarDate(date, locale, effectiveFormat);
 			}
+
+			if (effectiveFormat === "date") {
+				// "date" usually maps to a standard date string.
+				// Using 'picker' style (medium date) e.g. "Jan 2, 2026"
+				return formatCalendarDate(date, locale, "picker");
+			}
+
+			return formatCalendarDate(date, locale, "full");
 		};
 
 		return (

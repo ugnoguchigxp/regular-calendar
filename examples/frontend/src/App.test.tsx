@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next";
 import { useSettings as useMockSettings } from "./useSettings";
 import {
 	useScheduleContext as useMockScheduleApi,
-	type AppSettings,
-} from "regular-calendar";
+} from "./presets/ScheduleContext";
+
 
 vi.mock("react-i18next", () => ({
 	useTranslation: vi.fn(),
@@ -56,60 +56,52 @@ vi.mock("regular-calendar", () => ({
 }));
 
 describe("App", () => {
-	const mockUseTranslation = {
-		t: vi.fn((key: string) => {
-			const translations: Record<string, string> = {
-				app_title: "Regular Calendar Demo",
-				app_header_regular_calendar: "Regular Calendar",
-				app_header_facility_schedule: "Facility Schedule",
-				app_header_facility_structure: "Facility Structure",
-				settings_title: "Settings",
-			};
-			return translations[key] || key;
-		}),
-	};
-
-	const mockSettings = {
-		settings: {
-			language: "en" as const,
-			theme: "light" as const,
-			density: "normal" as const,
-			borderRadius: 4,
-			fontSize: 14,
-			weekStartsOn: 0 as const,
-			businessHoursStart: "09:00",
-			businessHoursEnd: "17:00",
-			timeZone: "UTC",
-			closedDays: [],
-		} as AppSettings,
-		updateSettings: vi.fn(),
-		resetSettings: vi.fn(),
-	};
-
-	const mockScheduleApi = {
-		groups: [],
-		resources: [],
-		personnel: [],
-		personnelEvents: [],
-		events: [],
-		settings: mockSettings.settings,
-		loading: false,
-		error: null,
-		createGroup: vi.fn(),
-		updateGroup: vi.fn(),
-		deleteGroup: vi.fn(),
-		createResource: vi.fn(),
-		updateResource: vi.fn(),
-		deleteResource: vi.fn(),
-		updatePersonnelPriority: vi.fn(),
-		fetchPersonnelEvents: vi.fn(),
-	};
-
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(useTranslation).mockReturnValue(mockUseTranslation as any);
-		vi.mocked(useMockSettings).mockReturnValue(mockSettings as any);
-		vi.mocked(useMockScheduleApi).mockReturnValue(mockScheduleApi as any);
+		vi.mocked(useTranslation).mockReturnValue({
+			t: ((k: string) => k) as any,
+			i18n: { language: "en", changeLanguage: vi.fn() } as any,
+			ready: true,
+		} as any);
+		vi.mocked(useMockSettings).mockReturnValue({
+			settings: {
+				theme: "light",
+				density: "normal",
+				borderRadius: 8,
+				fontSize: 14,
+				weekStartsOn: 0,
+				businessHoursStart: "09:00",
+				businessHoursEnd: "18:00",
+				closedDays: [],
+				language: "en",
+				timeZone: "UTC",
+			},
+			updateSettings: vi.fn(),
+			resetSettings: vi.fn(),
+		});
+		vi.mocked(useMockScheduleApi).mockReturnValue({
+			events: [],
+			resources: [],
+			groups: [],
+			settings: null,
+			loading: false,
+			error: null,
+			createEvent: vi.fn(),
+			updateEvent: vi.fn(),
+			deleteEvent: vi.fn(),
+			createGroup: vi.fn(),
+			updateGroup: vi.fn(),
+			deleteGroup: vi.fn(),
+			createResource: vi.fn(),
+			updateResource: vi.fn(),
+			deleteResource: vi.fn(),
+			updatePersonnelPriority: vi.fn(),
+			fetchResourceAvailability: vi.fn(),
+			fetchPersonnelEvents: vi.fn(),
+			personnel: [],
+			personnelEvents: [],
+			getResourceAvailabilityFromCache: vi.fn(),
+		});
 	});
 
 	it("アプリケーションタイトルが表示されること", () => {

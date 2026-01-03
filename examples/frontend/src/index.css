@@ -63,9 +63,12 @@
 	--ui-component-height: 3rem;
 	--ui-list-row-height: 3.5rem;
 	--ui-component-padding-x: 1.25rem;
-	--ui-component-padding-y: 1rem;
-	--ui-button-padding-x: 1.5rem;
+	--ui-component-padding-y: 0.75rem;
+	/* 12px */
+	--ui-button-padding-x: 1.25rem;
+	/* 20px */
 	--ui-button-padding-y: 0.75rem;
+	/* 12px */
 	--ui-font-size-base: 1rem;
 	--ui-modal-padding: 2rem;
 	--ui-table-cell-padding: 1rem;
@@ -115,6 +118,3 @@
 	width: 2.5rem !important;
 	/* 40px */
 }
-
-/* Ensure we use the config file */
-@config "../tailwind.config.js";

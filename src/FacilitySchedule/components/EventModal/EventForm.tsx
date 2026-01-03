@@ -3,8 +3,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button";
@@ -43,6 +42,8 @@ import { useAttendeeManagement } from "../../hooks/useAttendeeManagement";
 import { useResourceAvailability } from "../../hooks/useResourceAvailability";
 import { useScheduleConflict } from "../../hooks/useScheduleConflict";
 import { AttendeeInput } from "./AttendeeInput";
+import { formatCalendarDate } from "@/utils/dateFormats";
+import { formatIsoDateTime } from "@/utils/dateUtils";
 
 // Helper for duration formatting
 const formatDuration = (hours: number) => {
@@ -107,6 +108,10 @@ interface EventFormProps {
 	readOnlyResource?: boolean;
 	personnel?: Personnel[];
 	currentUserId?: string;
+	onAvailabilityRequest?: (criteria: {
+		startDate: Date;
+		endDate: Date;
+	}) => void;
 }
 
 export function EventForm({
@@ -123,8 +128,9 @@ export function EventForm({
 	readOnlyResource = false,
 	personnel = [],
 	currentUserId,
+	onAvailabilityRequest,
 }: EventFormProps) {
-	const { t } = useAppTranslation();
+	const { t, i18n } = useAppTranslation();
 	const isEditMode = !!event;
 	const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 
@@ -137,16 +143,15 @@ export function EventForm({
 				"",
 			attendee: event?.attendee || "[]",
 			resourceId: event?.resourceId || defaultResourceId || "",
-			startDate: format(
+			startDate: formatIsoDateTime(
 				event?.startDate || defaultStartTime || new Date(),
-				"yyyy-MM-dd'T'HH:mm",
 			),
 			durationHours: event
 				? Math.round(
-						((event.endDate.getTime() - event.startDate.getTime()) /
-							(1000 * 60 * 60)) *
-							100,
-					) / 100
+					((event.endDate.getTime() - event.startDate.getTime()) /
+						(1000 * 60 * 60)) *
+					100,
+				) / 100
 				: 1,
 			status: event?.status || "booked",
 			note: event?.note || "",
@@ -179,6 +184,22 @@ export function EventForm({
 			currentEventId: event?.id,
 			externalAvailability: resourceAvailability,
 		});
+
+	// Trigger external availability check when date/duration changes
+	useEffect(() => {
+		if (onAvailabilityRequest) {
+			const start = new Date(startDateVal);
+			if (!Number.isNaN(start.getTime())) {
+				const end = new Date(start);
+				const minutes = (Number(durationVal) || 0) * 60;
+				end.setMinutes(end.getMinutes() + minutes);
+				onAvailabilityRequest({
+					startDate: start,
+					endDate: end,
+				});
+			}
+		}
+	}, [startDateVal, durationVal, onAvailabilityRequest]);
 
 	const conflict = useScheduleConflict({
 		startDate: startDateVal,
@@ -362,7 +383,7 @@ export function EventForm({
 													} else {
 														date.setHours(0, 0, 0, 0);
 													}
-													field.onChange(format(date, "yyyy-MM-dd'T'HH:mm"));
+													field.onChange(formatIsoDateTime(date));
 												}
 											}}
 										/>
@@ -378,7 +399,7 @@ export function EventForm({
 									<FormItem>
 										<FormControl>
 											<Input
-												value={format(new Date(field.value), "HH:mm")}
+												value={formatCalendarDate(new Date(field.value), i18n.language, "time24")}
 												readOnly
 												className="cursor-pointer w-24"
 												onClick={() => setIsTimeModalOpen(true)}
@@ -425,8 +446,9 @@ export function EventForm({
 									<span className="text-sm text-muted-foreground">
 										End:{" "}
 										{!Number.isNaN(endDateDisplay.getTime())
-											? format(endDateDisplay, "HH:mm")
-											: "--:--"}
+											? formatCalendarDate(endDateDisplay, i18n.language, "time24")
+											: t("event_form_end_time_placeholder")
+										}
 									</span>
 								)}
 							</div>
@@ -441,9 +463,9 @@ export function EventForm({
 						<div>
 							<strong className="block text-sm">Conflict Detected</strong>
 							<span className="text-xs">
-								Clash with {conflict.existingSchedule.title} (
-								{format(conflict.existingSchedule.startDate, "HH:mm")} -{" "}
-								{format(conflict.existingSchedule.endDate, "HH:mm")})
+								{t("event_form_conflict_warning")} (
+								{formatCalendarDate(conflict.existingSchedule.startDate, i18n.language, "time24")} -{" "}
+								{formatCalendarDate(conflict.existingSchedule.endDate, i18n.language, "time24")})
 							</span>
 						</div>
 					</div>
@@ -521,10 +543,10 @@ export function EventForm({
 					const cur = new Date(form.getValues("startDate"));
 					const [h, m] = time.split(":").map(Number);
 					cur.setHours(h || 0, m || 0);
-					form.setValue("startDate", format(cur, "yyyy-MM-dd'T'HH:mm"));
+					form.setValue("startDate", formatIsoDateTime(cur));
 					setIsTimeModalOpen(false);
 				}}
-				initialValue={format(new Date(form.getValues("startDate")), "HH:mm")}
+				initialValue={formatCalendarDate(new Date(form.getValues("startDate")), i18n.language, "time24")}
 				variant="time"
 			/>
 		</Form>

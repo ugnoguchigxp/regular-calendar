@@ -5,6 +5,9 @@ Designed to be domain-agnostic, customizable, and easy to integrate with any bac
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
+[![npm](https://img.shields.io/npm/v/regular-calendar)](https://www.npmjs.com/package/regular-calendar)
+
+**npm**: https://www.npmjs.com/package/regular-calendar
 
 ## Screenshots 📸
 
@@ -31,10 +34,10 @@ pnpm install regular-calendar
 ```
 
 ### Peer Dependencies
-Ensure you have the following installed:
+Ensure you have the following installed (versions should match your app):
 
 ```bash
-pnpm install react react-dom date-fns
+pnpm install react react-dom date-fns i18next react-i18next
 ```
 
 ## Quick Start 🏃‍♂️
@@ -88,9 +91,21 @@ function App() {
         }}
         onEventCreate={(data) => console.log('Create:', data)}
         onEventUpdate={(id, data) => console.log('Update:', id, data)}
+        onEventDelete={(id) => console.log('Delete:', id)}
       />
     </div>
   );
+}
+```
+
+### RegularCalendar (compact calendar without resources)
+
+```tsx
+import { RegularCalendar } from 'regular-calendar';
+import 'regular-calendar/styles';
+
+function App() {
+  return <RegularCalendar />;
 }
 ```
 
@@ -175,7 +190,8 @@ type FacilityScheduleSettings = {
 
 ### Internationalization (i18n) 🌍
 
-This library uses `react-i18next` for translations. You must provide translations for the following keys in your i18n configuration:
+This library uses `react-i18next`. If you do nothing, it falls back to **English** labels.
+If you want multiple languages, initialize `i18next` in your app and provide the keys you need.
 
 ```json
 {
@@ -199,7 +215,7 @@ This library uses `react-i18next` for translations. You must provide translation
 }
 ```
 
-Ensure your `i18n` instance is initialized before rendering the component.
+Ensure your `i18n` instance is initialized before rendering the component when using multiple languages.
 
 ## Full Stack Example 🏗️
 

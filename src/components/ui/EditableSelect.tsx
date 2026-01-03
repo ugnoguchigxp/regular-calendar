@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { Icons } from "@/components/ui/Icons";
 import * as React from "react";
 import {
 	type SelectItemVariants,
@@ -155,8 +155,8 @@ export const EditableSelect = React.forwardRef<
 						tabIndex={-1}
 						aria-label="Toggle options"
 					>
-						<ChevronDown
-							className={cn(size === "lg" ? "h-5 w-5" : "h-4 w-4")}
+						<Icons.ChevronDown
+							className={cn("h-ui-icon w-ui-icon")}
 						/>
 					</button>
 				</div>

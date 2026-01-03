@@ -13,21 +13,40 @@ app.use("/*", cors());
 
 // Initialize DB (Local SQLite only)
 // For D1, tables should be created via wrangler migrations, but for simple demo we can skip or assume created.
+// Initialize DB (Local SQLite only)
 ensureTables();
 
-// Seed logic (Simple check on startup - mostly for local dev)
-app.use("*", async (c, next) => {
-	const db = getDb(c.env);
+// Auto-seed for local development (Immediate execution on startup)
+(async () => {
 	try {
+		// Attempt to get DB without env (works for local Bun + SQLite)
+		const db = getDb();
 		const groupCount = await db.select().from(groups).limit(1);
 		if (groupCount.length === 0) {
+			console.log("Local DB empty, seeding...");
 			await seed(db);
 		}
 	} catch (e) {
-		console.error(
-			"DB Init check failed (might be first run or D1 not ready):",
-			e,
-		);
+		// Ignore errors that might occur if this is running in a context where
+		// local getDb() fails (though ensureTables() implies local context).
+		console.log("Skipping local auto-seed (env specific)");
+	}
+})();
+
+// Legacy Middleware check (Optional: keeping for D1/Env specific cases if needed, though immediate check handles local)
+app.use("*", async (c, next) => {
+	// We can keep this for D1 environments where immediate execution above fails due to missing env
+	const db = getDb(c.env);
+	try {
+		// Only check if we are in an environment that has DB binding (D1)
+		if (c.env && c.env.DB) {
+			const groupCount = await db.select().from(groups).limit(1);
+			if (groupCount.length === 0) {
+				await seed(db);
+			}
+		}
+	} catch (e) {
+		// Silent fail or log
 	}
 	await next();
 });
@@ -74,7 +93,7 @@ app.get("/api/events", async (c) => {
 						}
 					}
 				}
-			} catch {}
+			} catch { }
 
 			// Check extendedProps (Legacy Fallback)
 			const extProps = event.extendedProps;

@@ -61,6 +61,17 @@
 	--spacing-ui-button-y: var(--ui-button-padding-y);
 	--spacing-ui-cell: var(--ui-table-cell-padding);
 	--spacing-ui-gap: var(--ui-gap-base);
+	--spacing-ui-icon: var(--ui-icon-size);
+	--spacing-ui-checkbox: var(--ui-checkbox-size);
+
+	/* Height and Width */
+	--height-ui: var(--ui-component-height);
+	--width-ui: var(--ui-component-height);
+	--min-height-ui-touch: var(--ui-touch-target-min);
+	--min-width-ui-touch: var(--ui-touch-target-min);
+
+	/* Font size */
+	--font-size-ui: var(--ui-font-size-base);
 }
 
 @layer base {
@@ -83,6 +94,10 @@ textarea {
 }
 
 @layer utilities {
+	.p-ui {
+		padding: var(--ui-component-padding-y) var(--ui-component-padding-x);
+	}
+
 	.px-ui {
 		padding-left: var(--ui-component-padding-x);
 		padding-right: var(--ui-component-padding-x);
@@ -105,5 +120,9 @@ textarea {
 
 	.gap-ui {
 		gap: var(--ui-gap-base);
+	}
+
+	.h-ui {
+		height: var(--ui-component-height);
 	}
 }

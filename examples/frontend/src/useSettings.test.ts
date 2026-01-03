@@ -3,7 +3,7 @@ import { useSettings } from "./useSettings";
 import {
 	useSettings as useLibrarySettings,
 	type AppSettings,
-} from "regular-calendar";
+} from "./presets/useSettings";
 import i18n from "./i18n";
 
 vi.mock("regular-calendar", () => ({
@@ -37,7 +37,22 @@ describe("useSettings", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		(useLibrarySettings as any).mockReturnValue(mockLibrarySettings);
+		vi.mocked(useLibrarySettings).mockReturnValue({
+			settings: {
+				theme: "light",
+				density: "normal",
+				borderRadius: 8,
+				fontSize: 14,
+				weekStartsOn: 0,
+				businessHoursStart: "09:00",
+				businessHoursEnd: "18:00",
+				closedDays: [],
+				language: "en",
+				timeZone: "UTC",
+			},
+			updateSettings: vi.fn(),
+			resetSettings: vi.fn(),
+		});
 	});
 
 	it("ライブラリのuseSettingsを呼び出し、その結果を返すこと", () => {

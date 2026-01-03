@@ -4,7 +4,7 @@
  * RegularCalendarとuseScheduleViewで重複していた日付計算ロジックを統合。
  */
 
-import { addDays, addMonths, addWeeks } from "date-fns";
+import { addDays, addMonths, addWeeks } from "@/utils/dateUtils";
 import type { ViewMode } from "../FacilitySchedule/FacilitySchedule.schema";
 
 /**

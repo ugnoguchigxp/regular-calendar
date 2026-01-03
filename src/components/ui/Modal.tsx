@@ -1,6 +1,6 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
 import * as React from "react";
+import { Icons } from "./Icons";
 import { cn } from "./utils";
 
 interface IModalProps
@@ -135,7 +135,7 @@ const Modal = React.memo(
 									{title || "Dialog"}
 								</DialogPrimitive.Title>
 								<DialogPrimitive.Close className="rounded-full p-1 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-accent focus:outline-none disabled:pointer-events-none cursor-pointer">
-									<X className="h-5 w-5 text-foreground" />
+									<Icons.X className="h-5 w-5 text-foreground" />
 									<span className="sr-only">Close</span>
 								</DialogPrimitive.Close>
 							</div>
@@ -203,32 +203,32 @@ const Modal = React.memo(
 								"fixed z-50 flex flex-col gap-0 bg-background",
 								!draggable && "duration-200",
 								!draggable &&
-									"data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+								"data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
 								!draggable &&
-									"bottom-0 left-0 right-0 w-full h-[90vh] rounded-t-xl border-t border-border",
+								"bottom-0 left-0 right-0 w-full h-[90vh] rounded-t-xl border-t border-border",
 								!draggable &&
-									"data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+								"data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
 								draggable &&
-									"left-[50%] top-[50%] h-auto max-h-[90vh] w-[90vw] max-w-lg rounded-md border border-border",
+								"left-[50%] top-[50%] h-auto max-h-[90vh] w-[90vw] max-w-lg rounded-md border border-border",
 								!draggable &&
-									"sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-md sm:border sm:border-border",
+								"sm:left-[50%] sm:top-[50%] sm:bottom-auto sm:right-auto sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-md sm:border sm:border-border",
 								!draggable &&
-									"sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
+								"sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
 								!draggable &&
-									"sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%]",
+								"sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%]",
 								!draggable &&
-									"sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]",
+								"sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]",
 								className,
 							)}
 							style={
 								draggable
 									? {
-											transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
-											cursor: isDragging ? "grabbing" : undefined,
-										}
+										transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
+										cursor: isDragging ? "grabbing" : undefined,
+									}
 									: {
-											transform: "translate(-50%, -50%)",
-										}
+										transform: "translate(-50%, -50%)",
+									}
 							}
 						>
 							{modalContent}

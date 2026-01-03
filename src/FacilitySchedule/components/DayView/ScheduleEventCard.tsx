@@ -43,7 +43,7 @@ export function ScheduleEventCard({
 		Math.round(
 			((event.endDate.getTime() - event.startDate.getTime()) /
 				(1000 * 60 * 60)) *
-				10,
+			10,
 		) / 10;
 
 	// Determine styling
@@ -88,7 +88,7 @@ export function ScheduleEventCard({
         absolute rounded-md shadow-sm border
         transition-all duration-200 cursor-pointer
         ${isDragging ? "opacity-50 scale-95" : "hover:shadow-md hover:scale-[1.02] hover:z-10"}
-        ${bgColor} text-primary-foreground
+        ${bgColor} text-primary-foreground text-left
         ${event.hasConflict ? "ring-2 ring-red-400 ring-offset-1" : ""}
       `}
 						style={customStyle}
@@ -97,7 +97,7 @@ export function ScheduleEventCard({
 						}}
 						onClick={onClick}
 					>
-						<div className="p-2 h-full flex flex-col overflow-hidden">
+						<div className="p-2 h-full flex flex-col items-start justify-start overflow-hidden">
 							{/* Conflict Warning */}
 							{event.hasConflict && (
 								<div className="text-xs font-bold mb-1">⚠️ Double Booking</div>

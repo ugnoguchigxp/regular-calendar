@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Icons } from "@/components/ui/Icons";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/Input";
@@ -102,6 +102,7 @@ export function AttendeeInput({
 				addAttendee({
 					name: inputValue.trim(),
 					type: "external",
+					// Add type if missing or default?
 				});
 			}
 		} else if (e.key === "Backspace" && inputValue === "" && value.length > 0) {
@@ -142,7 +143,7 @@ export function AttendeeInput({
 						}}
 						className="text-muted-foreground group-hover:text-destructive transition-colors"
 					>
-						<X className="h-3 w-3" />
+						<Icons.X className="h-3 w-3" />
 					</button>
 				</div>
 			))}

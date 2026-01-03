@@ -18,9 +18,9 @@ export const selectTriggerVariants = cva(
 				ghost: "bg-transparent border-transparent shadow-none",
 			},
 			size: {
-				sm: "min-h-[32px] px-3 py-1 text-sm",
-				md: "h-ui px-3 text-ui min-h-ui-touch",
-				lg: "h-12 px-5 py-3 text-lg",
+				sm: "px-ui py-1 text-sm",
+				md: "px-ui py-ui text-ui min-h-ui-touch",
+				lg: "px-5 py-3 text-lg",
 			},
 		},
 		defaultVariants: {
@@ -45,9 +45,9 @@ export const selectItemVariants = cva(
 				check: "",
 			},
 			size: {
-				sm: "min-h-[32px] py-1.5 text-sm",
-				md: "h-auto text-ui min-h-[var(--ui-list-row-height)]",
-				lg: "min-h-[48px] py-3 text-lg",
+				sm: "py-1.5 text-sm",
+				md: "h-auto text-ui py-ui",
+				lg: "py-3 text-lg",
 			},
 			padding: {
 				plain: "px-ui",

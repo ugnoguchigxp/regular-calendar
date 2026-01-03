@@ -3,6 +3,7 @@ import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "./Button";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
 import { cn } from "./utils";
+import { formatCalendarDate } from "@/utils/dateFormats";
 
 interface MonthYearPickerProps {
 	date: Date;
@@ -103,7 +104,7 @@ export function MonthYearPicker({
 						ref={handleScrollContainerRef}
 						style={{ scrollbarWidth: "thin" }}
 					>
-						<div className="p-2 grid grid-cols-3 gap-1">
+						<div className="p-ui-gap grid grid-cols-3 gap-1">
 							{years.map((y) => (
 								<Button
 									key={y}
@@ -123,26 +124,22 @@ export function MonthYearPicker({
 					</div>
 
 					{/* Right: Month Grid */}
-					<div className="w-[240px] p-3 flex flex-col">
+					<div className="w-[240px] p-ui flex flex-col">
 						<div className="text-center font-bold mb-2">
-							{new Intl.DateTimeFormat(locale, { year: "numeric" }).format(
-								new Date(year, 0, 1),
-							)}
+							{formatCalendarDate(new Date(year, 0, 1), locale, "year")}
 						</div>
 						<div className="grid grid-cols-3 gap-2">
 							{months.map((m) => {
 								const isCurrent =
 									m === date.getMonth() && year === date.getFullYear();
-								const monthLabel = new Intl.DateTimeFormat(locale, {
-									month: "short",
-								}).format(new Date(year, m, 1));
+								const monthLabel = formatCalendarDate(new Date(year, m, 1), locale, "monthShort");
 								return (
 									<Button
 										key={m}
 										variant={isCurrent ? "default" : "outline"}
 										size="sm"
 										onClick={() => handleMonthClick(m)}
-										className={cn("h-10", isCurrent && "pointer-events-none")}
+										className={cn("h-auto", isCurrent && "pointer-events-none")}
 									>
 										{monthLabel}
 									</Button>

@@ -1,7 +1,7 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Check, Loader2, X } from "lucide-react";
 import * as React from "react";
+import { Icons } from "./Icons";
 import { cn } from "./utils";
 
 const buttonVariants = cva(
@@ -49,11 +49,11 @@ const buttonVariants = cva(
 					"border border-destructive/50 text-destructive bg-background hover:bg-destructive/10 hover:border-destructive",
 			},
 			size: {
-				default: "h-ui px-ui-button py-ui-button text-ui min-h-ui-touch",
-				sm: "h-8 rounded-md px-3 text-xs",
-				lg: "h-10 rounded-md px-8",
-				icon: "h-ui w-[var(--ui-component-height)] min-h-ui-touch min-w-[var(--ui-touch-target-min)]",
-				circle: "h-8 w-8 rounded-full p-0",
+				default: "px-ui-button py-ui text-ui min-h-ui-touch",
+				sm: "rounded-md px-3 py-1 text-xs",
+				lg: "rounded-md px-8 py-3",
+				icon: "p-ui min-h-ui-touch min-w-[var(--ui-touch-target-min)]",
+				circle: "rounded-full p-2 aspect-square",
 			},
 		},
 		defaultVariants: {
@@ -65,7 +65,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof buttonVariants> {
+	VariantProps<typeof buttonVariants> {
 	asChild?: boolean;
 	loading?: boolean;
 	success?: boolean;
@@ -97,9 +97,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		const finalVariant = success ? "positive" : error ? "destructive" : variant;
 
 		const renderContent = () => {
-			if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
-			if (success) return <Check className="h-4 w-4" />;
-			if (error) return <X className="h-4 w-4" />;
+			if (loading) return <Icons.Spinner className="h-ui-icon w-ui-icon" />;
+			if (success) return <Icons.Check className="h-ui-icon w-ui-icon" />;
+			if (error) return <Icons.X className="h-ui-icon w-ui-icon" />;
 
 			const truncatedLabel =
 				typeof children === "string" && children.length > maxLabelLength
@@ -124,7 +124,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 			return (
 				<span className="flex min-w-0 items-center">
-					{Icon && <Icon className={cn("mr-2 h-4 w-4", !children && "mr-0")} />}
+					{Icon && <Icon className={cn("mr-2 h-ui-icon w-ui-icon", !children && "mr-0")} />}
 					{label}
 				</span>
 			);

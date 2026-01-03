@@ -1,12 +1,10 @@
-import { format } from "date-fns";
-import { enUS, ja } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
-import type { DateRange } from "react-day-picker";
+import { Icons } from "@/components/ui/Icons";
 import { useAppTranslation } from "@/utils/i18n";
 import { Button } from "./Button";
-import { Calendar } from "./Calendar";
+import { Calendar, type DateRange } from "./Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
 import { cn } from "./utils";
+import { formatCalendarDate } from "@/utils/dateFormats";
 
 interface DatePickerBaseProps {
 	className?: string;
@@ -55,7 +53,7 @@ export function DatePicker(props: DatePickerProps) {
 		selectsRange,
 	} = props;
 	const { t, i18n } = useAppTranslation();
-	const locale = i18n.language?.startsWith("ja") ? ja : enUS;
+	const locale = i18n.language?.startsWith("ja") ? "ja-JP" : "en-US";
 	const resolvedLabel = label ?? t("date_picker_label");
 
 	// Determine state for Single Mode
@@ -63,53 +61,57 @@ export function DatePicker(props: DatePickerProps) {
 	const singleDate = !selectsRange ? (props.value ?? props.date) : undefined;
 
 	// Handler for Single Mode
-	const handleSingleSelect = (date: Date | undefined) => {
+	const handleSingleSelect = (date: any) => {
+		const selectedDate = date as Date | undefined;
 		if (selectsRange) return;
 
 		// Support legacy onChange (Date | null)
 		if (props.onChange) {
-			props.onChange(date ?? null);
+			props.onChange(selectedDate ?? null);
 		}
 		// Support new setDate (Date | undefined)
 		if (props.setDate) {
-			props.setDate(date);
+			props.setDate(selectedDate);
 		}
 	};
 
 	// Determine state for Range Mode
 	const rangeDate: DateRange | undefined = selectsRange
 		? {
-				from: props.startDate ?? undefined,
-				to: props.endDate ?? undefined,
-			}
+			from: props.startDate ?? undefined,
+			to: props.endDate ?? undefined,
+		}
 		: undefined;
 
 	// Handler for Range Mode
-	const handleRangeSelect = (range: DateRange | undefined) => {
+	const handleRangeSelect = (range: any) => {
+		const selectedRange = range as DateRange | undefined;
 		if (!selectsRange) return;
 
 		if (props.onRangeChange) {
-			props.onRangeChange([range?.from ?? null, range?.to ?? null]);
+			props.onRangeChange([selectedRange?.from ?? null, selectedRange?.to ?? null]);
 		}
 	};
 
-	// Calculate disabled days for react-day-picker
+	// Calculate disabled days for custom calendar
 	const disabledDays = [
 		...(minDate ? [{ before: minDate }] : []),
 		...(maxDate ? [{ after: maxDate }] : []),
 	];
+
+
 
 	// Determine display text
 	let displayText = resolvedLabel;
 	const isValueSelected = selectsRange ? !!rangeDate?.from : !!singleDate;
 
 	if (selectsRange && rangeDate?.from) {
-		displayText = format(rangeDate.from, "PPP", { locale });
+		displayText = formatCalendarDate(rangeDate.from, locale, "picker");
 		if (rangeDate.to) {
-			displayText += ` - ${format(rangeDate.to, "PPP", { locale })}`;
+			displayText += ` - ${formatCalendarDate(rangeDate.to, locale, "picker")}`;
 		}
 	} else if (!selectsRange && singleDate) {
-		displayText = format(singleDate, "PPP", { locale });
+		displayText = formatCalendarDate(singleDate, locale, "picker");
 	}
 
 	return (
@@ -124,7 +126,7 @@ export function DatePicker(props: DatePickerProps) {
 						className,
 					)}
 				>
-					<CalendarIcon className="me-2 h-4 w-4" />
+					<Icons.Calendar className="me-2 h-ui-icon w-ui-icon" />
 					{displayText}
 				</Button>
 			</PopoverTrigger>
@@ -137,7 +139,7 @@ export function DatePicker(props: DatePickerProps) {
 						onSelect={handleRangeSelect}
 						numberOfMonths={monthsShown}
 						disabled={disabledDays}
-						initialFocus
+						locale={locale}
 					/>
 				) : (
 					<Calendar
@@ -147,7 +149,7 @@ export function DatePicker(props: DatePickerProps) {
 						onSelect={handleSingleSelect}
 						numberOfMonths={monthsShown}
 						disabled={disabledDays}
-						initialFocus
+						locale={locale}
 					/>
 				)}
 			</PopoverContent>

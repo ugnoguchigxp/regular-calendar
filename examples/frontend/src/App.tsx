@@ -1,20 +1,22 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-	ConnectedCalendar,
-	ConnectedFacilitySchedule,
-	ScheduleProvider,
-	useScheduleContext as useScheduleApi,
 	SettingsModal,
 	FacilityStructureSettings,
 	PersonnelPanel,
 	ResizablePanel,
 	getPersonnelColor,
 } from "regular-calendar";
+import { ConnectedCalendar } from "./presets/ConnectedCalendar";
+import { ConnectedFacilitySchedule } from "./presets/ConnectedFacilitySchedule";
+import {
+	ScheduleProvider,
+	useScheduleContext as useScheduleApi,
+} from "./presets/ScheduleContext";
 import { useSettings } from "./useSettings";
-import { Button } from "@/components/ui/Button";
-
-import "./index.css";
+import { Button } from "regular-calendar";
+import "regular-calendar/styles";
+// import "./index.css"; // Use package styles instead
 
 // Demo: "Me" is the first personnel (p1)
 const MY_PERSONNEL_ID = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";
@@ -110,12 +112,16 @@ function AppContent() {
 						});
 					}
 				}
-			} catch {} // ignore parse error
+			} catch { } // ignore parse error
 
 			// Fallback to legacy extendedProps if no matches found in attendees
 			if (matches.length === 0) {
-				const personnelId = event.extendedProps?.personnelId;
-				if (personnelId && visibleSet.has(personnelId)) {
+				const extendedProps = event.extendedProps;
+				const personnelId = extendedProps?.personnelId;
+				if (
+					typeof personnelId === "string" &&
+					visibleSet.has(personnelId)
+				) {
 					const color = personnelColorMap.get(personnelId);
 					if (color) {
 						matches.push({ personnelId, color });
@@ -202,10 +208,10 @@ function AppContent() {
 				{/* Right: Calendar */}
 				<div className="flex-1 overflow-hidden">
 					{activeTab === "facility" ? (
-						<ConnectedFacilitySchedule settings={settings} />
+						<ConnectedFacilitySchedule settings={settings as any} />
 					) : (
 						<ConnectedCalendar
-							settings={settings}
+							settings={settings as any}
 							additionalEvents={coloredPersonnelEvents}
 							currentUserId={MY_PERSONNEL_ID}
 						/>

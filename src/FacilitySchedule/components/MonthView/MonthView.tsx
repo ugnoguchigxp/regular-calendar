@@ -3,7 +3,7 @@
  * Heatmap based on booking density
  */
 
-import { addDays } from "date-fns";
+import { addDays } from "@/utils/dateUtils";
 import { useMemo } from "react";
 import { DateDisplay } from "@/components/ui/DateDisplay";
 import { PercentFormat } from "@/components/ui/PercentFormat";
@@ -137,7 +137,7 @@ export function MonthView({
 	return (
 		<div className="flex flex-col h-full">
 			{/* Header */}
-			<div className="border-b border-border bg-background px-6 py-3">
+			<div className="border-b border-border bg-background px-ui py-ui">
 				<div className="flex items-center justify-between">
 					<div className="flex-1">
 						<h2 className="text-lg font-semibold">

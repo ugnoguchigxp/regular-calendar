@@ -31,6 +31,10 @@ interface EventModalProps {
 	onSave: (data: EventFormData) => void;
 	onDelete?: (eventId: string) => void;
 	currentUserId?: string;
+	onAvailabilityRequest?: (criteria: {
+		startDate: Date;
+		endDate: Date;
+	}) => void;
 }
 
 export function EventModal({
@@ -48,6 +52,7 @@ export function EventModal({
 	personnel = [],
 	currentUserId,
 	resourceAvailability,
+	onAvailabilityRequest,
 }: EventModalProps) {
 	const { t } = useAppTranslation();
 	const isEditMode = !!event;
@@ -61,7 +66,7 @@ export function EventModal({
 	}>({
 		open: false,
 		title: "",
-		onConfirm: () => {},
+		onConfirm: () => { },
 	});
 
 	React.useEffect(() => {
@@ -115,6 +120,7 @@ export function EventModal({
 					onDelete={isEditMode && onDelete ? handleDelete : undefined}
 					readOnlyResource={readOnlyResource}
 					currentUserId={currentUserId}
+					onAvailabilityRequest={onAvailabilityRequest}
 				/>
 			</div>
 

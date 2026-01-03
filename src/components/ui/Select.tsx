@@ -87,13 +87,13 @@ export const SelectTrigger = React.forwardRef<
 			disabled={ctx.disabled || props.disabled}
 			onClick={() => !ctx.disabled && ctx.setOpen(!ctx.open)}
 			className={cn(
-				"flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+				"flex w-full items-center justify-between rounded-md border border-input bg-background px-ui py-ui text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
 				className,
 			)}
 			{...props}
 		>
 			{children}
-			<Icons.ChevronDown className="h-4 w-4 opacity-50" />
+			<Icons.ChevronDown className="h-ui-icon w-ui-icon opacity-50" />
 		</button>
 	);
 });
@@ -108,9 +108,7 @@ export const SelectValue = React.forwardRef<
 
 	return (
 		<span ref={ref} className={cn("block truncate", className)} {...props}>
-			<span ref={ref} className={cn("block truncate", className)} {...props}>
-				{props.children || ctx.label || ctx.value || placeholder}
-			</span>
+			{props.children || ctx.label || ctx.value || placeholder}
 		</span>
 	);
 });

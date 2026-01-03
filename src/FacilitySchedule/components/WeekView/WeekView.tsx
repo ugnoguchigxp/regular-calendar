@@ -5,7 +5,7 @@
  * Max 4 events per cell
  */
 
-import { addDays } from "date-fns";
+import { addDays } from "@/utils/dateUtils";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/Button";
 import { DateDisplay } from "@/components/ui/DateDisplay";
@@ -114,7 +114,7 @@ export function WeekView({
 	return (
 		<div className="flex flex-col h-full">
 			{/* Header (Desktop) */}
-			<div className="hidden md:block border-b border-border bg-background px-6 py-4">
+			<div className="hidden md:block border-b border-border bg-background px-ui py-ui">
 				<div className="flex items-center justify-between">
 					<div>
 						<h2 className="text-lg font-bold">

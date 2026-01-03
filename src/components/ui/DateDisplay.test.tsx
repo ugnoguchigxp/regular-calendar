@@ -60,7 +60,7 @@ describe("DateDisplay", () => {
 		render(
 			<DateDisplay date={new Date("2025-01-15")} format="monthDayShort" />,
 		);
-		expect(screen.getByText(/1\/15/)).toBeInTheDocument();
+		expect(screen.getByText(/1月15日/)).toBeInTheDocument();
 	});
 
 	it("handles compact format", () => {

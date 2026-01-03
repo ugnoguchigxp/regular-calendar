@@ -190,6 +190,16 @@ i18n
 
 					facility_prompt_group_name: "グループ名を入力",
 					facility_prompt_resource_name: "リソース名を入力",
+					// Extended keys
+					personnel_list_title: "担当者",
+					personnel_search_placeholder: "名前またはメールで検索...",
+					personnel_no_results: "該当する担当者は見つかりませんでした",
+					personnel_context_hint: "右クリックで優先度を設定",
+					event_name_label: "イベント名",
+					event_name_placeholder: "イベント名を入力",
+					attendee_self: "自分のみ",
+					date_picker_label: "日付を選択",
+					keypad_title_time: "時間を入力",
 				},
 			},
 		},

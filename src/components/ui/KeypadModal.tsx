@@ -80,11 +80,11 @@ const KeypadModalLayout: React.FC<KeypadLayoutProps> = React.memo(
 					{displayContent}
 				</div>
 				{errorMessage && (
-					<div className="text-destructive text-sm text-center p-2 bg-destructive/10 rounded-md border-l-[3px] border-destructive">
+					<div className="text-destructive text-sm text-center p-ui-gap bg-destructive/10 rounded-md border-l-[3px] border-destructive">
 						{errorMessage}
 					</div>
 				)}
-				<div className="grid grid-cols-3 gap-2">
+				<div className="grid grid-cols-3 gap-ui-gap">
 					{[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
 						<button
 							key={num}
@@ -113,7 +113,7 @@ const KeypadModalLayout: React.FC<KeypadLayoutProps> = React.memo(
 						⌫
 					</button>
 				</div>
-				<div className="grid grid-cols-2 gap-2 mt-2">
+				<div className="grid grid-cols-2 gap-ui-gap mt-2">
 					<button
 						type="button"
 						onClick={onClear}

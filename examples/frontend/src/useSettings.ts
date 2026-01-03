@@ -1,7 +1,7 @@
-import { useSettings as useLibrarySettings } from "regular-calendar";
+import { useSettings as useLibrarySettings } from "./presets/useSettings";
 import i18n from "./i18n";
 
-export type { AppSettings } from "regular-calendar";
+export type { AppSettings } from "./presets/useSettings";
 
 export function useSettings() {
 	return useLibrarySettings({

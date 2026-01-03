@@ -106,13 +106,9 @@ export function useAttendeeManagement({
 				// ignore
 			}
 
-			// Edit Mode: If no attendees, delete the event
-			if (isEditMode && finalAttendeeList.length === 0) {
-				return {
-					finalAttendees: "[]",
-					shouldDelete: true,
-				};
-			}
+			// Logic removed: previously deleted event if attendees were empty in edit mode.
+			// Now we allow empty attendees.
+
 
 			// Create Mode: Ensure current user is included if creating
 			if (!isEditMode && currentUserId && personnel) {

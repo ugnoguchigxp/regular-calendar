@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Check } from "lucide-react";
 import { describe, expect, it, vi } from "vitest";
 import { Button } from "./Button";
+import { Icons } from "./Icons";
 
 describe("Button", () => {
 	it("should render button with text", () => {
@@ -45,7 +45,7 @@ describe("Button", () => {
 	});
 
 	it("should render with icon", () => {
-		render(<Button icon={Check}>With Icon</Button>);
+		render(<Button icon={Icons.Check}>With Icon</Button>);
 
 		const iconElement = screen.getByRole("button").querySelector("svg");
 		expect(iconElement).toBeInTheDocument();
@@ -142,14 +142,14 @@ describe("Button", () => {
 	});
 
 	it("should handle icon-only button", () => {
-		render(<Button icon={Check}></Button>);
+		render(<Button icon={Icons.Check}></Button>);
 
 		const iconElement = screen.getByRole("button").querySelector("svg");
 		expect(iconElement).toBeInTheDocument();
 	});
 
 	it("should not add margin when icon-only", () => {
-		render(<Button icon={Check}></Button>);
+		render(<Button icon={Icons.Check}></Button>);
 
 		const iconElement = screen.getByRole("button").querySelector("svg");
 		expect(iconElement).not.toHaveClass("mr-2");

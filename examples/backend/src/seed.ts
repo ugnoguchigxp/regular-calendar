@@ -138,7 +138,9 @@ const initialEvents = [
 		resourceId: "r1",
 		groupId: "group1",
 		title: "Morning Session",
-		attendee: "John Doe",
+		attendee: JSON.stringify([
+			{ name: "John Doe", type: "personnel", personnelId: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" },
+		]),
 		startDate: `${todayStr}T09:00:00`,
 		endDate: `${todayStr}T13:00:00`,
 		status: "booked",
@@ -149,7 +151,7 @@ const initialEvents = [
 		resourceId: "r2",
 		groupId: "group1",
 		title: "Afternoon Checkup",
-		attendee: "Jane Smith",
+		attendee: JSON.stringify([{ name: "Jane Smith", type: "external" }]),
 		startDate: `${todayStr}T14:00:00`,
 		endDate: `${todayStr}T15:30:00`,
 		status: "booked",
@@ -262,6 +264,89 @@ export async function seed(db: any) {
 
 	let eventId = 100;
 
+	// X. GUARANTEED John Doe Events (User Request)
+	// Ensure John Doe has visible events in the current view
+	const johnDoe = seedPersonnel.find((p) => p.name === "John Doe");
+	if (johnDoe) {
+		const fixedEvents = [
+			{
+				title: "Project Kickoff",
+				offset: 0,
+				hour: 10,
+				duration: 60,
+				type: "Meeting",
+			},
+			{ title: "Deep Work", offset: 0, hour: 14, duration: 90, type: "Event" },
+			{
+				title: "1on1 with Manager",
+				offset: 1,
+				hour: 11,
+				duration: 60,
+				type: "Meeting",
+			},
+			{
+				title: "Sprint Planning",
+				offset: 2,
+				hour: 13,
+				duration: 90,
+				type: "Meeting",
+			},
+			{
+				title: "Code Review",
+				offset: 3,
+				hour: 9,
+				duration: 60,
+				type: "Event",
+			},
+		];
+
+		fixedEvents.forEach((evt) => {
+			const date = new Date(today);
+			date.setDate(date.getDate() + evt.offset);
+			// Skip Sunday logic if needed, but for guaranteed visibility let's keep it or just shift if Sunday
+			if (date.getDay() === 0) date.setDate(date.getDate() + 1);
+
+			const startDate = new Date(date);
+			startDate.setHours(evt.hour, 0, 0, 0);
+			const endDate = new Date(startDate);
+			endDate.setMinutes(endDate.getMinutes() + evt.duration);
+
+			// Try to assign a resource for Meetings
+			let resourceId: string | null = null;
+			let groupId: string | null = null;
+			if (evt.type === "Meeting") {
+				const r = seedResources[0]; // Just pick first one
+				if (isAvailable(r.id, startDate, endDate)) {
+					bookResource(r.id, startDate, endDate);
+					resourceId = r.id;
+					groupId = r.groupId;
+				}
+			}
+
+			allEvents.push({
+				id: `john${eventId++}`,
+				resourceId: resourceId,
+				groupId: groupId,
+				title: evt.title,
+				attendee: JSON.stringify([
+					{
+						name: johnDoe.name,
+						personnelId: johnDoe.id,
+						type: "personnel",
+					},
+				]),
+				startDate: startDate.toISOString(),
+				endDate: endDate.toISOString(),
+				status: "booked",
+				isAllDay: false,
+				extendedProps: {
+					usage: evt.type,
+					ownerId: johnDoe.id,
+				},
+			});
+		});
+	}
+
 	// A. Create Shared Meetings (One event, One Resource, Multiple Attendees)
 	// Create 15 shared meetings
 	for (let i = 0; i < 15; i++) {
@@ -366,14 +451,17 @@ export async function seed(db: any) {
 
 			const title = eventTitles[Math.floor(Math.random() * eventTitles.length)];
 
+			// Generate valid JSON attendee structure
+			const attendeeData = [
+				{ name: person.name, personnelId: person.id, type: "personnel" },
+			];
+
 			allEvents.push({
 				id: `pe${eventId++}`,
 				resourceId: resourceId,
 				groupId: groupId,
 				title: title,
-				attendee: JSON.stringify([
-					{ name: person.name, personnelId: person.id },
-				]),
+				attendee: JSON.stringify(attendeeData),
 				startDate: startDate.toISOString(),
 				endDate: endDate.toISOString(),
 				status: "booked",

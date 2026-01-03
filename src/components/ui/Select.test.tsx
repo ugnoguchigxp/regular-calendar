@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 import {
 	Select,
 	SelectContent,
@@ -25,19 +26,25 @@ describe("Select", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: "a Chevron down" }),
+			screen.getByRole("button", { name: "a" }),
 		).toHaveTextContent("a");
 
-		await user.click(screen.getByRole("button", { name: "a Chevron down" }));
+		await user.click(screen.getByRole("button", { name: "a" }));
 		expect(screen.getAllByText("Alpha").length).toBeGreaterThan(0);
 		expect(screen.getByText("Beta")).toBeInTheDocument();
 
 		await user.click(screen.getByText("Beta"));
 		expect(onValueChange).toHaveBeenCalledWith("b");
-		await user.click(screen.getByRole("button", { name: "Beta Chevron down" }));
+
+		// Wait for dropdown to close
+		await waitFor(() => {
+			expect(screen.queryByText("Alpha")).not.toBeInTheDocument();
+		});
+
+		await user.click(screen.getAllByRole("button", { name: "Beta" })[0]);
 		await waitFor(() => {
 			expect(
-				screen.getByRole("button", { name: "Beta Chevron down" }),
+				screen.getAllByRole("button", { name: "Beta" })[0],
 			).toHaveTextContent("Beta");
 		});
 	});
@@ -55,7 +62,7 @@ describe("Select", () => {
 			</Select>,
 		);
 
-		await user.click(screen.getByRole("button", { name: "a Chevron down" }));
+		await user.click(screen.getByRole("button", { name: "a" }));
 		expect(screen.queryByText("Alpha")).not.toBeInTheDocument();
 	});
 });

@@ -4,11 +4,11 @@ import {
 	endOfDay,
 	endOfMonth,
 	endOfWeek,
-	format,
 	startOfDay,
 	startOfMonth,
 	startOfWeek,
-} from "date-fns";
+} from "@/utils/dateUtils";
+import { formatCalendarDate } from "@/utils/dateFormats";
 import type {
 	Resource,
 	ScheduleConflict,
@@ -99,9 +99,12 @@ export function getEventDuration(event: ScheduleEvent): number {
 	return durationMs / (1000 * 60 * 60);
 }
 
+
+// ... (existing imports/code)
+
 export function getEventDisplayText(event: ScheduleEvent): string {
-	const startTime = format(event.startDate, "HH:mm");
-	const endTime = format(event.endDate, "HH:mm");
+	const startTime = formatCalendarDate(event.startDate, undefined, "time24");
+	const endTime = formatCalendarDate(event.endDate, undefined, "time24");
 	return `${event.title} (${startTime}-${endTime})`;
 }
 

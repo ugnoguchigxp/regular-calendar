@@ -43,16 +43,10 @@
 			"import": "./dist/index.js",
 			"require": "./dist/index.cjs"
 		},
-		"./styles": "./dist/index.css",
-		"./tailwind-preset": {
-			"import": "./tailwind.preset.js",
-			"require": "./tailwind.preset.cjs"
-		}
+		"./styles": "./dist/index.css"
 	},
 	"files": [
-		"dist",
-		"tailwind.preset.js",
-		"tailwind.preset.cjs"
+		"dist"
 	],
 	"scripts": {
 		"build": "tsc -p tsconfig.build.json && vite build",
@@ -66,8 +60,6 @@
 		"prepublishOnly": "npm run test:run && npm run build"
 	},
 	"peerDependencies": {
-		"@gxp/design-system": "*",
-		"date-fns": "^3.0.0 || ^4.0.0",
 		"i18next": ">= 23.0.0",
 		"react": "^18.0.0 || ^19.0.0",
 		"react-dom": "^18.0.0 || ^19.0.0",
@@ -90,8 +82,6 @@
 		"@radix-ui/react-slot": "^1.2.4",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"lucide-react": "^0.562.0",
-		"react-day-picker": "^9.13.0",
 		"react-hook-form": "^7.51.3",
 		"tailwind-merge": "^3.4.0",
 		"tailwindcss-animate": "^1.0.7",
@@ -99,7 +89,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
-		"@tailwindcss/postcss": "^4.1.18",
+		"@tailwindcss/vite": "^4.1.18",
 		"@testing-library/dom": "^10.0.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^15.0.0",
@@ -110,9 +100,7 @@
 		"@vitejs/plugin-react": "^5.1.2",
 		"@vitest/coverage-istanbul": "^3.2.4",
 		"@vitest/ui": "^3.2.4",
-		"autoprefixer": "^10.4.22",
 		"jsdom": "^24.0.0",
-		"postcss": "^8.5.4",
 		"tailwindcss": "^4.1.17",
 		"typescript": "^5.9.2",
 		"vite": "^7.2.7",
