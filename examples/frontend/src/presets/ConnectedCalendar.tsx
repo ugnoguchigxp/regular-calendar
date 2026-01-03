@@ -1,13 +1,7 @@
-import { useState } from "react";
-import {
-	RegularCalendar,
-	RegularCalendarSchema,
-	type ScheduleEvent,
-} from "regular-calendar";
-import { ConnectedEventModal } from "./ConnectedEventModal";
-import type { EventFormData } from "./hooks/useEventForm";
+import { useMemo } from "react";
+import { ScheduleManager, type ScheduleEvent } from "regular-calendar";
 import { useScheduleContext } from "./ScheduleContext";
-import { cleanEventId, mergeEvents } from "./utils";
+import { mergeEvents } from "./utils";
 
 interface ConnectedCalendarProps {
 	settings: {
@@ -38,103 +32,49 @@ export function ConnectedCalendar({
 		deleteEvent,
 	} = useScheduleContext();
 
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | undefined>(
-		undefined,
+	const allEvents = useMemo(
+		() => mergeEvents(events, additionalEvents),
+		[events, additionalEvents]
 	);
-	const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-	// Merge all events using utility function
-	const allEvents = mergeEvents(events, additionalEvents);
+	const mergedSettings = useMemo(() => ({
+		...apiSettings,
+		defaultDuration: 30,
+		weekStartsOn: settings.weekStartsOn,
+		businessHoursStart: settings.businessHoursStart,
+		businessHoursEnd: settings.businessHoursEnd,
+		timeZone: settings.timeZone,
+	}), [apiSettings, settings]);
 
 	if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
 	if (!apiSettings || loading)
 		return <div className="p-4">Loading schedule data...</div>;
 
-	// Merge API settings with local settings
-	const mergedSettings = {
-		...apiSettings,
-		defaultDuration: 30,
-		weekStartsOn: settings.weekStartsOn,
-		startTime: settings.businessHoursStart,
-		endTime: settings.businessHoursEnd,
-		timeZone: settings.timeZone,
-	};
-	const calendarEvents =
-		allEvents as unknown as RegularCalendarSchema.ScheduleEvent[];
-	const calendarSettings =
-		mergedSettings as unknown as RegularCalendarSchema.FacilityScheduleSettings;
-
-	const handleTimeSlotClick = (date: Date) => {
-		setSelectedDate(date);
-		setSelectedEvent(undefined);
-		setIsModalOpen(true);
+	const handleUpdate = async (id: string, data: any) => {
+		// Restore real ID from event if needed (recurrence logic, etc.)
+		// We try to find the event and check for realId property
+		const event = allEvents.find((e) => e.id === id);
+		const realId = (event?.extendedProps?.realId as string) || id;
+		await updateEvent(realId, data);
 	};
 
-	const handleEventClick = (event: ScheduleEvent) => {
-		// Restore real ID using utility function
-		const cleanEvent = cleanEventId(event);
-		setSelectedEvent(cleanEvent);
-		setSelectedDate(undefined);
-		setIsModalOpen(true);
-	};
-
-	const handleClose = () => {
-		setIsModalOpen(false);
-		setSelectedEvent(undefined);
-		setSelectedDate(undefined);
-	};
-
-	const handleSave = async (data: EventFormData) => {
-		try {
-			if (selectedEvent) {
-				await updateEvent(selectedEvent.id, data);
-			} else {
-				await createEvent(data);
-			}
-			handleClose();
-		} catch (e) {
-			console.error("Failed to save event", e);
-		}
-	};
-
-	const handleDelete = async () => {
-		if (selectedEvent) {
-			try {
-				await deleteEvent(selectedEvent.id);
-				handleClose();
-			} catch (e) {
-				console.error("Failed to delete event", e);
-			}
-		}
+	const handleDelete = async (id: string) => {
+		const event = allEvents.find((e) => e.id === id);
+		const realId = (event?.extendedProps?.realId as string) || id;
+		await deleteEvent(realId);
 	};
 
 	return (
-		<>
-			<RegularCalendar
-				events={calendarEvents}
-				settings={calendarSettings}
-				isLoading={loading}
-				onEventClick={handleEventClick}
-				onTimeSlotClick={handleTimeSlotClick}
-				onDateClick={handleTimeSlotClick}
-				enablePersistence={true}
-				defaultView="week"
-				storageKey="regular-calendar-demo-view"
-			/>
-
-			<ConnectedEventModal
-				isOpen={isModalOpen}
-				onClose={handleClose}
-				onSave={handleSave}
-				onDelete={handleDelete}
-				event={selectedEvent}
-				defaultStartTime={selectedDate}
-				resources={resources}
-				groups={groups}
-				events={events}
-				currentUserId={currentUserId}
-			/>
-		</>
+		<ScheduleManager
+			events={allEvents}
+			resources={resources}
+			groups={groups}
+			settings={mergedSettings}
+			isLoading={loading}
+			onEventCreate={createEvent}
+			onEventUpdate={handleUpdate}
+			onEventDelete={handleDelete}
+			currentUserId={currentUserId}
+		/>
 	);
 }

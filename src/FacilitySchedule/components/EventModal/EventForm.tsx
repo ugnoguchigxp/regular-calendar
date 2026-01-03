@@ -3,7 +3,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/Button";
@@ -35,6 +35,8 @@ import type {
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
+	CustomField,
+	EventFormData,
 } from "../../FacilitySchedule.schema";
 import { useAttendeeManagement } from "../../hooks/useAttendeeManagement";
 
@@ -62,35 +64,25 @@ const getStringProp = (
 	return typeof candidate === "string" ? candidate : undefined;
 };
 
-// App specific sanitization removed, relying on basic React/Zod protection
-// or assuming input is safe or sanitized on server.
-
-const eventSchema = z.object({
-	title: z.string().min(1, "required"), // Was patientId -> mapped to title
-	attendee: z.string(), // Allow empty (will be '[]')
+// Base Schema
+const baseEventSchema = z.object({
+	title: z.string().min(1, "required"),
+	attendee: z.string(),
 	resourceId: z.string().optional(),
 	startDate: z.string().min(1, "required"),
 	durationHours: z.number().min(0.25).max(24),
 	status: z.string().optional(),
 	note: z.string().optional(),
-
-	// Extended Logic
 	isRecurring: z.boolean().optional(),
 	scheduleType: z.string().optional(),
 	endDate: z.string().optional(),
 	isAllDay: z.boolean().optional(),
 });
 
-type EventFormValues = z.infer<typeof eventSchema>;
+type BaseEventFormValues = z.infer<typeof baseEventSchema>;
+// Allow any extra fields for custom fields
+type EventFormValues = BaseEventFormValues & Record<string, unknown>;
 
-export interface EventFormData
-	extends Omit<EventFormValues, "startDate" | "endDate"> {
-	startDate: Date;
-	endDate: Date;
-	description?: string;
-	[key: string]: unknown;
-	// mapped fields
-}
 
 interface EventFormProps {
 	event?: ScheduleEvent;
@@ -112,6 +104,7 @@ interface EventFormProps {
 		startDate: Date;
 		endDate: Date;
 	}) => void;
+	customFields?: CustomField[];
 }
 
 export function EventForm({
@@ -129,14 +122,46 @@ export function EventForm({
 	personnel = [],
 	currentUserId,
 	onAvailabilityRequest,
+	customFields = [],
 }: EventFormProps) {
 	const { t, i18n } = useAppTranslation();
 	const isEditMode = !!event;
 	const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 
-	const form = useForm<EventFormValues>({
-		resolver: zodResolver(eventSchema),
-		defaultValues: {
+	// Create dynamic schema
+	const schema = useMemo(() => {
+		const customShape: Record<string, z.ZodTypeAny> = {};
+		customFields.forEach((field) => {
+			let fieldSchema: z.ZodTypeAny;
+			if (field.type === "number") {
+				fieldSchema = z.union([
+					z.number(),
+					z.string().transform((val) => (val === "" ? undefined : Number(val))),
+				]);
+				if (field.required) {
+					fieldSchema = z.coerce.number().min(1, "required");
+				} else {
+					fieldSchema = z.coerce.number().optional();
+				}
+			} else if (field.type === "boolean") {
+				fieldSchema = z.boolean().optional();
+			} else {
+				// string-based
+				fieldSchema = z.string();
+				if (field.required) {
+					fieldSchema = (fieldSchema as z.ZodString).min(1, "required");
+				} else {
+					fieldSchema = (fieldSchema as z.ZodString).optional();
+				}
+			}
+			customShape[field.name] = fieldSchema;
+		});
+		return baseEventSchema.extend(customShape);
+	}, [customFields]);
+
+	// Prepare default values
+	const defaultValues = useMemo(() => {
+		const baseDefaults = {
 			title:
 				getStringProp(event?.extendedProps, "originalTitle") ??
 				event?.title ??
@@ -157,9 +182,24 @@ export function EventForm({
 			note: event?.note || "",
 			isRecurring: false,
 			isAllDay: event?.isAllDay || false,
-		},
+		};
+
+		const customDefaults: Record<string, unknown> = {};
+		customFields.forEach((field) => {
+			const val = event?.extendedProps?.[field.name];
+			customDefaults[field.name] =
+				val !== undefined ? val : (field.defaultValue ?? "");
+		});
+
+		return { ...baseDefaults, ...customDefaults };
+	}, [event, defaultResourceId, defaultStartTime, customFields]);
+
+	const form = useForm<EventFormValues>({
+		resolver: zodResolver(schema),
+		defaultValues,
 	});
 
+	// Watch values
 	const isAllDay = form.watch("isAllDay");
 	const startDateVal = form.watch("startDate");
 	const durationVal = form.watch("durationHours");
@@ -234,13 +274,46 @@ export function EventForm({
 			return;
 		}
 
-		const { startDate: _startDate, endDate: _endDate, ...rest } = data;
-		const payload: EventFormData = {
+		// Extract base fields
+		const {
+			startDate: _startDate,
+			endDate: _endDate,
+			title,
+			attendee,
+			resourceId,
+			status,
+			note,
+			durationHours,
+			isAllDay: _isAllDay,
+			isRecurring,
+			scheduleType,
+			...rest
+		} = data;
+
+		// Everything else is a custom field or extended prop
+		const extendedProps: Record<string, unknown> = {
+			...(event?.extendedProps ?? {}),
 			...rest,
-			resourceId: data.resourceId || undefined,
+		};
+
+		// Also extract explicitly defined custom fields to ensure they are captured even if conflicting with base names (unlikely but safe)
+		customFields.forEach((field) => {
+			if (data[field.name] !== undefined) {
+				extendedProps[field.name] = data[field.name];
+			}
+		});
+
+		const payload: EventFormData = {
+			title,
+			attendee: finalAttendees,
+			resourceId: resourceId || undefined,
 			startDate: start,
 			endDate: end,
-			attendee: finalAttendees,
+			status,
+			note,
+			durationHours, // Keep duration if needed by API
+			isAllDay: !!data.isAllDay,
+			extendedProps,
 		};
 
 		onSubmit(payload);
@@ -283,7 +356,7 @@ export function EventForm({
 							<FormLabel>{t("attendee_label") || "Attendee"}</FormLabel>
 							<FormControl>
 								<AttendeeInput
-									value={parseAttendees(field.value)}
+									value={parseAttendees(field.value as string)}
 									onChange={(val) => field.onChange(JSON.stringify(val))}
 									personnel={personnel || []}
 									placeholder={
@@ -301,7 +374,7 @@ export function EventForm({
 					control={form.control}
 					name="resourceId"
 					render={({ field }) => {
-						const displayValue = getDisplayName(field.value || "");
+						const displayValue = getDisplayName((field.value as string) || "");
 
 						return (
 							<FormItem>
@@ -311,7 +384,6 @@ export function EventForm({
 										<div className="p-2 bg-muted rounded-md text-sm border border-input">
 											{displayValue || t("resource_placeholder")}
 										</div>
-										{/* フォーム状態維持用の隠しinput */}
 										<input type="hidden" {...field} />
 									</>
 								) : (
@@ -319,7 +391,6 @@ export function EventForm({
 										<EditableSelect
 											value={displayValue || ""}
 											onChange={(val) => {
-												// 逆引き: 表示名 -> ID
 												const match = availableResources.find((r) => {
 													const displayName = getDisplayName(r.id);
 													return displayName === val;
@@ -337,6 +408,67 @@ export function EventForm({
 					}}
 				/>
 
+				{/* Custom Fields */}
+				{customFields.map((field) => (
+					<FormField
+						key={field.name}
+						control={form.control}
+						name={field.name}
+						render={({ field: formField }) => (
+							<FormItem>
+								<FormLabel>
+									{field.label}
+									{field.required && <span className="text-red-500"> *</span>}
+								</FormLabel>
+								<FormControl>
+									{field.type === "select" ? (
+										<Select
+											onValueChange={formField.onChange}
+											value={String(formField.value || "")}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select..." />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{field.options?.map((opt) => (
+													<SelectItem key={opt.value} value={opt.value}>
+														{opt.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									) : field.type === "boolean" ? (
+										<div className="flex items-center space-x-2">
+											<Checkbox
+												checked={!!formField.value}
+												onCheckedChange={formField.onChange}
+											/>
+											<span className="text-sm text-muted-foreground">
+												{field.label}
+											</span>
+										</div>
+									) : field.type === "number" ? (
+										<Input
+											type="number"
+											{...formField}
+											value={String(formField.value || "")}
+											onChange={formField.onChange}
+										/>
+									) : (
+										<Input
+											{...formField}
+											value={String(formField.value || "")}
+										/>
+									)}
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				))}
+
 				{/* Start Date & Time */}
 				<div className="space-y-4">
 					<div className="flex justify-between items-center">
@@ -350,9 +482,9 @@ export function EventForm({
 								<FormItem className="flex flex-row items-center space-x-2 space-y-0">
 									<FormControl>
 										<Checkbox
-											checked={field.value}
+											checked={!!field.value}
 											onCheckedChange={field.onChange}
-											id="isAllDay-checkbox" // Add ID
+											id="isAllDay-checkbox"
 										/>
 									</FormControl>
 									<label
@@ -399,7 +531,11 @@ export function EventForm({
 									<FormItem>
 										<FormControl>
 											<Input
-												value={formatCalendarDate(new Date(field.value), i18n.language, "time24")}
+												value={formatCalendarDate(
+													new Date(field.value),
+													i18n.language,
+													"time24",
+												)}
 												readOnly
 												className="cursor-pointer w-24"
 												onClick={() => setIsTimeModalOpen(true)}
@@ -446,9 +582,12 @@ export function EventForm({
 									<span className="text-sm text-muted-foreground">
 										End:{" "}
 										{!Number.isNaN(endDateDisplay.getTime())
-											? formatCalendarDate(endDateDisplay, i18n.language, "time24")
-											: t("event_form_end_time_placeholder")
-										}
+											? formatCalendarDate(
+												endDateDisplay,
+												i18n.language,
+												"time24",
+											)
+											: t("event_form_end_time_placeholder")}
 									</span>
 								)}
 							</div>
@@ -464,8 +603,18 @@ export function EventForm({
 							<strong className="block text-sm">Conflict Detected</strong>
 							<span className="text-xs">
 								{t("event_form_conflict_warning")} (
-								{formatCalendarDate(conflict.existingSchedule.startDate, i18n.language, "time24")} -{" "}
-								{formatCalendarDate(conflict.existingSchedule.endDate, i18n.language, "time24")})
+								{formatCalendarDate(
+									conflict.existingSchedule.startDate,
+									i18n.language,
+									"time24",
+								)}{" "}
+								-{" "}
+								{formatCalendarDate(
+									conflict.existingSchedule.endDate,
+									i18n.language,
+									"time24",
+								)}
+								)
 							</span>
 						</div>
 					</div>
@@ -478,7 +627,7 @@ export function EventForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>{t("status_label")}</FormLabel>
-							<Select onValueChange={field.onChange} value={field.value}>
+							<Select onValueChange={field.onChange} value={field.value as string}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue />
@@ -502,7 +651,7 @@ export function EventForm({
 						<FormItem>
 							<FormLabel>{t("note_label")}</FormLabel>
 							<FormControl>
-								<Textarea {...field} placeholder="Add notes..." rows={2} />
+								<Textarea {...field} value={field.value as string || ""} placeholder="Add notes..." rows={2} />
 							</FormControl>
 						</FormItem>
 					)}
@@ -546,7 +695,11 @@ export function EventForm({
 					form.setValue("startDate", formatIsoDateTime(cur));
 					setIsTimeModalOpen(false);
 				}}
-				initialValue={formatCalendarDate(new Date(form.getValues("startDate")), i18n.language, "time24")}
+				initialValue={formatCalendarDate(
+					new Date(form.getValues("startDate")),
+					i18n.language,
+					"time24",
+				)}
 				variant="time"
 			/>
 		</Form>

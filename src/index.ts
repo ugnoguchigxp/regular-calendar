@@ -12,6 +12,30 @@ export { Button, buttonVariants } from "./components/ui/Button";
 export { Checkbox } from "./components/ui/Checkbox";
 export * from "./components/ui/DatePicker";
 export { EditableSelect } from "./components/ui/EditableSelect";
+export * from "./components/ScheduleManager";
+
+// Facility Schedule Manager
+export * from "./components/FacilityScheduleManager/FacilityScheduleManager";
+
+// Context & Providers
+export * from "./contexts/ScheduleContext";
+export type {
+    EventData,
+    ContextResourceAvailability,
+    ScheduleApiClient,
+    ScheduleContextType,
+} from "./contexts/types";
+
+
+// Utils
+export {
+    transformBookingsToEvents,
+    formatEventTitleWithAttendees,
+    resolveEventOwnerId,
+    cleanEventId,
+    parseAttendeeNames,
+    mergeEvents,
+} from "./utils/transformHelpers";
 export {
     Form,
     FormControl,
@@ -40,6 +64,7 @@ export { EventForm } from "./FacilitySchedule/components/EventModal/EventForm";
 export * from "./FacilitySchedule/components/EventModal/EventModal";
 export * from "./FacilitySchedule/FacilitySchedule";
 export * from "./FacilitySchedule/FacilitySchedule.schema";
+
 export * from "./FacilitySchedule/hooks/useAttendeeManagement";
 export * from "./FacilitySchedule/hooks/useResourceAvailability";
 export * from "./FacilitySchedule/hooks/useScheduleConflict";

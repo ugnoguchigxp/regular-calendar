@@ -1,6 +1,7 @@
 import type React from "react";
 import { z } from "zod";
 import type { Personnel } from "../PersonnelPanel/PersonnelPanel.schema";
+export type { Personnel };
 
 // ==========================================
 // Field Schemas
@@ -15,9 +16,16 @@ export const AttendeeInfoSchema = z.object({
 	type: z.enum(["personnel", "external"]).default("external"),
 });
 
-// ==========================================
-// Entity Schemas
-// ==========================================
+// Custom Fields
+export interface CustomField {
+	name: string;
+	label: string;
+	type: "text" | "textarea" | "number" | "date" | "select" | "boolean" | "checkbox";
+	options?: { label: string; value: string }[]; // For select
+	required?: boolean;
+	defaultValue?: unknown;
+	placeholder?: string;
+}
 
 export const ScheduleEventSchema = z.object({
 	id: z.string(),
@@ -153,6 +161,7 @@ export interface EventModalComponentProps {
 	onSave: (data: EventFormData) => void;
 	onDelete?: (eventId: string) => void;
 	currentUserId?: string;
+	customFields?: CustomField[];
 }
 
 export interface FacilityScheduleProps {
@@ -161,6 +170,7 @@ export interface FacilityScheduleProps {
 	resources: Resource[];
 	groups: ResourceGroup[];
 	settings: FacilityScheduleSettings;
+	customFields?: CustomField[];
 
 	// State (controlled)
 	currentDate?: Date;

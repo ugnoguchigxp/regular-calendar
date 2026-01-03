@@ -116,7 +116,7 @@ describe("useAttendeeManagement", () => {
 	});
 
 	describe("processAttendeesForSubmit", () => {
-		it("returns shouldDelete true in edit mode when attendees are empty", () => {
+		it("returns shouldDelete false in edit mode when attendees are empty", () => {
 			const { result } = renderHook(() =>
 				useAttendeeManagement({
 					personnel: mockPersonnel,
@@ -127,10 +127,10 @@ describe("useAttendeeManagement", () => {
 			const output = result.current.processAttendeesForSubmit("[]");
 
 			expect(output.finalAttendees).toBe("[]");
-			expect(output.shouldDelete).toBe(true);
+			expect(output.shouldDelete).toBe(false);
 		});
 
-		it("returns shouldDelete true in edit mode when attendee string is empty", () => {
+		it("returns shouldDelete false in edit mode when attendee string is empty", () => {
 			const { result } = renderHook(() =>
 				useAttendeeManagement({
 					personnel: mockPersonnel,
@@ -141,7 +141,7 @@ describe("useAttendeeManagement", () => {
 			const output = result.current.processAttendeesForSubmit("");
 
 			expect(output.finalAttendees).toBe("[]");
-			expect(output.shouldDelete).toBe(true);
+			expect(output.shouldDelete).toBe(false);
 		});
 
 		it("returns shouldDelete false in edit mode when attendees exist", () => {

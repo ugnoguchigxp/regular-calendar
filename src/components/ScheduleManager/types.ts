@@ -1,18 +1,14 @@
-import type { Resource, ResourceGroup, ScheduleEvent } from "../../types";
+import type { Resource, ResourceGroup, ScheduleEvent, CustomField } from "../../FacilitySchedule/FacilitySchedule.schema";
+export type { CustomField };
 
 export interface CustomFieldOption {
     value: string;
     label: string;
 }
 
-export interface CustomField {
-    name: string;
+export interface CustomFieldOption {
+    value: string;
     label: string;
-    type: "text" | "textarea" | "select" | "checkbox" | "number";
-    options?: CustomFieldOption[]; // For select type
-    required?: boolean;
-    defaultValue?: unknown;
-    placeholder?: string;
 }
 
 export interface ScheduleManagerProps {

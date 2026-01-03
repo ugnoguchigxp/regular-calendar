@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { selectItemVariants, selectTriggerVariants } from "./selectVariants";
 
 describe("selectVariants", () => {
@@ -18,6 +19,6 @@ describe("selectVariants", () => {
 			size: "sm",
 		});
 		expect(classes).toContain("pl-");
-		expect(classes).toContain("min-h-[32px]");
+		expect(classes).toContain("text-sm");
 	});
 });

@@ -1,20 +1,19 @@
-import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-    ConfirmModal,
-    KeypadModal,
-    Modal,
-} from "../../ui";
+import { ConfirmModal } from "../../ui/Modal";
+import { KeypadModal } from "../../ui/KeypadModal";
+import { Modal } from "../../ui/Modal";
 import type {
     Resource,
     ResourceGroup,
     ScheduleEvent,
-} from "../../../types";
+} from "../../../FacilitySchedule/FacilitySchedule.schema";
+import { formatCalendarDate } from "../../../utils/dateFormats";
+import { formatIsoDateTime } from "../../../utils/dateUtils";
 import type { CustomField } from "../types";
 import { EventForm } from "./EventForm";
 import {
-    type EventFormData,
+    type SMEventFormData,
     type EventFormValues,
     prepareEventFormData,
     useAvailableResources,
@@ -33,7 +32,7 @@ interface DefaultEventModalProps {
     defaultStartTime?: Date;
     readOnlyResource?: boolean;
     onClose: () => void;
-    onSave: (data: EventFormData) => void;
+    onSave: (data: SMEventFormData) => void;
     onDelete?: (eventId: string) => void;
     currentUserId?: string;
     customFields?: CustomField[];
@@ -54,7 +53,7 @@ export function DefaultEventModal({
     currentUserId,
     customFields = [],
 }: DefaultEventModalProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Use extracted form hook
     const {
@@ -206,10 +205,10 @@ export function DefaultEventModal({
                     const cur = new Date(form.getValues("startDate"));
                     const [h, m] = time.split(":").map(Number);
                     cur.setHours(h || 0, m || 0);
-                    form.setValue("startDate", format(cur, "yyyy-MM-dd'T'HH:mm"));
+                    form.setValue("startDate", formatIsoDateTime(cur));
                     setIsTimeModalOpen(false);
                 }}
-                initialValue={format(new Date(startDateVal), "HH:mm")}
+                initialValue={formatCalendarDate(new Date(startDateVal), i18n.language, "time24")}
                 variant="time"
             />
 

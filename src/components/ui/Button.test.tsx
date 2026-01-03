@@ -20,7 +20,8 @@ describe("Button", () => {
 	it("should render button with size", () => {
 		render(<Button size="sm">Small</Button>);
 
-		expect(screen.getByRole("button")).toHaveClass("h-8");
+		expect(screen.getByRole("button")).toHaveClass("text-xs");
+		expect(screen.getByRole("button")).toHaveClass("py-1");
 	});
 
 	it("should render loading state", () => {
@@ -100,9 +101,9 @@ describe("Button", () => {
 	it("should handle circle variant", () => {
 		render(<Button size="circle">Circle</Button>);
 
-		expect(screen.getByRole("button")).toHaveClass("h-8");
-		expect(screen.getByRole("button")).toHaveClass("w-8");
 		expect(screen.getByRole("button")).toHaveClass("rounded-full");
+		expect(screen.getByRole("button")).toHaveClass("p-2");
+		expect(screen.getByRole("button")).toHaveClass("aspect-square");
 	});
 
 	it("should apply custom className", () => {

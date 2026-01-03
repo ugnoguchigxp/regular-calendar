@@ -50,6 +50,7 @@ export function ScheduleHeader({
 					variant="outline"
 					size="icon"
 					onClick={() => onNavigate("prev")}
+					aria-label={t("previous")}
 				>
 					<Icons.ChevronLeft className="h-4 w-4" />
 				</Button>
@@ -60,6 +61,7 @@ export function ScheduleHeader({
 					variant="outline"
 					size="icon"
 					onClick={() => onNavigate("next")}
+					aria-label={t("next")}
 				>
 					<Icons.ChevronRight className="h-4 w-4" />
 				</Button>

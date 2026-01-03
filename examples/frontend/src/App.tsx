@@ -10,7 +10,7 @@ import {
 import { ConnectedCalendar } from "./presets/ConnectedCalendar";
 import { ConnectedFacilitySchedule } from "./presets/ConnectedFacilitySchedule";
 import {
-	ScheduleProvider,
+	AppScheduleProvider as ScheduleProvider,
 	useScheduleContext as useScheduleApi,
 } from "./presets/ScheduleContext";
 import { useSettings } from "./useSettings";

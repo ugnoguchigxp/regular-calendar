@@ -1,12 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 import { ScheduleHeader } from "./ScheduleHeader";
 
 const groups = [
 	{
 		id: "g1",
 		name: "Group A",
-		displayMode: "grid",
+		displayMode: "grid" as const,
 		dimension: 1,
 		resources: [],
 		createdAt: new Date(),
@@ -15,7 +16,7 @@ const groups = [
 	{
 		id: "g2",
 		name: "Group B",
-		displayMode: "grid",
+		displayMode: "grid" as const,
 		dimension: 1,
 		resources: [],
 		createdAt: new Date(),
@@ -50,10 +51,10 @@ describe("ScheduleHeader", () => {
 		await user.click(screen.getByRole("button", { name: /week/i }));
 		expect(onViewChange).toHaveBeenCalledWith("week");
 
-		await user.click(screen.getByRole("button", { name: "Chevron left" }));
+		await user.click(screen.getByRole("button", { name: "Previous" }));
 		expect(onNavigate).toHaveBeenCalledWith("prev");
 
-		await user.click(screen.getByRole("button", { name: "Chevron right" }));
+		await user.click(screen.getByRole("button", { name: "Next" }));
 		expect(onNavigate).toHaveBeenCalledWith("next");
 
 		await user.click(screen.getByRole("button", { name: /Group A/ }));

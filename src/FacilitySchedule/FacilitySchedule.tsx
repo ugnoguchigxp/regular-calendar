@@ -39,6 +39,7 @@ export function FacilitySchedule({
 	defaultView = "day",
 	enablePersistence = false,
 	storageKey = "facility-schedule-view",
+	customFields,
 }: FacilityScheduleProps) {
 	const { t } = useAppTranslation();
 
@@ -158,10 +159,10 @@ export function FacilitySchedule({
 					groups={groups}
 					events={events}
 					defaultResourceId={newInfo.resourceId}
-					defaultStartTime={newInfo.startTime}
 					onSave={handleModalSave}
 					onDelete={onEventDelete ? handleModalDelete : undefined}
 					readOnlyResource={true}
+					customFields={customFields}
 				/>
 			) : (
 				<EventModal
@@ -176,6 +177,7 @@ export function FacilitySchedule({
 					onSave={handleModalSave}
 					onDelete={onEventDelete ? handleModalDelete : undefined}
 					readOnlyResource={true}
+					customFields={customFields}
 				/>
 			)}
 		</div>

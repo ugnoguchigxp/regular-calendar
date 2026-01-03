@@ -10,9 +10,11 @@ import type {
 	Resource,
 	ResourceGroup,
 	ScheduleEvent,
+	CustomField,
+	EventFormData,
 } from "../../FacilitySchedule.schema";
 
-import { EventForm, type EventFormData } from "./EventForm";
+import { EventForm } from "./EventForm";
 
 interface EventModalProps {
 	isOpen: boolean;
@@ -35,6 +37,7 @@ interface EventModalProps {
 		startDate: Date;
 		endDate: Date;
 	}) => void;
+	customFields?: CustomField[];
 }
 
 export function EventModal({
@@ -53,6 +56,7 @@ export function EventModal({
 	currentUserId,
 	resourceAvailability,
 	onAvailabilityRequest,
+	customFields,
 }: EventModalProps) {
 	const { t } = useAppTranslation();
 	const isEditMode = !!event;
@@ -96,9 +100,6 @@ export function EventModal({
 		});
 	};
 
-	// const selectedAttendee = event ? attendees.find(a => a.label === event.title) : undefined;
-	// Fallback matching by title if no ID link.
-
 	return (
 		<Modal
 			open={isOpen}
@@ -121,6 +122,7 @@ export function EventModal({
 					readOnlyResource={readOnlyResource}
 					currentUserId={currentUserId}
 					onAvailabilityRequest={onAvailabilityRequest}
+					customFields={customFields}
 				/>
 			</div>
 

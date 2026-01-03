@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { checkScheduleConflict } from "../../../FacilitySchedule/utils/scheduleHelpers";
-import type { Resource, ResourceGroup, ScheduleEvent } from "../../../types";
+import type { Resource, ResourceGroup, ScheduleEvent } from "../../../FacilitySchedule/FacilitySchedule.schema";
+import { formatIsoDateTime } from "../../../utils/dateUtils";
 import type { CustomField } from "../types";
 
 /**
@@ -23,7 +23,7 @@ const baseEventFormSchema = z.object({
 
 // We'll use a dynamic schema generator
 const createEventFormSchema = (customFields: CustomField[] = []) => {
-    let schema = baseEventFormSchema;
+    const schema = baseEventFormSchema;
 
     // We can't easily add fields to the root object if we want them in extendedProps
     // But for the form, we flatten everything and then restructure on submit.
@@ -62,8 +62,9 @@ export type EventFormValues = z.infer<typeof baseEventFormSchema> & Record<strin
 
 /**
  * Event form data with parsed dates
+ * Renamed to SMEventFormData (ScheduleManagerEventFormData) to avoid collision
  */
-export interface EventFormData extends Omit<EventFormValues, "startDate"> {
+export interface SMEventFormData extends Omit<EventFormValues, "startDate"> {
     startDate: Date;
     endDate: Date;
     extendedProps?: Record<string, unknown>;
@@ -98,7 +99,7 @@ export function useEventForm({
     defaultStartTime,
     resources,
     customFields = [],
-    currentUserId,
+    currentUserId: _currentUserId,
 }: UseEventFormOptions): UseEventFormReturn {
     const isEditMode = !!event;
 
@@ -110,9 +111,8 @@ export function useEventForm({
             attendee: event?.attendee || "",
             resourceId:
                 event?.resourceId || defaultResourceId || resources[0]?.id || "",
-            startDate: format(
-                event?.startDate || defaultStartTime || new Date(),
-                "yyyy-MM-dd'T'HH:mm",
+            startDate: formatIsoDateTime(
+                event?.startDate || defaultStartTime || new Date()
             ),
             durationHours: event
                 ? Math.round(
@@ -195,14 +195,17 @@ export function useConflictCheck(
 /**
  * Compute available resources based on resource availability
  * (Simplified for now, assuming all resources are available unless externally filtered)
- * If you need the advanced filtering from the example, we can add it later.
  */
 export function useAvailableResources(
     resources: Resource[],
-    events: ScheduleEvent[],
-    startDate: Date,
-    endDate: Date,
-    currentEventId?: string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _events: ScheduleEvent[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _startDate: Date,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _endDate: Date,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _currentEventId?: string
 ): Resource[] {
     // Placeholder for availability logic if needed. 
     // For now just return all resources.
@@ -235,7 +238,7 @@ export function prepareEventFormData(
     event: ScheduleEvent | undefined,
     currentUserId?: string,
     customFields: CustomField[] = []
-): EventFormData {
+): SMEventFormData {
     const start = new Date(data.startDate);
     if (data.isAllDay) {
         start.setHours(0, 0, 0, 0);
@@ -247,9 +250,6 @@ export function prepareEventFormData(
     // Extract custom fields to extendedProps
     const extendedProps: Record<string, unknown> = { ...(event?.extendedProps ?? {}) };
 
-    // Set ownerId if it exists in previous event or if currentUserId is provided and it's a new event
-    // Ideally, ScheduleManager shouldn't care about ownerId too much unless it's a specific requirement.
-    // But we'll preserve it if present in the original event.
     if (currentUserId && !event) {
         extendedProps.ownerId = currentUserId;
     }

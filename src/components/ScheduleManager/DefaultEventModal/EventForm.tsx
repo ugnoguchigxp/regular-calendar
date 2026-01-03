@@ -1,35 +1,33 @@
-import { format } from "date-fns";
-import { type Control, type UseFormReturn } from "react-hook-form";
+import { type UseFormReturn, type ControllerRenderProps } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { Button } from "../../ui/Button";
+import { Checkbox } from "../../ui/Checkbox";
+import { DatePicker } from "../../ui/DatePicker";
+import { EditableSelect } from "../../ui/EditableSelect";
 import {
-    Button,
-    Checkbox,
-    DatePicker,
-    EditableSelect,
     Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
-    FormMessage,
-    Icons,
-    Input,
+    FormMessage
+} from "../../ui/Form";
+import { Icons } from "../../ui/Icons";
+import { Input } from "../../ui/Input";
+import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
-    Textarea,
-} from "../../ui";
-import { formatDuration } from "../../../FacilitySchedule/utils/scheduleHelpers";
+    SelectValue
+} from "../../ui/Select";
+import { Textarea } from "../../ui/Textarea";
+
+import { formatCalendarDate } from "../../../utils/dateFormats";
+import { formatIsoDateTime, formatIsoTime } from "../../../utils/dateUtils";
 import type { CustomField } from "../types";
 import type { EventFormValues } from "./useEventForm";
-
-// Helper for duration formatting (example helper, or import it)
-// We need to import `formatDuration` or define it.
-// It seems `ConnectedCalendar` had `formatDuration` in `utils`. 
-// I'll create a local helper or import if available. 
-// Let's assume a simple local helper for now if imports fail, but I will try to find it.
+import type { Resource, ResourceGroup, ScheduleConflict } from "../../../FacilitySchedule/FacilitySchedule.schema";
 
 interface EventFormProps {
     form: UseFormReturn<EventFormValues>;
@@ -41,10 +39,10 @@ interface EventFormProps {
     isAllDay: boolean;
     startDateVal: string;
     displayValue: string;
-    availableResources: any[]; // strict typing later
+    availableResources: Resource[];
     resourceDisplayNames: Map<string, string>;
-    groups: any[];
-    conflict?: any;
+    groups: ResourceGroup[];
+    conflict?: ScheduleConflict | null;
     setIsTimeModalOpen: (open: boolean) => void;
     customFields?: CustomField[];
     readOnlyResource?: boolean;
@@ -68,7 +66,7 @@ export function EventForm({
     customFields = [],
     readOnlyResource = false,
 }: EventFormProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Helper to format duration for display
     const formatDurationDisplay = (h: number) => {
@@ -89,7 +87,7 @@ export function EventForm({
                 <FormField
                     control={form.control}
                     name="title"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<EventFormValues, "title"> }) => (
                         <FormItem>
                             <FormLabel>
                                 {t("event_name_label", "Event Name")}{" "}
@@ -113,7 +111,7 @@ export function EventForm({
                 <FormField
                     control={form.control}
                     name="attendee"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<EventFormValues, "attendee"> }) => (
                         <FormItem>
                             <FormLabel>
                                 {t("attendee_label", "Attendee")} <span className="text-red-500">*</span>
@@ -136,7 +134,7 @@ export function EventForm({
                 <FormField
                     control={form.control}
                     name="resourceId"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<EventFormValues, "resourceId"> }) => (
                         <FormItem>
                             <FormLabel>
                                 {t("resource_label", "Resource")}{" "}
@@ -183,7 +181,7 @@ export function EventForm({
                             <FormField
                                 control={form.control}
                                 name="isAllDay"
-                                render={({ field }) => (
+                                render={({ field }: { field: ControllerRenderProps<EventFormValues, "isAllDay"> }) => (
                                     <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                                         <FormControl>
                                             <Checkbox
@@ -203,7 +201,7 @@ export function EventForm({
                             <FormField
                                 name="startDate"
                                 control={form.control}
-                                render={({ field }) => (
+                                render={({ field }: { field: ControllerRenderProps<EventFormValues, "startDate"> }) => (
                                     <DatePicker
                                         value={new Date(field.value)}
                                         disabled={isAllDay || !canEdit}
@@ -215,7 +213,7 @@ export function EventForm({
                                                 } else {
                                                     date.setHours(0, 0, 0, 0);
                                                 }
-                                                field.onChange(format(date, "yyyy-MM-dd'T'HH:mm"));
+                                                field.onChange(formatIsoDateTime(date));
                                             }
                                         }}
                                     />
@@ -223,7 +221,7 @@ export function EventForm({
                             />
                             {!isAllDay && (
                                 <Input
-                                    value={format(new Date(startDateVal), "HH:mm")}
+                                    value={formatIsoTime(new Date(startDateVal))}
                                     readOnly={!canEdit}
                                     className="w-24 cursor-pointer"
                                     onClick={() => canEdit && setIsTimeModalOpen(true)}
@@ -237,7 +235,7 @@ export function EventForm({
                     <FormField
                         control={form.control}
                         name="durationHours"
-                        render={({ field }) => (
+                        render={({ field }: { field: ControllerRenderProps<EventFormValues, "durationHours"> }) => (
                             <FormItem>
                                 <FormLabel>{t("duration_label", "Duration")}</FormLabel>
                                 <Select
@@ -289,7 +287,7 @@ export function EventForm({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {customField.options?.map(opt => (
+                                                {customField.options?.map((opt: { label: string; value: string }) => (
                                                     <SelectItem key={opt.value} value={opt.value}>
                                                         {opt.label}
                                                     </SelectItem>
@@ -315,9 +313,9 @@ export function EventForm({
                         <div>
                             <strong className="block text-sm">Conflict Detected</strong>
                             <span className="text-xs">
-                                Clash with {conflict.existingSchedule.title} (
-                                {format(conflict.existingSchedule.startDate, "HH:mm")} -{" "}
-                                {format(conflict.existingSchedule.endDate, "HH:mm")})
+                                {t("event_form_conflict_warning", "Clash with existing event")} (
+                                {formatCalendarDate(conflict.existingSchedule.startDate, i18n.language, "time24")} -{" "}
+                                {formatCalendarDate(conflict.existingSchedule.endDate, i18n.language, "time24")})
                             </span>
                         </div>
                     </div>
@@ -327,7 +325,7 @@ export function EventForm({
                 <FormField
                     control={form.control}
                     name="status"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<EventFormValues, "status"> }) => (
                         <FormItem>
                             <FormLabel>{t("status_label", "Status")}</FormLabel>
                             <Select
@@ -354,7 +352,7 @@ export function EventForm({
                 <FormField
                     control={form.control}
                     name="note"
-                    render={({ field }) => (
+                    render={({ field }: { field: ControllerRenderProps<EventFormValues, "note"> }) => (
                         <FormItem>
                             <FormLabel>{t("note_label", "Note")}</FormLabel>
                             <FormControl>

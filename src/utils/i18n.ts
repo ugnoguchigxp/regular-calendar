@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 const EN_MESSAGES: Record<string, string> = {
 	loading: "Loading",
 	today_button: "Today",
+	previous: "Previous",
+	next: "Next",
 	view_day: "Day",
 	view_week: "Week",
 	view_month: "Month",

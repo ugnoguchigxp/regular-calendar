@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConnectedCalendar } from "./ConnectedCalendar";
+import { vi, describe, it, expect } from 'vitest';
 
 const mockContext = vi.fn();
 
@@ -8,57 +9,49 @@ vi.mock("./ScheduleContext", () => ({
 	useScheduleContext: () => mockContext(),
 }));
 
+// Mock ScheduleManager from regular-calendar
 vi.mock("regular-calendar", async (importOriginal) => {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 	const actual = await importOriginal<typeof import("regular-calendar")>();
 	return {
 		...actual,
-		RegularCalendar: ({
-			onEventClick,
-			onTimeSlotClick,
+		ScheduleManager: ({
+			onEventCreate,
+			onEventUpdate,
+			onEventDelete,
 		}: {
-			onEventClick?: (event: { id: string; title: string }) => void;
-			onTimeSlotClick?: (date: Date) => void;
+			onEventCreate: (data: any) => Promise<void>;
+			onEventUpdate: (id: string, data: any) => Promise<void>;
+			onEventDelete: (id: string) => Promise<void>;
 		}) => (
 			<div>
 				<button
-					type="button"
-					onClick={() => onEventClick?.({ id: "e1", title: "Event" } as any)}
+					onClick={() => {
+						// Simulate create
+						onEventCreate({ title: "New Event", start: "2024-01-01" });
+					}}
 				>
-					Event
+					Simulate Create
 				</button>
 				<button
-					type="button"
-					onClick={() => onTimeSlotClick?.(new Date("2024-01-10T10:00:00Z"))}
+					onClick={() => {
+						// Simulate update
+						onEventUpdate("e1", { title: "Updated Event" });
+					}}
 				>
-					Open Slot
+					Simulate Update
+				</button>
+				<button
+					onClick={() => {
+						// Simulate delete
+						onEventDelete("e1");
+					}}
+				>
+					Simulate Delete
 				</button>
 			</div>
 		),
 	};
 });
-
-vi.mock("./ConnectedEventModal", () => ({
-	ConnectedEventModal: ({
-		isOpen,
-		onSave,
-		onDelete,
-	}: {
-		isOpen: boolean;
-		onSave: (data: { title: string }) => void;
-		onDelete?: () => void;
-	}) => (
-		<div>
-			<div>Modal {isOpen ? "open" : "closed"}</div>
-			<button type="button" onClick={() => onSave({ title: "New" })}>
-				Save
-			</button>
-			<button type="button" onClick={() => onDelete?.()}>
-				Delete
-			</button>
-		</div>
-	),
-}));
 
 describe("ConnectedCalendar", () => {
 	it("renders loading and error states", () => {
@@ -107,14 +100,14 @@ describe("ConnectedCalendar", () => {
 		expect(screen.getByText("Error: Boom")).toBeInTheDocument();
 	});
 
-	it("opens modal and calls create/update/delete", async () => {
+	it("calls create/update/delete callbacks", async () => {
 		const user = userEvent.setup();
 		const createEvent = vi.fn().mockResolvedValue(undefined);
 		const updateEvent = vi.fn().mockResolvedValue(undefined);
 		const deleteEvent = vi.fn().mockResolvedValue(undefined);
 
 		mockContext.mockReturnValue({
-			events: [],
+			events: [{ id: "e1", title: "Existing" }],
 			resources: [],
 			groups: [],
 			settings: { weekStartsOn: 1 },
@@ -136,18 +129,14 @@ describe("ConnectedCalendar", () => {
 			/>,
 		);
 
-		await user.click(screen.getByRole("button", { name: "Event" }));
-		expect(screen.getByText("Modal open")).toBeInTheDocument();
-
-		await user.click(screen.getByRole("button", { name: "Delete" }));
-		expect(deleteEvent).toHaveBeenCalled();
-
-		await user.click(screen.getByRole("button", { name: "Event" }));
-		await user.click(screen.getByRole("button", { name: "Save" }));
-		expect(updateEvent).toHaveBeenCalled();
-
-		await user.click(screen.getByRole("button", { name: "Open Slot" }));
-		await user.click(screen.getByRole("button", { name: "Save" }));
+		// Click simulate buttons
+		await user.click(screen.getByText("Simulate Create"));
 		expect(createEvent).toHaveBeenCalled();
+
+		await user.click(screen.getByText("Simulate Update"));
+		expect(updateEvent).toHaveBeenCalledWith("e1", expect.objectContaining({ title: "Updated Event" }));
+
+		await user.click(screen.getByText("Simulate Delete"));
+		expect(deleteEvent).toHaveBeenCalledWith("e1");
 	});
 });
