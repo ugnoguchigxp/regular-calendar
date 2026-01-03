@@ -127,8 +127,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					{Icon && (
 						<Icon
 							className={cn(
-								"mr-[var(--ui-space-2)] h-ui-icon w-ui-icon",
-								!children && "mr-[var(--ui-space-0)]",
+								children ? "mr-[var(--ui-space-2)]" : "mr-[var(--ui-space-0)]",
+								"h-ui-icon w-ui-icon",
 							)}
 						/>
 					)}

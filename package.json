@@ -83,7 +83,6 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"react-hook-form": "^7.51.3",
-		"tailwind-merge": "^3.4.0",
 		"tailwindcss-animate": "^1.0.7",
 		"zod": "^3.22.4"
 	},

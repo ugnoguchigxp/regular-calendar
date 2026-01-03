@@ -52,8 +52,7 @@ describe("ResourceColumn", () => {
 		);
 
 		expect(screen.getByText("Room 1")).toBeInTheDocument();
-		const eventButtons = screen.getAllByText("Checkup");
-		fireEvent.click(eventButtons[0]);
+		fireEvent.click(screen.getByRole("button", { name: /checkup/i }));
 		expect(onEventClick).toHaveBeenCalled();
 
 		const content = container.querySelector("div.relative.flex-1");

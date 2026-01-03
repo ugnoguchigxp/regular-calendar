@@ -226,26 +226,29 @@ export function WeekView({
 											style={{
 												height: `${WEEK_VIEW.DAY_CELL_HEIGHT}px`,
 											}}
-											onPointerUp={() => {
-												if (!isClosed && onEmptySlotClick) {
-													onEmptySlotClick(resource.id, day);
-												}
-											}}
 										>
-											{!isClosed && (
-												<Button
-													type="button"
-													variant="ghost"
-													className="sr-only focus:not-sr-only focus:absolute focus:right-[var(--ui-space-1)] focus:top-[var(--ui-space-1)]"
-													onClick={(event) => {
-														event.stopPropagation();
+											<Button
+												type="button"
+												variant="ghost"
+												className="absolute inset-[var(--ui-space-0)] z-0 p-[var(--ui-space-0)]"
+												disabled={isClosed || !onEmptySlotClick}
+												aria-label={`Add event to ${resource.name}`}
+												onClick={() => {
+													if (!isClosed) {
 														onEmptySlotClick?.(resource.id, day);
-													}}
-												>
-													Add
-												</Button>
-											)}
-											<div className="flex flex-col gap-[var(--ui-space-0)] h-full overflow-hidden">
+													}
+												}}
+												onKeyDown={(event) => {
+													if (isClosed || !onEmptySlotClick) return;
+													if (event.key === "Enter" || event.key === " ") {
+														event.preventDefault();
+														onEmptySlotClick(resource.id, day);
+													}
+												}}
+											>
+												<span className="sr-only">Add</span>
+											</Button>
+											<div className="relative z-10 flex flex-col gap-[var(--ui-space-0)] h-full overflow-hidden">
 												{cellEvents
 													.slice(0, WEEK_VIEW.MAX_VISIBLE_EVENTS)
 													.map((event) => {
@@ -274,9 +277,6 @@ export function WeekView({
 																onClick={(e) => {
 																	e.stopPropagation();
 																	onEventClick?.(event);
-																}}
-																onPointerUp={(e) => {
-																	e.stopPropagation();
 																}}
 															>
 																<span className="font-medium">

@@ -160,7 +160,7 @@ export function ResourceColumn({
 		return { top, height, widthPercent, leftPercent };
 	}
 
-	function handleColumnClick(e: React.PointerEvent<HTMLDivElement>) {
+	function handleColumnPointerUp(e: React.PointerEvent<HTMLDivElement>) {
 		if (!onEmptySlotClick) return;
 
 		const rect = e.currentTarget.getBoundingClientRect();
@@ -214,7 +214,7 @@ export function ResourceColumn({
 			<div
 				ref={contentRef}
 				className="relative flex-1 w-full cursor-pointer"
-				onPointerUp={handleColumnClick}
+				onPointerUp={handleColumnPointerUp}
 			>
 				{/* Grid Lines Background */}
 				<div className="absolute inset-[var(--ui-space-0)] z-0 pointer-events-none flex flex-col">

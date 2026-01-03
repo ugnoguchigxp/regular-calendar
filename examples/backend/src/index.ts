@@ -273,7 +273,21 @@ app.put("/api/events/:id", async (c) => {
 	const cleanUpdate: any = {};
 	if (body.title !== undefined) cleanUpdate.title = body.title;
 	if (body.attendee !== undefined) cleanUpdate.attendee = body.attendee;
-	if (body.resourceId !== undefined) cleanUpdate.resourceId = body.resourceId;
+	if (body.resourceId !== undefined) {
+		cleanUpdate.resourceId = body.resourceId;
+		if (body.resourceId) {
+			const resource = await db
+				.select()
+				.from(resources)
+				.where(eq(resources.id, body.resourceId))
+				.get();
+			if (resource) {
+				cleanUpdate.groupId = resource.groupId;
+			}
+		} else {
+			cleanUpdate.groupId = null;
+		}
+	}
 	if (body.startDate !== undefined) cleanUpdate.startDate = body.startDate;
 	if (body.endDate !== undefined) cleanUpdate.endDate = body.endDate;
 	if (body.status !== undefined) cleanUpdate.status = body.status;

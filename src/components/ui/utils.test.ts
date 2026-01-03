@@ -19,12 +19,6 @@ describe("utils", () => {
 			expect(cn({ foo: true, bar: false, baz: true })).toBe("foo baz");
 		});
 
-		it("removes conflicting tailwind classes", () => {
-			expect(cn("px-[var(--ui-space-2)] px-[var(--ui-space-4)]")).toBe(
-				"px-[var(--ui-space-4)]",
-			);
-		});
-
 		it("handles undefined and null values", () => {
 			expect(cn("foo", undefined, null, "bar")).toBe("foo bar");
 		});

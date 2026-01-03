@@ -152,7 +152,30 @@ Tailwind のユーティリティクラスを確実に適用するための強�
 
 ---
 
-## 7. チェックリスト
+---
+
+## 7. `cn` ユーティリティの推奨構成
+
+Tailwind CSS v4 では、`tailwind-merge` による動的な衝突解決を避け、バンドルサイズと実行時負荷を抑えるために `clsx` のみを使用したシンプルな構成を推奨する。
+
+### `src/lib/utils.ts`
+
+```ts
+import { type ClassValue, clsx } from 'clsx';
+
+/**
+ * クラス名を条件に応じて結合するユーティリティ。
+ * Tailwind v4 では、コンポーネント設計レベルでクラスの衝突を避けることを推奨し、
+ * ライブラリによる自動マージ（tailwind-merge）は使用しない。
+ */
+export function cn(...inputs: ClassValue[]) {
+  return clsx(inputs);
+}
+```
+
+---
+
+## 8. チェックリスト
 
 新規プロジェクトまたは既存プロジェクトの修正時：
 
@@ -162,6 +185,7 @@ Tailwind のユーティリティクラスを確実に適用するための強�
 - [ ] `vite.config.ts` に `@tailwindcss/vite` を追加
 - [ ] `@source` でクラススキャンパスを定義
 - [ ] UI密度変数を共通CSSから読み込み or 定義
+- [ ] `cn` ユーティリティを `clsx` ベースに更新
 - [ ] 必要に応じて角丸オーバーライドを追加
 
 ---
@@ -170,4 +194,5 @@ Tailwind のユーティリティクラスを確実に適用するための強�
 
 - IDEが `@source`、`@theme` を認識しない警告が出ても無視してOK（Tailwind v4の正式構文）
 - `!important` の使用は最小限に抑える（Tailwindの上書きが必要な場合のみ）
+- `cn` でのクラス衝突解決（Last-one-wins）が必要な場合は、明示的な設計変更で対応する
 - 複数プロジェクトで共有する場合は、共通の `variables.css` を npm パッケージ化を検討

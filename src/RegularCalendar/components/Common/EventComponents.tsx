@@ -107,6 +107,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 	// Resolve resource name from ID or fallback to locationText
 	const resource = resources.find((r) => r.id === event.resourceId);
 	const resourceName = resource?.name || getEventLocation(event);
+	const showLocation = position.height >= 60;
 
 	// Calculate width and left position for overlapping events
 	const widthPercent = 100 / totalColumns;
@@ -149,7 +150,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 					{displayAttendee}
 				</div>
 			)}
-			{resourceName !== "" && (
+			{showLocation && resourceName !== "" && (
 				<div className="text-[10px] opacity-90 truncate w-full">
 					{resourceName}
 				</div>

@@ -28,6 +28,43 @@ interface DayViewProps {
 	resources?: Resource[];
 }
 
+import { useDroppable } from "@dnd-kit/core";
+
+const DroppableSlot = ({
+	date,
+	timeSlot,
+	onClick,
+}: {
+	date: Date;
+	timeSlot: string;
+	onClick?: (date: Date, timeSlot: string) => void;
+}) => {
+	// Generate an ID that can be parsed back to a Date
+	// Format: YYYY-MM-DDTHH:mm
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	const slotId = `${year}-${month}-${day}T${timeSlot}`;
+
+	const { setNodeRef, isOver } = useDroppable({
+		id: slotId,
+	});
+
+	return (
+		<button
+			ref={setNodeRef}
+			type="button"
+			onClick={() => onClick?.(date, timeSlot)}
+			className={`
+        border-b border-border cursor-pointer transition-colors w-full text-left p-0 m-0 block box-border
+        ${isOver ? "bg-accent/50" : "hover:bg-muted/30"}
+      `}
+			style={{ height: `${TIME_SLOT_HEIGHT}px` }}
+			aria-label={`Time slot ${timeSlot}`}
+		/>
+	);
+};
+
 export function DayView({
 	currentDate,
 	events,
@@ -190,13 +227,11 @@ export function DayView({
 
 						{/* Slots Background */}
 						{timeSlots.map((timeSlot) => (
-							<button
+							<DroppableSlot
 								key={timeSlot}
-								type="button"
-								onClick={() => onTimeSlotClick?.(currentDate, timeSlot)}
-								className="border-b border-border cursor-pointer transition-colors hover:bg-muted/30 w-full text-left p-0 m-0 block box-border"
-								style={{ height: `${TIME_SLOT_HEIGHT}px` }}
-								aria-label={`Time slot ${timeSlot}`}
+								date={currentDate}
+								timeSlot={timeSlot}
+								onClick={onTimeSlotClick}
 							/>
 						))}
 

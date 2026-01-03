@@ -1,11 +1,6 @@
-import { type ClassValue, clsx } from "clsx";
 import * as React from "react";
-import { twMerge } from "tailwind-merge";
 import { Icons } from "@/components/ui/Icons";
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}
+import { cn } from "./utils";
 
 // Minimal Select implementation using native select for simplicity in standalone package
 // while mocking the Radix UI structure used in the original code to minimize refactor.

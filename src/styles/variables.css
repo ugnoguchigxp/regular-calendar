@@ -21,6 +21,8 @@
 	--ui-font-size-base: 0.875rem;
 	/* 14px */
 	--ui-table-cell-padding: 0.75rem;
+	--radius: 0.5rem;
+	/* 8px */
 	--ui-touch-target-min: 0px;
 	--ui-icon-size: 1.125rem;
 	/* 18px */
@@ -72,7 +74,7 @@
 
 /* Density: Compact */
 :root[data-density="compact"] {
-	--ui-component-height: 2.75rem;
+	--ui-component-height: 2rem;
 	/* 32px */
 	--ui-list-row-height: 2rem;
 	/* 32px */
@@ -88,6 +90,8 @@
 
 	--ui-gap-base: 0.25rem;
 	/* 4px */
+	--ui-font-size-base: 0.825rem;
+	/* 13.2px */
 	--ui-icon-size: 1rem;
 	/* 16px */
 	--ui-modal-padding: 1rem;
@@ -97,29 +101,29 @@
 	--ui-card-padding: 1rem;
 }
 
-/* Density: Spacious (Reduced by 10%) */
-/* Density: Spacious (Extremely Reduced) */
 :root[data-density="spacious"] {
-	--ui-component-height: 2rem;
-	/* 32px */
+	--ui-component-height: 3rem;
+	/* 48px */
 	--ui-component-padding-x: 1.25rem;
 	/* 20px */
 	--ui-component-padding-y: 0.75rem;
 	/* 12px */
 
-	--ui-button-padding-x: 0.75rem;
-	/* 12px */
-	--ui-button-padding-y: 1.25rem;
+	--ui-button-padding-x: 1.25rem;
 	/* 20px */
+	--ui-button-padding-y: 0.75rem;
+	/* 12px */
 
 	--ui-gap-base: 0.5rem;
 	/* 8px */
-	--ui-list-row-height: 2rem;
-	/* 32px */
+	--ui-list-row-height: 3.5rem;
+	/* 56px */
+	--ui-font-size-base: 1rem;
+	/* 16px */
 	--ui-icon-size: 1rem;
 	/* 16px */
-	--ui-modal-padding: 1.5rem;
-	--ui-table-cell-padding: 0.75rem;
+	--ui-modal-padding: 2rem;
+	--ui-table-cell-padding: 1rem;
 	--ui-checkbox-size: 1.125rem;
 	/* 18px */
 	--ui-card-padding: 1.5rem;

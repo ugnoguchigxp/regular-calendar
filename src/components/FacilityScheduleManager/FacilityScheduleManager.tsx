@@ -3,6 +3,7 @@ import {
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import { useScheduleContext } from "../../contexts/ScheduleContext";
@@ -40,6 +41,7 @@ export function FacilityScheduleManager({
 		settings: apiSettings,
 		loading,
 		error,
+		events: contextEvents,
 		createEvent,
 		updateEvent,
 		deleteEvent,
@@ -60,6 +62,7 @@ export function FacilityScheduleManager({
 	>([]);
 
 	// Fetch data based on current view
+	// biome-ignore lint/correctness/useExhaustiveDependencies: contextEvents is used as a trigger for data refresh
 	const fetchData = useCallback(async () => {
 		setIsFetching(true);
 		try {
@@ -83,12 +86,46 @@ export function FacilityScheduleManager({
 		} finally {
 			setIsFetching(false);
 		}
-	}, [currentDate, viewMode, fetchResourceAvailability, personnel]);
+	}, [
+		currentDate,
+		viewMode,
+		fetchResourceAvailability,
+		personnel,
+		contextEvents,
+	]);
 
-	// Initial fetch and on view/date change
+	// Initial fetch and on view/date/event change
 	useEffect(() => {
 		fetchData();
 	}, [fetchData]);
+
+	// Merge context events with local transformed events (to ensure colors and extra info)
+	const displayEvents = useMemo(() => {
+		// Use Map to deduplicate by ID, preferring local transformed events for colors
+		const eventMap = new Map<string, ScheduleEvent>();
+
+		// 1. Add events from context
+		for (const e of contextEvents) {
+			eventMap.set(e.id, e);
+		}
+
+		// 2. Override with localEvents (which have colors assigned by transformBookingsToEvents)
+		// and ensure they belong to the correct groupId/resourceId
+		for (const le of localEvents) {
+			const existing = eventMap.get(le.id);
+			if (existing) {
+				eventMap.set(le.id, {
+					...existing,
+					color: le.color || existing.color,
+					groupId: le.groupId || existing.groupId,
+				} as ScheduleEvent);
+			} else {
+				eventMap.set(le.id, le);
+			}
+		}
+
+		return Array.from(eventMap.values());
+	}, [contextEvents, localEvents]);
 
 	const handleCreate = useCallback(
 		async (data: EventFormData) => {
@@ -112,12 +149,12 @@ export function FacilityScheduleManager({
 
 			try {
 				await createEvent(enhancedData);
-				fetchData();
+				// context update will trigger fetchData via useEffect
 			} catch (e) {
 				console.error("Failed to save event", e);
 			}
 		},
-		[createEvent, effectiveUserId, fetchData],
+		[createEvent, effectiveUserId],
 	);
 
 	const handleUpdate = useCallback(
@@ -138,24 +175,24 @@ export function FacilityScheduleManager({
 
 			try {
 				await updateEvent(id, updateData);
-				fetchData();
+				// context update will trigger fetchData via useEffect
 			} catch (e) {
 				console.error("Failed to update event", e);
 			}
 		},
-		[updateEvent, fetchData],
+		[updateEvent],
 	);
 
 	const handleDelete = useCallback(
 		async (id: string) => {
 			try {
 				await deleteEvent(id);
-				fetchData();
+				// context update will trigger fetchData via useEffect
 			} catch (e) {
 				console.error("Failed to delete event", e);
 			}
 		},
-		[deleteEvent, fetchData],
+		[deleteEvent],
 	);
 
 	const handleAvailabilityRequest = useCallback(
@@ -181,24 +218,44 @@ export function FacilityScheduleManager({
 		[fetchResourceAvailability],
 	);
 
-	// Wrap Standard EventModal
-	const WrappedEventModal = useMemo(() => {
-		return (props: ComponentProps<typeof EventModal>) => (
-			<EventModal
-				{...props}
-				currentUserId={effectiveUserId}
-				personnel={personnel}
-				readOnlyResource={true}
-				resourceAvailability={resourceAvailability}
-				onAvailabilityRequest={handleAvailabilityRequest}
-			/>
-		);
+	// Stable wrapper to avoid remounting the modal
+	// We pass the data-dependent parts as simple props if possible,
+	// but since FacilitySchedule doesn't support them all, we use a ref-based approach or context.
+	// For now, let's keep it simple: Define the component once and use a ref for the changing data.
+	const modalDataRef = useRef({
+		effectiveUserId,
+		personnel,
+		resourceAvailability,
+		onAvailabilityRequest: handleAvailabilityRequest,
+	});
+
+	useEffect(() => {
+		modalDataRef.current = {
+			effectiveUserId,
+			personnel,
+			resourceAvailability,
+			onAvailabilityRequest: handleAvailabilityRequest,
+		};
 	}, [
 		effectiveUserId,
 		personnel,
 		resourceAvailability,
 		handleAvailabilityRequest,
 	]);
+
+	const EventModalComponent = useMemo(
+		() => (props: ComponentProps<typeof EventModal>) => (
+			<EventModal
+				{...props}
+				currentUserId={modalDataRef.current.effectiveUserId}
+				personnel={modalDataRef.current.personnel}
+				readOnlyResource={true}
+				resourceAvailability={modalDataRef.current.resourceAvailability}
+				onAvailabilityRequest={modalDataRef.current.onAvailabilityRequest}
+			/>
+		),
+		[], // Identity stable
+	);
 
 	if (error)
 		return (
@@ -220,7 +277,7 @@ export function FacilityScheduleManager({
 
 	return (
 		<FacilitySchedule
-			events={localEvents}
+			events={displayEvents}
 			resources={resources}
 			groups={groups}
 			settings={mergedSettings}
@@ -233,7 +290,7 @@ export function FacilityScheduleManager({
 			onEventUpdate={handleUpdate}
 			onEventDelete={handleDelete}
 			components={{
-				EventModal: WrappedEventModal,
+				EventModal: EventModalComponent,
 			}}
 			enablePersistence={enablePersistence}
 		/>

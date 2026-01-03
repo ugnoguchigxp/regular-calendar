@@ -1,10 +1,5 @@
-import { type ClassValue, clsx } from "clsx";
 import * as React from "react";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}
+import { cn } from "./utils";
 
 // Stub implementation for Tooltip
 // A real accessible tooltip requires complex state or library like Radix.
