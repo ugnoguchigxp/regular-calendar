@@ -6,7 +6,7 @@ import {
 } from "./presets/useSettings";
 import i18n from "./i18n";
 
-vi.mock("regular-calendar", () => ({
+vi.mock("./presets/useSettings", () => ({
 	useSettings: vi.fn(),
 }));
 
@@ -23,11 +23,11 @@ describe("useSettings", () => {
 			language: "en" as const,
 			theme: "light" as const,
 			density: "normal" as const,
-			borderRadius: 4,
+			borderRadius: 8,
 			fontSize: 14,
 			weekStartsOn: 0 as const,
 			businessHoursStart: "09:00",
-			businessHoursEnd: "17:00",
+			businessHoursEnd: "18:00",
 			timeZone: "UTC",
 			closedDays: [],
 		} as AppSettings,
@@ -50,8 +50,8 @@ describe("useSettings", () => {
 				language: "en",
 				timeZone: "UTC",
 			},
-			updateSettings: vi.fn(),
-			resetSettings: vi.fn(),
+			updateSettings: mockLibrarySettings.updateSettings,
+			resetSettings: mockLibrarySettings.resetSettings,
 		});
 	});
 

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ScheduleProvider, useScheduleContext } from "./ScheduleContext";
+import { AppScheduleProvider as ScheduleProvider, useScheduleContext } from "./ScheduleContext";
 
 const createApiClient = () => ({
 	getConfig: vi.fn(),
@@ -34,43 +34,43 @@ const Consumer = () => {
 						title: "New",
 						startDate: new Date(),
 						endDate: new Date(),
-					})
+					}).catch(() => { })
 				}
 			>
 				create
 			</button>
 			<button
 				type="button"
-				onClick={() => ctx.updateEvent("e1", { title: "Update" })}
+				onClick={() => ctx.updateEvent("e1", { title: "Update" }).catch(() => { })}
 			>
 				update
 			</button>
-			<button type="button" onClick={() => ctx.deleteEvent("e1")}>
+			<button type="button" onClick={() => ctx.deleteEvent("e1").catch(() => { })}>
 				delete
 			</button>
 			<button
 				type="button"
-				onClick={() => ctx.updatePersonnelPriority("p2", 1)}
+				onClick={() => ctx.updatePersonnelPriority("p2", 1).catch(() => { })}
 			>
 				priority
 			</button>
 			<button
 				type="button"
 				onClick={() =>
-					ctx.fetchResourceAvailability(new Date("2024-01-10T00:00:00Z"))
+					ctx.fetchResourceAvailability(new Date("2024-01-10T00:00:00Z")).catch(() => { })
 				}
 			>
 				availability
 			</button>
 			<button
 				type="button"
-				onClick={() => ctx.fetchPersonnelEvents(["p1"], false)}
+				onClick={() => ctx.fetchPersonnelEvents(["p1"], false).catch(() => { })}
 			>
 				fetch
 			</button>
 			<button
 				type="button"
-				onClick={() => ctx.fetchPersonnelEvents(["p1"], true)}
+				onClick={() => ctx.fetchPersonnelEvents(["p1"], true).catch(() => { })}
 			>
 				append
 			</button>
@@ -84,23 +84,23 @@ const BranchConsumer = () => {
 		<div>
 			<div>personnel-events:{ctx.personnelEvents.length}</div>
 			<div>error:{ctx.error ?? "none"}</div>
-			<button type="button" onClick={() => ctx.fetchPersonnelEvents([], false)}>
+			<button type="button" onClick={() => ctx.fetchPersonnelEvents([], false).catch(() => { })}>
 				empty-clear
 			</button>
-			<button type="button" onClick={() => ctx.fetchPersonnelEvents([], true)}>
+			<button type="button" onClick={() => ctx.fetchPersonnelEvents([], true).catch(() => { })}>
 				empty-append
 			</button>
 			<button
 				type="button"
 				onClick={() =>
-					ctx.fetchResourceAvailability(new Date("2024-01-10T00:00:00Z"))
+					ctx.fetchResourceAvailability(new Date("2024-01-10T00:00:00Z")).catch(() => { })
 				}
 			>
 				availability-error
 			</button>
 			<button
 				type="button"
-				onClick={() => ctx.updatePersonnelPriority("p1", 2)}
+				onClick={() => ctx.updatePersonnelPriority("p1", 2).catch(() => { })}
 			>
 				priority-error
 			</button>

@@ -43,8 +43,11 @@ export { ViewSelector } from "./components/ui/ViewSelector";
 // Context & Providers
 export * from "./contexts/ScheduleContext";
 export type {
+	ConfigResponse,
 	ContextResourceAvailability,
 	EventData,
+	ResourceAvailabilityParams,
+	ResourceAvailabilityResponse,
 	ScheduleApiClient,
 	ScheduleContextType,
 } from "./contexts/types";

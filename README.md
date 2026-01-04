@@ -105,7 +105,31 @@ import { RegularCalendar } from 'regular-calendar';
 import 'regular-calendar/styles';
 
 function App() {
-  return <RegularCalendar />;
+  const events = [
+    {
+      id: 'e1',
+      resourceId: 'r1', // Required but ignored in RegularCalendar (no resource view)
+      title: 'Meeting',
+      startDate: new Date('2024-01-01T09:00:00'),
+      endDate: new Date('2024-01-01T10:00:00'),
+      color: '#3b82f6'
+    }
+  ];
+
+  return (
+    <div style={{ height: '100vh' }}>
+      <RegularCalendar 
+        events={events}
+        settings={{
+            weekStartsOn: 1,
+            startTime: '08:00',
+            endTime: '18:00',
+            defaultDuration: 60,
+            closedDays: [0],
+        }}
+      />
+    </div>
+  );
 }
 ```
 

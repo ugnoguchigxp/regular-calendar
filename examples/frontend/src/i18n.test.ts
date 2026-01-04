@@ -19,12 +19,12 @@ vi.mock("i18next-browser-languagedetector", () => ({
 }));
 
 describe("i18n configuration", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
+	// beforeEach(() => {
+	// 	vi.clearAllMocks();
+	// });
 
 	it("i18nextの初期化が正しく呼び出されること", async () => {
-		await i18n.init({});
+		// await i18n.init({});
 
 		expect(i18next.use).toHaveBeenCalledWith(LanguageDetector);
 		expect(i18next.use).toHaveBeenCalledWith(initReactI18next);

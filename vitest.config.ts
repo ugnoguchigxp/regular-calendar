@@ -12,6 +12,8 @@ export default defineVitestConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
+			"react": path.resolve(__dirname, "./node_modules/react"),
+			"react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
 		},
 	},
 	test: {
@@ -19,6 +21,11 @@ export default defineVitestConfig({
 		environment: "jsdom",
 		setupFiles: "./src/test/setup.ts",
 		include: ["src/**/*.test.{ts,tsx}"],
+		server: {
+			deps: {
+				inline: ["@radix-ui", "react-i18next", "clsx", "tailwind-merge"],
+			},
+		},
 		coverage: {
 			provider: "istanbul",
 			reporter: ["text", "json", "html"],

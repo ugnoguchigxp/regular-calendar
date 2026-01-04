@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { EventData } from "../../contexts/types";
 import type { ScheduleEvent } from "../../FacilitySchedule/FacilitySchedule.schema";
 import { RegularCalendar } from "../../RegularCalendar/RegularCalendar";
 import type * as RegularCalendarSchema from "../../RegularCalendar/RegularCalendar.schema";
@@ -62,10 +63,13 @@ export function ScheduleManager({
 	const handleSave = async (data: SMEventFormData) => {
 		try {
 			if (selectedEvent) {
-				await onEventUpdate(selectedEvent.id, data);
+				await onEventUpdate(
+					selectedEvent.id,
+					data as unknown as Partial<EventData>,
+				);
 				onToast?.("Event updated successfully", "success");
 			} else {
-				await onEventCreate(data);
+				await onEventCreate(data as unknown as EventData);
 				onToast?.("Event created successfully", "success");
 			}
 			handleClose();

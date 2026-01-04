@@ -7,6 +7,8 @@ import type {
 } from "../../FacilitySchedule/FacilitySchedule.schema";
 export type { CustomField };
 
+import type { EventData } from "../../contexts/types";
+
 export interface CustomFieldOption {
 	value: string;
 	label: string;
@@ -24,11 +26,8 @@ export interface ScheduleManagerProps {
 		[key: string]: unknown;
 	};
 	isLoading?: boolean;
-	onEventCreate: (data: Record<string, unknown>) => Promise<void>;
-	onEventUpdate: (
-		eventId: string,
-		data: Record<string, unknown>,
-	) => Promise<void>;
+	onEventCreate: (data: EventData) => Promise<void>;
+	onEventUpdate: (eventId: string, data: Partial<EventData>) => Promise<void>;
 	onEventDelete: (eventId: string) => Promise<void>;
 	onToast?: (message: string, type: "success" | "error") => void;
 	customFields?: CustomField[];

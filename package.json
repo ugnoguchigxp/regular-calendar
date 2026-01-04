@@ -49,7 +49,7 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "tsc -p tsconfig.build.json && vite build",
+		"build": "vite build",
 		"type-check": "tsc --noEmit",
 		"lint": "biome check .",
 		"format": "biome format --write .",

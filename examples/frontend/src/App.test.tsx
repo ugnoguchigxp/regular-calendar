@@ -16,12 +16,24 @@ vi.mock("./useSettings", () => ({
 	useSettings: vi.fn(),
 }));
 
+vi.mock("./presets/ConnectedFacilitySchedule", () => ({
+	ConnectedFacilitySchedule: vi.fn(() => (
+		<div data-testid="facility-schedule">Facility Schedule</div>
+	)),
+}));
+
+vi.mock("./presets/ConnectedCalendar", () => ({
+	ConnectedCalendar: vi.fn(() => (
+		<div data-testid="connected-calendar">Calendar</div>
+	)),
+}));
+
 vi.mock("regular-calendar", () => ({
 	ConnectedCalendar: vi.fn(() => (
 		<div data-testid="connected-calendar">Calendar</div>
 	)),
-	ConnectedFacilitySchedule: vi.fn(() => (
-		<div data-testid="facility-schedule">Facility Schedule</div>
+	Button: vi.fn(({ children, ...props }: any) => (
+		<button {...props}>{children}</button>
 	)),
 	ScheduleProvider: ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
@@ -38,13 +50,11 @@ vi.mock("regular-calendar", () => ({
 				</div>
 			) : null,
 	),
-	FacilityStructureSettings: vi.fn(({ isOpen, onClose }: any) =>
-		isOpen ? (
-			<div data-testid="facility-settings-modal">
-				<button onClick={onClose}>Close</button>
-			</div>
-		) : null,
-	),
+	FacilityStructureSettings: vi.fn(({ onClose }: any) => (
+		<div data-testid="facility-settings-modal">
+			<button onClick={onClose}>Close</button>
+		</div>
+	)),
 	PersonnelPanel: vi.fn(() => (
 		<div data-testid="personnel-panel">Personnel Panel</div>
 	)),
@@ -107,14 +117,14 @@ describe("App", () => {
 	it("アプリケーションタイトルが表示されること", () => {
 		render(<App />);
 
-		expect(screen.getByText("Regular Calendar Demo")).toBeInTheDocument();
+		expect(screen.getByText("app_title")).toBeInTheDocument();
 	});
 
 	it("デフォルトで「通常カレンダー」タブが選択されていること", () => {
 		render(<App />);
 
 		const regularButton = screen.getByRole("button", {
-			name: /regular calendar/i,
+			name: /app_header_regular_calendar/i,
 		});
 		expect(regularButton).toHaveClass("cursor-pointer");
 	});
@@ -124,7 +134,7 @@ describe("App", () => {
 		render(<App />);
 
 		const facilityButton = screen.getByRole("button", {
-			name: /facility schedule/i,
+			name: /app_header_facility_schedule/i,
 		});
 		await user.click(facilityButton);
 
@@ -136,12 +146,12 @@ describe("App", () => {
 		render(<App />);
 
 		const facilityButton = screen.getByRole("button", {
-			name: /facility schedule/i,
+			name: /app_header_facility_schedule/i,
 		});
 		await user.click(facilityButton);
 
 		const regularButton = screen.getByRole("button", {
-			name: /regular calendar/i,
+			name: /app_header_regular_calendar/i,
 		});
 		await user.click(regularButton);
 
@@ -176,7 +186,7 @@ describe("App", () => {
 		render(<App />);
 
 		const facilityStructureButton = screen.getByRole("button", {
-			name: /facility structure/i,
+			name: /app_header_facility_structure/i,
 		});
 		await user.click(facilityStructureButton);
 
@@ -188,7 +198,7 @@ describe("App", () => {
 		render(<App />);
 
 		const facilityStructureButton = screen.getByRole("button", {
-			name: /facility structure/i,
+			name: /app_header_facility_structure/i,
 		});
 		await user.click(facilityStructureButton);
 
@@ -212,7 +222,7 @@ describe("App", () => {
 		render(<App />);
 
 		const facilityButton = screen.getByRole("button", {
-			name: /facility schedule/i,
+			name: /app_header_facility_schedule/i,
 		});
 		await user.click(facilityButton);
 
@@ -234,7 +244,7 @@ describe("App", () => {
 		render(<App />);
 
 		const facilityStructureButton = screen.getByRole("button", {
-			name: /facility structure/i,
+			name: /app_header_facility_structure/i,
 		});
 		await user.click(facilityStructureButton);
 
