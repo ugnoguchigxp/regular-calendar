@@ -213,7 +213,7 @@ export function RegularCalendar({
 		// If dropped on a day cell (Month view or Day header), preserve original time but change date
 		const isTimeSlot = dropId.includes("T");
 
-		let newStartDate = new Date(dropDate);
+		const newStartDate = new Date(dropDate);
 
 		if (!isTimeSlot) {
 			// Month view or day header drop: Keep original time

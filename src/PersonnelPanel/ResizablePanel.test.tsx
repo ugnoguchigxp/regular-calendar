@@ -4,6 +4,7 @@ import { ResizablePanel } from "./ResizablePanel";
 const createStorage = () => ({
 	getItem: vi.fn(),
 	setItem: vi.fn(),
+	removeItem: vi.fn(),
 });
 
 describe("ResizablePanel", () => {

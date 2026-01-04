@@ -117,7 +117,7 @@ export function DefaultEventModal({
 	const conflict = useConflictCheck(
 		startDateVal,
 		durationVal,
-		resourceIdVal,
+		resourceIdVal || "",
 		events,
 		event?.id,
 	);
@@ -139,7 +139,7 @@ export function DefaultEventModal({
 	// Display value for selected resource
 	const displayValue = useMemo(() => {
 		const res = resources.find((r) => r.id === resourceIdVal);
-		if (!res) return resourceIdVal;
+		if (!res) return resourceIdVal || "";
 		const group = groups.find((g) => g.id === res.groupId);
 		return group ? `${res.name} (${group.name})` : res.name;
 	}, [resourceIdVal, resources, groups]);

@@ -262,7 +262,7 @@ export function EventForm({
 		end.setMinutes(end.getMinutes() + minutes);
 
 		const { finalAttendees, shouldDelete } = processAttendeesForSubmit(
-			data.attendee,
+			data.attendee || "[]",
 		);
 
 		if (shouldDelete && onDelete) {

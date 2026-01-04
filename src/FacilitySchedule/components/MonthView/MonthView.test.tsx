@@ -43,7 +43,7 @@ const settings = {
 	startTime: "08:00",
 	endTime: "18:00",
 	closedDays: [],
-	weekStartsOn: 1,
+	weekStartsOn: 0 as const,
 	timeSlots: [
 		{ id: "t1", label: "Slot", startTime: "08:00", endTime: "09:00" },
 	],

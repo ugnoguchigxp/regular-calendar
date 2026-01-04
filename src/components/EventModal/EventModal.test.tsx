@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import type { ScheduleEvent } from "../../FacilitySchedule.schema";
-import type { EventFormData } from "./EventForm";
+import type {
+	EventFormData,
+	ScheduleEvent,
+} from "../../FacilitySchedule/FacilitySchedule.schema";
 import { EventModal } from "./EventModal";
 
 type EventFormProps = {
@@ -54,7 +56,7 @@ const groups = [
 	{
 		id: "g1",
 		name: "Group A",
-		displayMode: "grid",
+		displayMode: "grid" as const,
 		dimension: 1,
 		resources,
 		createdAt: new Date(),

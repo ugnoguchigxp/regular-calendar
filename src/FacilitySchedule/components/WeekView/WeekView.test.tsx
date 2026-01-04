@@ -18,7 +18,7 @@ const groups = [
 	{
 		id: "g1",
 		name: "Group A",
-		displayMode: "grid",
+		displayMode: "grid" as const,
 		dimension: 1,
 		resources,
 		createdAt: new Date(),
@@ -46,7 +46,7 @@ const settings = {
 	startTime: "08:00",
 	endTime: "18:00",
 	closedDays: [0],
-	weekStartsOn: 0,
+	weekStartsOn: 0 as const,
 };
 
 describe("WeekView", () => {
@@ -74,8 +74,8 @@ describe("WeekView", () => {
 
 		expect(screen.getByText("Off")).toBeInTheDocument();
 
-		const addButtons = screen.getAllByRole("button", { name: "Add" });
-		await user.click(addButtons[0]);
+		const addButtons = screen.getAllByRole("button", { name: /Add event to/i });
+		await user.click(addButtons[1]);
 		expect(onEmptySlotClick).toHaveBeenCalled();
 	});
 });

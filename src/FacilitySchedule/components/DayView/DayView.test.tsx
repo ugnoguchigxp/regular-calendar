@@ -6,7 +6,7 @@ const settings = {
 	startTime: "08:00",
 	endTime: "10:00",
 	closedDays: [],
-	weekStartsOn: 1,
+	weekStartsOn: 0 as const,
 };
 
 const resources = [

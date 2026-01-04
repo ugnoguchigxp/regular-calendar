@@ -6,7 +6,7 @@ const groups = [
 	{
 		id: "g1",
 		name: "Group 1",
-		displayMode: "grid",
+		displayMode: "grid" as const,
 		dimension: 1,
 		resources: [],
 		createdAt: new Date(),

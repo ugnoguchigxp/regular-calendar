@@ -38,7 +38,7 @@ const groups = [
 	{
 		id: "g1",
 		name: "Group A",
-		displayMode: "grid",
+		displayMode: "grid" as const,
 		dimension: 1,
 		resources,
 		createdAt: new Date(),
@@ -87,6 +87,7 @@ describe("EventForm", () => {
 
 	it("submits valid form data and shows conflict warning", async () => {
 		const user = userEvent.setup();
+
 		const onSubmit = vi.fn();
 
 		render(

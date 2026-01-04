@@ -277,6 +277,7 @@ describe("RegularCalendar", () => {
 		const storage = {
 			getItem: vi.fn().mockReturnValue("month"),
 			setItem: vi.fn(),
+			removeItem: vi.fn(),
 		};
 
 		render(
@@ -298,6 +299,7 @@ describe("RegularCalendar", () => {
 				throw new Error("storage error");
 			}),
 			setItem: vi.fn(),
+			removeItem: vi.fn(),
 		};
 
 		render(
@@ -317,6 +319,7 @@ describe("RegularCalendar", () => {
 		const storage = {
 			getItem: vi.fn().mockReturnValue(null),
 			setItem: vi.fn(),
+			removeItem: vi.fn(),
 		};
 
 		render(
@@ -345,6 +348,7 @@ describe("RegularCalendar", () => {
 		const storage = {
 			getItem: vi.fn().mockReturnValue("week"),
 			setItem: vi.fn(),
+			removeItem: vi.fn(),
 		};
 
 		render(

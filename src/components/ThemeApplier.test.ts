@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { DOMThemeApplier, MockThemeApplier } from "./ThemeApplier";
 
 const fullConfig = {
-	density: "compact",
+	density: "compact" as const,
 	tabletMode: true,
 	radius: 0.5,
 	fontSize: 0.875,
@@ -56,9 +56,12 @@ describe("ThemeApplier", () => {
 		};
 		const originalWindow = globalWithWindow.window;
 
+		// @ts-expect-error
 		globalWithWindow.window = undefined;
 
-		expect(() => applier.applyVariables({ density: "compact" })).not.toThrow();
+		expect(() =>
+			applier.applyVariables({ density: "compact" as const }),
+		).not.toThrow();
 		expect(() => applier.removeVariables()).not.toThrow();
 
 		globalWithWindow.window = originalWindow;
@@ -67,13 +70,13 @@ describe("ThemeApplier", () => {
 	it("tracks applied config in mock applier", () => {
 		const applier = new MockThemeApplier();
 
-		applier.applyVariables({ density: "normal" });
+		applier.applyVariables({ density: "normal" as const });
 		expect(applier.appliedConfig).toEqual({ density: "normal" });
 
 		applier.removeVariables();
 		expect(applier.appliedConfig).toBeUndefined();
 
-		applier.applyVariables({ density: "compact" });
+		applier.applyVariables({ density: "compact" as const });
 		applier.reset();
 		expect(applier.appliedConfig).toBeUndefined();
 	});
