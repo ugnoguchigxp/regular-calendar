@@ -270,6 +270,45 @@ export function SettingsModal({
 					</div>
 				</div>
 
+				{/* Pagination (New) */}
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="flex items-center justify-between mb-[var(--ui-space-2)]">
+						<div className="text-sm font-bold">{t("settings_pagination")}</div>
+						<div className="flex items-center gap-[var(--ui-space-2)]">
+							<Button
+								variant={settings.paginationEnabled ? "default" : "outline"}
+								onClick={() =>
+									update({ paginationEnabled: !settings.paginationEnabled })
+								}
+							>
+								{settings.paginationEnabled ? "ON" : "OFF"}
+							</Button>
+						</div>
+					</div>
+					{settings.paginationEnabled && (
+						<div className="flex items-center gap-[var(--ui-space-4)]">
+							<label
+								htmlFor="settings-page-size"
+								className="text-sm whitespace-nowrap"
+							>
+								{t("settings_page_size")}: {settings.paginationPageSize}
+							</label>
+							<input
+								id="settings-page-size"
+								type="range"
+								min="4"
+								max="20"
+								step="1"
+								value={settings.paginationPageSize}
+								onChange={(e) =>
+									update({ paginationPageSize: Number(e.target.value) })
+								}
+								className="w-full cursor-pointer"
+							/>
+						</div>
+					)}
+				</div>
+
 				{/* Reset Button (Optional) */}
 				{onResetSettings && (
 					<div className="mt-[var(--ui-space-8)] border-t border-border pt-[var(--ui-space-4)]">

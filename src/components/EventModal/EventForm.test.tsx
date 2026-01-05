@@ -101,7 +101,10 @@ describe("EventForm", () => {
 			/>,
 		);
 
-		await user.type(screen.getByPlaceholderText("Enter name"), "John Doe");
+		await user.type(
+			screen.getByPlaceholderText("Enter event name"),
+			"John Doe",
+		);
 
 		await user.click(screen.getByRole("button", { name: /save/i }));
 		expect(onSubmit).toHaveBeenCalled();

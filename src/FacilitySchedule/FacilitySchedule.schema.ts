@@ -115,6 +115,10 @@ export const FacilityScheduleSettingsSchema = z.object({
 
 	// Time slots
 	timeSlots: z.array(TimeSlotSchema).optional(),
+
+	// Pagination
+	paginationEnabled: z.boolean().optional(),
+	paginationPageSize: z.number().optional(),
 });
 
 export const DensityDataSchema = z.object({
@@ -214,7 +218,17 @@ export interface FacilityScheduleProps {
 	defaultView?: ViewMode;
 	enablePersistence?: boolean;
 	storageKey?: string;
+
+	// Pagination
+	pagination?: PaginationOptions;
 }
+
+export const PaginationOptionsSchema = z.object({
+	enabled: z.boolean().default(false),
+	pageSize: z.number().default(8),
+});
+
+export type PaginationOptions = z.infer<typeof PaginationOptionsSchema>;
 
 export type ViewMode = z.infer<typeof ViewModeSchema>;
 export type AttendeeInfo = z.infer<typeof AttendeeInfoSchema>;

@@ -9,6 +9,8 @@ export interface AppSettings {
 	closedDays: number[]; // 0-6 (Sunday=0)
 	language: "ja" | "en";
 	timeZone: string;
+	paginationEnabled: boolean;
+	paginationPageSize: number;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -22,4 +24,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
 	closedDays: [0, 6], // Sunday and Saturday
 	language: "ja",
 	timeZone: "Asia/Tokyo",
+	paginationEnabled: false,
+	paginationPageSize: 8,
 };

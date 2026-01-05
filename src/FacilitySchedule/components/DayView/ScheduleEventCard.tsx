@@ -21,6 +21,30 @@ interface ScheduleEventCardProps {
 	isDragging?: boolean;
 }
 
+// Helper to parse attendee JSON string or return as is
+function parseAttendeeName(attendeeStr: string): string {
+	if (!attendeeStr) return "";
+	try {
+		const parsed = JSON.parse(attendeeStr);
+		if (Array.isArray(parsed)) {
+			const names = parsed
+				// biome-ignore lint/suspicious/noExplicitAny: JSON parse result is any
+				.map((p: any) => p.name || p.personnelId)
+				.filter(Boolean);
+			if (names.length > 0) {
+				return names.join(", ");
+			}
+		} else if (typeof parsed === "object" && parsed !== null) {
+			if (parsed.name) {
+				return parsed.name;
+			}
+		}
+	} catch {
+		// Not JSON, use string as is
+	}
+	return attendeeStr;
+}
+
 export function ScheduleEventCard({
 	event,
 	top,
@@ -54,7 +78,7 @@ export function ScheduleEventCard({
 			? "border-primary/30" // If custom color, just border (or custom border)
 			: "bg-primary border-primary/30";
 
-	// Helper for formatting time
+	// Helper for formatTime (can be inside or use existing vars)
 	const formatTime = (date: Date) => {
 		return date.toLocaleTimeString("ja-JP", {
 			hour: "2-digit",
@@ -107,16 +131,16 @@ export function ScheduleEventCard({
 								{event.title}
 							</div>
 
-							{/* Attendee */}
+							{/* Attendee - Prioritized visibility */}
 							{event.attendee && (
-								<div className="text-xs text-primary-foreground/90 truncate mt-[var(--ui-space-0-5)]">
-									👤 {event.attendee}
+								<div className="text-xs font-bold text-white mt-[var(--ui-space-0-5)] drop-shadow-sm break-words leading-tight z-10">
+									👤 {parseAttendeeName(event.attendee)}
 								</div>
 							)}
 
-							{/* Time/Duration - Hidden for AllDay */}
+							{/* Time/Duration - Lower priority, push to bottom or clip if no space */}
 							{!event.isAllDay && (
-								<div className="flex items-center gap-[var(--ui-space-1)] text-[10px] opacity-90 mt-[var(--ui-space-1)]">
+								<div className="flex items-center gap-[var(--ui-space-1)] text-[10px] opacity-90 mt-auto pt-[var(--ui-space-1)] overflow-hidden whitespace-nowrap">
 									<span className="font-mono tabular-nums tracking-tight">
 										{formatTime(event.startDate)}
 									</span>
@@ -143,7 +167,9 @@ export function ScheduleEventCard({
 						)}
 						<p className="font-semibold text-xs">{event.title}</p>
 						{event.attendee && (
-							<p className="text-xs">With: {event.attendee}</p>
+							<p className="text-xs">
+								With: {parseAttendeeName(event.attendee)}
+							</p>
 						)}
 						<p className="text-xs">
 							{startTime} - {endTime} ({durationHours}h)

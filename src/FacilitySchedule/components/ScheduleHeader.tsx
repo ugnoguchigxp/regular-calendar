@@ -25,6 +25,13 @@ interface ScheduleHeaderProps {
 	onToday: () => void;
 	onViewChange: (view: ViewMode) => void;
 	onGroupChange: (groupId: string | null) => void;
+
+	// Pagination
+	isPaginated?: boolean;
+	currentPage?: number;
+	totalPages?: number;
+	onPageChange?: (page: number) => void;
+	pageInfo?: { page: number; startResource: string; endResource: string }[];
 }
 
 export function ScheduleHeader({
@@ -40,6 +47,11 @@ export function ScheduleHeader({
 	onToday,
 	onViewChange,
 	onGroupChange,
+	isPaginated,
+	currentPage,
+	totalPages,
+	onPageChange,
+	pageInfo,
 }: ScheduleHeaderProps) {
 	const { t } = useAppTranslation();
 
@@ -102,6 +114,29 @@ export function ScheduleHeader({
 						{ value: "month", label: t("view_month") },
 					]}
 				/>
+
+				{isPaginated && totalPages && totalPages > 1 && onPageChange && (
+					<div className="flex bg-muted p-[calc(var(--ui-gap-base)/2)] rounded-md gap-[calc(var(--ui-gap-base)/2)]">
+						{Array.from({ length: totalPages }).map((_, i) => {
+							const info = pageInfo?.find((p) => p.page === i);
+							const title = info
+								? `${t("page")} ${i + 1}: ${info.startResource} - ${info.endResource}`
+								: `${t("page")} ${i + 1}`;
+							return (
+								<Button
+									key={i}
+									variant={(currentPage ?? 0) === i ? "default" : "ghost"}
+									onClick={() => onPageChange(i)}
+									className="h-[var(--ui-component-height)] w-[var(--ui-component-height)] p-0"
+									title={title}
+								>
+									{i + 1}
+								</Button>
+							);
+						})}
+					</div>
+				)}
+
 				{headerRight}
 			</div>
 		</header>

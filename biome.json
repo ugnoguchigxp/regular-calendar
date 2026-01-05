@@ -11,5 +11,17 @@
 		"rules": {
 			"recommended": true
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["src/FacilitySchedule/components/ScheduleHeader.tsx"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noArrayIndexKey": "off"
+					}
+				}
+			}
+		}
+	]
 }

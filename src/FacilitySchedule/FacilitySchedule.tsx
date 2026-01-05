@@ -11,6 +11,7 @@ import { MonthView } from "./components/MonthView/MonthView";
 import { ScheduleHeader } from "./components/ScheduleHeader";
 import { WeekView } from "./components/WeekView/WeekView";
 import type { FacilityScheduleProps } from "./FacilitySchedule.schema";
+import { useResourcePagination } from "./hooks/useResourcePagination";
 import { useScheduleData } from "./hooks/useScheduleData";
 import { useScheduleEventHandlers } from "./hooks/useScheduleEventHandlers";
 import { useScheduleView } from "./hooks/useScheduleView";
@@ -39,6 +40,7 @@ export function FacilitySchedule({
 	enablePersistence = false,
 	storageKey = "facility-schedule-view",
 	customFields,
+	pagination,
 }: FacilityScheduleProps) {
 	const { t } = useAppTranslation();
 
@@ -88,13 +90,25 @@ export function FacilitySchedule({
 		onViewChange: setViewMode,
 	});
 
+	const {
+		paginatedResources,
+		currentPage,
+		totalPages,
+		goToPage,
+		isPaginated,
+		pageInfo,
+	} = useResourcePagination({
+		allResources: filteredResources,
+		paginationOptions: pagination,
+	});
+
 	return (
 		<div className={`flex flex-col h-full bg-background ${className}`}>
 			<ScheduleHeader
 				currentDate={currentDate}
 				viewMode={viewMode}
 				groups={groups}
-				selectedGroupId={selectedGroupId}
+				selectedGroupId={effectiveGroupId}
 				isLoading={isLoading}
 				hideGroupSelector={hideGroupSelector}
 				headerLeft={headerLeft}
@@ -103,6 +117,11 @@ export function FacilitySchedule({
 				onToday={goToToday}
 				onViewChange={setViewMode}
 				onGroupChange={setSelectedGroupId}
+				isPaginated={isPaginated}
+				currentPage={currentPage}
+				totalPages={totalPages}
+				onPageChange={goToPage}
+				pageInfo={pageInfo}
 			/>
 
 			{/* Content */}
@@ -116,7 +135,7 @@ export function FacilitySchedule({
 				{viewMode === "day" && (
 					<DayView
 						currentDate={currentDate}
-						resources={filteredResources}
+						resources={paginatedResources}
 						events={filteredEvents}
 						settings={settings}
 						onEventClick={handleEventClick}
@@ -127,7 +146,7 @@ export function FacilitySchedule({
 				{viewMode === "week" && (
 					<WeekView
 						weekStart={currentDate}
-						resources={filteredResources}
+						resources={paginatedResources}
 						events={filteredEvents}
 						settings={settings}
 						groups={groups}
@@ -139,8 +158,10 @@ export function FacilitySchedule({
 				{viewMode === "month" && (
 					<MonthView
 						month={currentDate}
-						events={events}
-						resources={resources}
+						events={events} // Month view usually shows all resources or aggregates?
+						// Month view interface: resources: Resource[]
+						// If we paginate month view, we pass paginated resources.
+						resources={paginatedResources}
 						settings={settings}
 						selectedGroupId={effectiveGroupId}
 						onDayClick={handleDayClick}

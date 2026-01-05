@@ -105,6 +105,7 @@ export function EventModal({
 			open={isOpen}
 			onOpenChange={(open) => !open && onClose()}
 			title={isEditMode ? t("event_edit_title") : t("event_create_title")}
+			className="sm:max-w-3xl"
 		>
 			<div style={{ pointerEvents: isModalReady ? "auto" : "none" }}>
 				<EventForm

@@ -11,6 +11,7 @@ import type { ResourceAvailabilityResponse } from "../../contexts/types";
 import { FacilitySchedule } from "../../FacilitySchedule/FacilitySchedule";
 import type {
 	EventFormData,
+	PaginationOptions,
 	ScheduleEvent,
 	ViewMode,
 } from "../../FacilitySchedule/FacilitySchedule.schema";
@@ -28,12 +29,14 @@ export interface FacilityScheduleManagerProps {
 	settings: FacilityScheduleManagerSettings;
 	currentUserId?: string;
 	enablePersistence?: boolean;
+	pagination?: PaginationOptions;
 }
 
 export function FacilityScheduleManager({
 	settings,
 	currentUserId,
 	enablePersistence = true,
+	pagination,
 }: FacilityScheduleManagerProps) {
 	const {
 		resources,
@@ -275,6 +278,21 @@ export function FacilityScheduleManager({
 		endTime: settings.businessHoursEnd ?? apiSettings.endTime,
 	};
 
+	// Determine effective pagination options
+	// Priority: 1. Direct Prop (if passed), 2. Settings (from context/props), 3. Default
+	const effectivePagination: PaginationOptions = {
+		enabled:
+			pagination?.enabled ??
+			(settings.paginationEnabled as boolean) ??
+			apiSettings.paginationEnabled ??
+			false,
+		pageSize:
+			pagination?.pageSize ??
+			(settings.paginationPageSize as number) ??
+			apiSettings.paginationPageSize ??
+			8,
+	};
+
 	return (
 		<FacilitySchedule
 			events={displayEvents}
@@ -293,6 +311,7 @@ export function FacilityScheduleManager({
 				EventModal: EventModalComponent,
 			}}
 			enablePersistence={enablePersistence}
+			pagination={effectivePagination}
 		/>
 	);
 }

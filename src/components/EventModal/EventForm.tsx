@@ -104,6 +104,9 @@ interface EventFormProps {
 	customFields?: CustomField[];
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: Generic empty array constant
+const EMPTY_ARRAY: any[] = [];
+
 export function EventForm({
 	event,
 	resources,
@@ -116,10 +119,10 @@ export function EventForm({
 	onCancel,
 	onDelete,
 	readOnlyResource = false,
-	personnel = [],
+	personnel = EMPTY_ARRAY,
 	currentUserId,
 	onAvailabilityRequest,
-	customFields = [],
+	customFields = EMPTY_ARRAY,
 }: EventFormProps) {
 	const { t, i18n } = useAppTranslation();
 	const isEditMode = !!event;
@@ -195,6 +198,11 @@ export function EventForm({
 		resolver: zodResolver(schema),
 		defaultValues,
 	});
+
+	// Reset form when defaultValues change (e.g. switching events)
+	useEffect(() => {
+		form.reset(defaultValues);
+	}, [defaultValues, form]);
 
 	// Watch values
 	const isAllDay = form.watch("isAllDay");
@@ -321,20 +329,22 @@ export function EventForm({
 				onSubmit={form.handleSubmit(handleSubmit)}
 				className="space-y-[var(--ui-space-4)] text-foreground"
 			>
-				{/* Title (Patient/User Name) */}
+				{/* Title (Event Name) */}
 				<FormField
 					control={form.control}
 					name="title"
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>
-								{t("user_name_label") || "User Name"}{" "}
+								{t("event_name_label") || "Event Name"}{" "}
 								<span className="text-red-500">*</span>
 							</FormLabel>
 							<FormControl>
 								<Input
 									{...field}
-									placeholder={t("name_placeholder") || "Enter name"}
+									placeholder={
+										t("event_name_placeholder") || "Enter event name"
+									}
 									autoFocus
 								/>
 							</FormControl>
@@ -473,10 +483,12 @@ export function EventForm({
 				))}
 
 				{/* Start Date & Time */}
-				<div className="space-y-[var(--ui-space-4)]">
-					<div className="flex justify-between items-center">
-						<FormLabel>
-							{t("start_time_label")} <span className="text-red-500">*</span>
+				<div className="space-y-[var(--ui-space-2)]">
+					{/* Header Row: Label & All Day Checkbox */}
+					<div className="flex items-center justify-between">
+						<FormLabel className="text-base font-semibold">
+							{t("date_time_label") || "Date & Time"}{" "}
+							<span className="text-red-500">*</span>
 						</FormLabel>
 						<FormField
 							control={form.control}
@@ -494,18 +506,24 @@ export function EventForm({
 										htmlFor="isAllDay-checkbox"
 										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
 									>
-										All Day
+										{t("all_day") || "All Day"}
 									</label>
 								</FormItem>
 							)}
 						/>
 					</div>
-					<div className="flex gap-[var(--ui-space-2)] items-center">
+
+					{/* 4-Column Grid */}
+					<div className="grid grid-cols-4 gap-[var(--ui-space-4)] items-start">
+						{/* Col 1: Date Picker */}
 						<FormField
 							control={form.control}
 							name="startDate"
 							render={({ field }) => (
-								<FormItem>
+								<FormItem className="space-y-[var(--ui-space-1-5)]">
+									<FormLabel className="text-xs text-muted-foreground">
+										{t("date_label") || "Date"}
+									</FormLabel>
 									<FormControl>
 										<DatePicker
 											value={new Date(field.value)}
@@ -521,17 +539,26 @@ export function EventForm({
 													field.onChange(formatIsoDateTime(date));
 												}
 											}}
+											className="w-full"
 										/>
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>
-						{!isAllDay && (
+
+						{/* Col 2: Time Picker (Hidden if All Day) */}
+						{isAllDay ? (
+							<div aria-hidden="true" />
+						) : (
 							<FormField
 								control={form.control}
 								name="startDate"
 								render={({ field }) => (
-									<FormItem>
+									<FormItem className="space-y-[var(--ui-space-1-5)]">
+										<FormLabel className="text-xs text-muted-foreground">
+											{t("time_label") || "Time"}
+										</FormLabel>
 										<FormControl>
 											<Input
 												value={formatCalendarDate(
@@ -540,63 +567,77 @@ export function EventForm({
 													"time24",
 												)}
 												readOnly
-												className="cursor-pointer w-[var(--ui-space-24)]"
+												className="cursor-pointer w-full text-center"
 												onClick={() => setIsTimeModalOpen(true)}
 												tabIndex={-1}
 											/>
 										</FormControl>
+										<FormMessage />
 									</FormItem>
 								)}
 							/>
 						)}
+
+						{/* Col 3: Duration (Hidden if All Day) */}
+						{isAllDay ? (
+							<div aria-hidden="true" />
+						) : (
+							<FormField
+								control={form.control}
+								name="durationHours"
+								render={({ field }) => (
+									<FormItem className="space-y-[var(--ui-space-1-5)]">
+										<FormLabel className="text-xs text-muted-foreground">
+											{t("duration_label")}
+										</FormLabel>
+										<Select
+											onValueChange={(v) => field.onChange(Number(v))}
+											value={String(field.value)}
+											disabled={isAllDay}
+										>
+											<FormControl>
+												<SelectTrigger className="w-full">
+													<SelectValue />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent className="max-h-[var(--ui-space-50)]">
+												{[
+													0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5,
+													2.75, 3, 3.5, 4, 4.5, 5, 6, 8,
+												].map((h) => (
+													<SelectItem key={h} value={String(h)}>
+														{formatDuration(h)}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
+
+						{/* Col 4: End Time Display (Hidden if All Day) */}
+						{isAllDay ? (
+							<div aria-hidden="true" />
+						) : (
+							<div className="space-y-[var(--ui-space-1-5)]">
+								<FormLabel className="text-xs text-muted-foreground">
+									End Time
+								</FormLabel>
+								<div className="h-[var(--ui-component-height)] px-3 py-1 flex items-center justify-center border border-transparent text-sm text-foreground/80 font-medium whitespace-nowrap">
+									{!Number.isNaN(endDateDisplay.getTime())
+										? formatCalendarDate(
+												endDateDisplay,
+												i18n.language,
+												"time24",
+											)
+										: "-"}
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
-
-				{/* Duration */}
-				<FormField
-					control={form.control}
-					name="durationHours"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>{t("duration_label")}</FormLabel>
-							<div className="flex items-center gap-[var(--ui-space-2)]">
-								<Select
-									onValueChange={(v) => field.onChange(Number(v))}
-									value={String(field.value)}
-									disabled={isAllDay}
-								>
-									<FormControl>
-										<SelectTrigger className="w-[var(--ui-space-32)]">
-											<SelectValue />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent className="max-h-[var(--ui-space-50)]">
-										{[
-											0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75,
-											3, 3.5, 4, 4.5, 5, 6, 8,
-										].map((h) => (
-											<SelectItem key={h} value={String(h)}>
-												{formatDuration(h)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								{!isAllDay && (
-									<span className="text-sm text-muted-foreground">
-										End:{" "}
-										{!Number.isNaN(endDateDisplay.getTime())
-											? formatCalendarDate(
-													endDateDisplay,
-													i18n.language,
-													"time24",
-												)
-											: t("event_form_end_time_placeholder")}
-									</span>
-								)}
-							</div>
-						</FormItem>
-					)}
-				/>
 
 				{/* Conflict Warning */}
 				{conflict && (

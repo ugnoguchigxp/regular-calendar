@@ -20,15 +20,14 @@ export function ViewSelector<T extends string = string>({
 }: ViewSelectorProps<T>) {
 	return (
 		<div
-			className={`flex bg-muted p-[calc(var(--ui-gap-base)/2)] rounded-md ${className || ""}`}
+			className={`flex bg-muted p-[calc(var(--ui-gap-base)/2)] rounded-md gap-[calc(var(--ui-gap-base)/2)] ${className || ""}`}
 		>
 			{options.map((option) => (
 				<Button
 					key={option.value}
 					variant={currentView === option.value ? "default" : "ghost"}
-					size="default"
 					onClick={() => onViewChange(option.value)}
-					className="flex-1"
+					className="flex-1 h-[var(--ui-component-height)] px-[var(--ui-button-padding-x)]"
 				>
 					{option.label}
 				</Button>
