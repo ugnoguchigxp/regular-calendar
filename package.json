@@ -1,6 +1,6 @@
 {
 	"name": "regular-calendar",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "A generic, high-performance facility schedule management component for React. Designed to be domain-agnostic, customizable, and easy to integrate with any backend.",
 	"type": "module",
 	"keywords": [
