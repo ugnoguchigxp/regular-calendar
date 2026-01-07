@@ -69,7 +69,6 @@ const baseEventSchema = z.object({
 	resourceId: z.string().optional(),
 	startDate: z.string().min(1, "required"),
 	durationHours: z.number().min(0.25).max(24),
-	status: z.string().optional(),
 	note: z.string().optional(),
 	isRecurring: z.boolean().optional(),
 	scheduleType: z.string().optional(),
@@ -178,7 +177,6 @@ export function EventForm({
 							100,
 					) / 100
 				: 1,
-			status: event?.status || "booked",
 			note: event?.note || "",
 			isRecurring: false,
 			isAllDay: event?.isAllDay || false,
@@ -285,7 +283,6 @@ export function EventForm({
 			title,
 			attendee,
 			resourceId,
-			status,
 			note,
 			durationHours,
 			isAllDay: _isAllDay,
@@ -313,7 +310,7 @@ export function EventForm({
 			resourceId: resourceId || undefined,
 			startDate: start,
 			endDate: end,
-			status,
+			status: event?.status ?? "booked",
 			note,
 			durationHours, // Keep duration if needed by API
 			isAllDay: !!data.isAllDay,
@@ -663,32 +660,6 @@ export function EventForm({
 						</div>
 					</div>
 				)}
-
-				{/* Status */}
-				<FormField
-					control={form.control}
-					name="status"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>{t("status_label")}</FormLabel>
-							<Select
-								onValueChange={field.onChange}
-								value={field.value as string}
-							>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									<SelectItem value="booked">Booked</SelectItem>
-									<SelectItem value="completed">Completed</SelectItem>
-									<SelectItem value="cancelled">Cancelled</SelectItem>
-								</SelectContent>
-							</Select>
-						</FormItem>
-					)}
-				/>
 
 				{/* Note */}
 				<FormField

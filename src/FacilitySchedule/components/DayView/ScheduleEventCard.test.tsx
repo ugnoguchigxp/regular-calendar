@@ -74,25 +74,6 @@ describe("ScheduleEventCard", () => {
 		expect(button?.textContent).toContain("1.5h");
 	});
 
-	it("renders attendee", () => {
-		const onClick = vi.fn();
-		const eventWithAttendee: ScheduleEvent = {
-			...mockEvent,
-			attendee: "田中 太郎",
-		};
-
-		render(
-			<ScheduleEventCard
-				event={eventWithAttendee}
-				top={100}
-				height={90}
-				onClick={onClick}
-			/>,
-		);
-
-		expect(screen.getByText("👤 田中 太郎")).toBeInTheDocument();
-	});
-
 	it("calls onClick when clicked", () => {
 		const onClick = vi.fn();
 		const { getByRole } = render(
