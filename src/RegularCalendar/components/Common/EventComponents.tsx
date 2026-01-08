@@ -4,7 +4,8 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import type React from "react";
-import type { ScheduleEvent } from "../../RegularCalendar.schema";
+import type { RegularCalendarComponents } from "../../RegularCalendar";
+import type { ScheduleEvent, ViewMode } from "../../RegularCalendar.schema";
 
 // Helper to get location string
 const getEventLocation = (event: ScheduleEvent): string => {
@@ -39,6 +40,12 @@ interface EventItemProps {
 	onEventClick?: (event: ScheduleEvent) => void;
 	currentUserId?: string;
 	resources?: { id: string; name: string }[];
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+	components?: RegularCalendarComponents;
+	viewMode?: ViewMode | "resource";
 }
 
 const getDisplayAttendee = (
@@ -88,6 +95,9 @@ export const EventItem: React.FC<EventItemProps> = ({
 	onEventClick,
 	currentUserId,
 	resources = [],
+	renderEventContent,
+	components,
+	viewMode = "week",
 }) => {
 	// Note: Drag functionality depends on DndContext being present in parent
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -144,16 +154,29 @@ export const EventItem: React.FC<EventItemProps> = ({
 				zIndex: isDragging ? 50 : 10 + column,
 			}}
 		>
-			<div className="font-medium truncate text-xs w-full">{title}</div>
-			{displayAttendee !== "" && (
-				<div className="text-[10px] opacity-90 truncate w-full">
-					{displayAttendee}
-				</div>
-			)}
-			{showLocation && resourceName !== "" && (
-				<div className="text-[10px] opacity-90 truncate w-full">
-					{resourceName}
-				</div>
+			{components?.EventCard ? (
+				<components.EventCard
+					event={event}
+					viewMode={viewMode || "week"}
+					isDragging={isDragging}
+					onClick={handleClick}
+				/>
+			) : renderEventContent ? (
+				renderEventContent(event, (viewMode as ViewMode) || "week")
+			) : (
+				<>
+					<div className="font-medium truncate text-xs w-full">{title}</div>
+					{displayAttendee !== "" && (
+						<div className="text-[10px] opacity-90 truncate w-full">
+							{displayAttendee}
+						</div>
+					)}
+					{showLocation && resourceName !== "" && (
+						<div className="text-[10px] opacity-90 truncate w-full">
+							{resourceName}
+						</div>
+					)}
+				</>
 			)}
 		</button>
 	);
@@ -166,11 +189,18 @@ interface MonthEventItemProps {
 	event: ScheduleEvent;
 	onClick?: (event: ScheduleEvent) => void;
 	currentUserId?: string;
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+	components?: RegularCalendarComponents;
 }
 
 export const MonthEventItem: React.FC<MonthEventItemProps> = ({
 	event,
 	onClick,
+	renderEventContent,
+	components,
 }) => {
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -194,8 +224,21 @@ export const MonthEventItem: React.FC<MonthEventItemProps> = ({
 				color: "white",
 			}}
 		>
-			<span className="font-medium mr-[var(--ui-space-1)]">{timeStr}</span>{" "}
-			{title}
+			{components?.EventCard ? (
+				<components.EventCard
+					event={event}
+					viewMode="month"
+					isDragging={false}
+					onClick={handleClick}
+				/>
+			) : renderEventContent ? (
+				renderEventContent(event, "month")
+			) : (
+				<>
+					<span className="font-medium mr-[var(--ui-space-1)]">{timeStr}</span>{" "}
+					{title}
+				</>
+			)}
 		</button>
 	);
 };

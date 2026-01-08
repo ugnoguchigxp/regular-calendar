@@ -451,7 +451,7 @@ app.put("/api/personnel/:id", async (c) => {
 // --- Scheduled Reset (Cron) ---
 
 const worker = {
-	port: 3006,
+	port: 3366,
 	fetch: app.fetch,
 	async scheduled(event: any, env: Bindings, ctx: any) {
 		console.log("Scheduled reset triggered");
@@ -471,4 +471,4 @@ const worker = {
 
 export default worker;
 
-console.log("Server running on http://localhost:3006");
+console.log("Server running on http://localhost:3366");

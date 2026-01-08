@@ -4,9 +4,11 @@
 
 import { useMemo } from "react";
 import { useAppTranslation } from "@/utils/i18n";
+import type { RegularCalendarComponents } from "../../RegularCalendar";
 import type {
 	FacilityScheduleSettings,
 	ScheduleEvent,
+	ViewMode,
 } from "../../RegularCalendar.schema";
 import {
 	getDateClasses,
@@ -22,6 +24,11 @@ interface MonthViewProps {
 	onDateClick?: (date: Date) => void;
 	onEventClick?: (event: ScheduleEvent) => void;
 	currentUserId?: string;
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+	components?: RegularCalendarComponents;
 }
 
 export function MonthView({
@@ -31,6 +38,8 @@ export function MonthView({
 	onDateClick,
 	onEventClick,
 	currentUserId,
+	renderEventContent,
+	components,
 }: MonthViewProps) {
 	const { t } = useAppTranslation();
 	const weekStart = settings.weekStartsOn ?? 1;
@@ -126,6 +135,8 @@ export function MonthView({
 												event={event}
 												onClick={onEventClick}
 												currentUserId={currentUserId}
+												renderEventContent={renderEventContent}
+												components={components}
 											/>
 										))}
 										{dayEvents.length > 3 && (

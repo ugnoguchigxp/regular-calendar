@@ -7,7 +7,7 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { useEffect, useState } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { DateDisplay as DateFormat } from "@/components/ui/DateDisplay";
 import { Icons } from "@/components/ui/Icons";
@@ -25,6 +25,18 @@ import type {
 	ScheduleEvent,
 	ViewMode,
 } from "./RegularCalendar.schema";
+
+export interface EventCardProps {
+	event: ScheduleEvent;
+	viewMode: ViewMode | "resource";
+	isDragging: boolean;
+	onClick?: (e: React.MouseEvent) => void;
+}
+
+export interface RegularCalendarComponents {
+	EventCard?: ComponentType<EventCardProps>;
+	EventModal?: ComponentType<Record<string, unknown>>;
+}
 
 export interface RegularCalendarProps {
 	// Data
@@ -68,6 +80,15 @@ export interface RegularCalendarProps {
 
 	// Resources for resolving names
 	resources?: Resource[];
+
+	// Custom Rendering
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+
+	// Component Overrides
+	components?: RegularCalendarComponents;
 }
 
 export function RegularCalendar({
@@ -91,6 +112,8 @@ export function RegularCalendar({
 	storage = defaultStorage,
 	currentUserId,
 	resources = [],
+	renderEventContent,
+	components,
 }: RegularCalendarProps) {
 	const { t } = useAppTranslation();
 
@@ -291,6 +314,8 @@ export function RegularCalendar({
 							onTimeSlotClick={handleTimeSlotClick}
 							currentUserId={currentUserId}
 							resources={resources}
+							renderEventContent={renderEventContent}
+							components={components}
 						/>
 					)}
 
@@ -303,6 +328,8 @@ export function RegularCalendar({
 							onTimeSlotClick={handleTimeSlotClick}
 							currentUserId={currentUserId}
 							resources={resources}
+							renderEventContent={renderEventContent}
+							components={components}
 						/>
 					)}
 
@@ -314,6 +341,8 @@ export function RegularCalendar({
 							onEventClick={onEventClick}
 							onDateClick={handleDayClick}
 							currentUserId={currentUserId}
+							renderEventContent={renderEventContent}
+							components={components}
 						/>
 					)}
 				</div>

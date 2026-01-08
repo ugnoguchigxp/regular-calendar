@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DateDisplay } from "@/components/ui/DateDisplay";
 import { useAppTranslation } from "@/utils/i18n";
@@ -5,10 +6,12 @@ import {
 	DEFAULT_VIEW_HOURS,
 	TIME_SLOT_HEIGHT,
 } from "../../constants/calendarConstants";
+import type { RegularCalendarComponents } from "../../RegularCalendar";
 import type {
 	FacilityScheduleSettings,
 	Resource,
 	ScheduleEvent,
+	ViewMode,
 } from "../../RegularCalendar.schema";
 import {
 	calculateEventPosition,
@@ -26,9 +29,12 @@ interface DayViewProps {
 	onEventClick?: (event: ScheduleEvent) => void;
 	currentUserId?: string;
 	resources?: Resource[];
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+	components?: RegularCalendarComponents;
 }
-
-import { useDroppable } from "@dnd-kit/core";
 
 const DroppableSlot = ({
 	date,
@@ -73,6 +79,8 @@ export function DayView({
 	onEventClick,
 	currentUserId,
 	resources,
+	renderEventContent,
+	components,
 }: DayViewProps) {
 	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30; // Fallback to 30 min
@@ -244,6 +252,8 @@ export function DayView({
 								onEventClick={onEventClick}
 								currentUserId={currentUserId}
 								resources={resources}
+								renderEventContent={renderEventContent}
+								components={components}
 							/>
 						))}
 					</div>

@@ -82,7 +82,10 @@ const getSecondaryCalendarSetting = (): string | null => {
 
 const getPreferLocalCalendarSetting = (): boolean => {
 	if (typeof document === "undefined") return false;
-	return document.documentElement.getAttribute("data-prefer-local-calendar") === "true";
+	return (
+		document.documentElement.getAttribute("data-prefer-local-calendar") ===
+		"true"
+	);
 };
 
 const getLocalCalendarForLocale = (lang: string): string | null => {
@@ -117,7 +120,6 @@ const formatWithCalendar = (
 			return formatter({ year: "numeric", month: "long" });
 		case "monthDay":
 			return formatter({ month: "long", day: "numeric" });
-		case "full":
 		default:
 			return formatter({
 				year: "numeric",
@@ -180,7 +182,12 @@ export const DateDisplay: React.FC<DateDisplayProps> = React.memo(
 			const primaryCalendar = getPrimaryCalendar();
 			if (primaryCalendar) {
 				const primaryLocale = getCalendarLocale(primaryCalendar) ?? locale;
-				return formatWithCalendar(date, primaryLocale, effectiveFormat, primaryCalendar);
+				return formatWithCalendar(
+					date,
+					primaryLocale,
+					effectiveFormat,
+					primaryCalendar,
+				);
 			}
 			return formatDate();
 		};
@@ -194,7 +201,12 @@ export const DateDisplay: React.FC<DateDisplayProps> = React.memo(
 			if (secondaryCalendar === primaryCalendar) return null;
 
 			const secondaryLocale = getCalendarLocale(secondaryCalendar) ?? locale;
-			return formatWithCalendar(date, secondaryLocale, effectiveFormat, secondaryCalendar);
+			return formatWithCalendar(
+				date,
+				secondaryLocale,
+				effectiveFormat,
+				secondaryCalendar,
+			);
 		};
 
 		const primaryText = formatPrimary();

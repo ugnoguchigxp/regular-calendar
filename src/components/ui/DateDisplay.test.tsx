@@ -48,7 +48,8 @@ describe("DateDisplay", () => {
 
 	it("handles weekday format", () => {
 		render(<DateDisplay date={new Date("2025-01-15")} format="weekday" />);
-		expect(screen.getByText(/水曜日/)).toBeInTheDocument();
+		// Japanese locale now uses (水) format instead of 水曜日
+		expect(screen.getByText(/\(水\)/)).toBeInTheDocument();
 	});
 
 	it("handles weekdayShort format", () => {

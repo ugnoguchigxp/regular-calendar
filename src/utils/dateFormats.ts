@@ -56,11 +56,20 @@ export function formatCalendarDate(
 				day: "numeric",
 			}).format(date);
 
-		case "weekday":
-			// "Sunday" (en), "日曜日" (ja)
+		case "weekday": {
+			// "Sunday" (en), "(日)" (ja)
+			const weekdayStr = new Intl.DateTimeFormat(locale, {
+				weekday: "short",
+			}).format(date);
+			// For Japanese locale, wrap in parentheses
+			if (locale?.startsWith("ja")) {
+				return `(${weekdayStr})`;
+			}
+			// For other locales, use long format
 			return new Intl.DateTimeFormat(locale, {
 				weekday: "long",
 			}).format(date);
+		}
 
 		case "weekdayShort":
 			// "Sun" (en), "日" (ja)
@@ -160,14 +169,28 @@ export function formatCalendarDate(
 				month: "short",
 			}).format(date);
 
-		case "full":
-			// "Friday, October 23, 2025" (en), "2025年10月23日金曜日" (ja)
+		case "full": {
+			// "Friday, October 23, 2025" (en), "2025年10月23日(金)" (ja)
+			const dateStr = new Intl.DateTimeFormat(locale, {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			}).format(date);
+			const weekdayStr = new Intl.DateTimeFormat(locale, {
+				weekday: "short",
+			}).format(date);
+			// For Japanese locale, use short weekday in parentheses
+			if (locale?.startsWith("ja")) {
+				return `${dateStr}(${weekdayStr})`;
+			}
+			// For other locales, use standard long format
 			return new Intl.DateTimeFormat(locale, {
 				year: "numeric",
 				month: "long",
 				day: "numeric",
 				weekday: "long",
 			}).format(date);
+		}
 
 		case "yearMonth":
 			// "October 2025" (en), "2025年10月" (ja) (Standard long format)

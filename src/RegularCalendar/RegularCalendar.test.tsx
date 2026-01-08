@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RegularCalendar } from "./RegularCalendar";
+import {
+	RegularCalendar,
+	type RegularCalendarComponents,
+} from "./RegularCalendar";
 import type {
 	FacilityScheduleSettings,
 	ScheduleEvent,
@@ -21,6 +25,11 @@ type ViewSelectorProps = {
 type DayViewProps = {
 	currentDate: Date;
 	onTimeSlotClick?: (date: Date, timeSlot?: string) => void;
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+	components?: RegularCalendarComponents;
 };
 
 type MonthViewProps = {
@@ -62,14 +71,23 @@ vi.mock("@/components/ui/ViewSelector", () => ({
 }));
 
 vi.mock("./components/DayView/DayView", () => ({
-	DayView: ({ currentDate, onTimeSlotClick }: DayViewProps) => (
-		<button
-			type="button"
-			data-testid="day-view"
-			onClick={() => onTimeSlotClick?.(currentDate, "09:30")}
-		>
-			DayView
-		</button>
+	DayView: ({
+		currentDate,
+		onTimeSlotClick,
+		renderEventContent,
+		components,
+	}: DayViewProps) => (
+		<div>
+			<button
+				type="button"
+				data-testid="day-view"
+				onClick={() => onTimeSlotClick?.(currentDate, "09:30")}
+			>
+				DayView
+			</button>
+			{renderEventContent && <div data-testid="has-custom-renderer" />}
+			{components?.EventCard && <div data-testid="has-custom-event-card" />}
+		</div>
 	),
 }));
 
@@ -418,5 +436,33 @@ describe("RegularCalendar", () => {
 		);
 
 		expect(container.firstChild).toHaveClass("custom-class");
+	});
+
+	it("passes renderEventContent to views", () => {
+		const handleRenderEventContent = () => <div>Custom</div>;
+		render(
+			<RegularCalendar
+				events={mockEvents}
+				settings={mockSettings}
+				viewMode="day"
+				renderEventContent={handleRenderEventContent}
+			/>,
+		);
+
+		expect(screen.getByTestId("has-custom-renderer")).toBeInTheDocument();
+	});
+
+	it("passes components to views", () => {
+		const CustomEventCard = () => <div>Custom</div>;
+		render(
+			<RegularCalendar
+				events={mockEvents}
+				settings={mockSettings}
+				viewMode="day"
+				components={{ EventCard: CustomEventCard }}
+			/>,
+		);
+
+		expect(screen.getByTestId("has-custom-event-card")).toBeInTheDocument();
 	});
 });

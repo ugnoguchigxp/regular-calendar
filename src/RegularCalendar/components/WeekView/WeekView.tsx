@@ -8,10 +8,12 @@ import {
 	DEFAULT_VIEW_HOURS,
 	TIME_SLOT_HEIGHT,
 } from "../../constants/calendarConstants";
+import type { RegularCalendarComponents } from "../../RegularCalendar";
 import type {
 	FacilityScheduleSettings,
 	Resource,
 	ScheduleEvent,
+	ViewMode,
 } from "../../RegularCalendar.schema";
 import {
 	calculateEventsWithLayout,
@@ -31,6 +33,11 @@ interface WeekViewProps {
 	onEventClick?: (event: ScheduleEvent) => void;
 	currentUserId?: string;
 	resources?: Resource[];
+	renderEventContent?: (
+		event: ScheduleEvent,
+		viewMode: ViewMode,
+	) => React.ReactNode;
+	components?: RegularCalendarComponents;
 }
 
 export function WeekView({
@@ -41,6 +48,8 @@ export function WeekView({
 	onEventClick,
 	currentUserId,
 	resources,
+	renderEventContent,
+	components,
 }: WeekViewProps) {
 	const { t } = useAppTranslation();
 	const timeInterval = settings.defaultDuration || 30;
@@ -102,12 +111,9 @@ export function WeekView({
 		const allDay: ScheduleEvent[] = [];
 		const timed: ScheduleEvent[] = [];
 
-		console.log("WeekView events total:", events.length);
-
 		events.forEach((e) => {
 			// Check both root and extendedProps for isAllDay
 			const isAllDay = e.isAllDay || e.extendedProps?.isAllDay;
-			// console.log('Event:', e.title, 'isAllDay:', isAllDay, e);
 
 			if (isAllDay) {
 				allDay.push(e);
@@ -115,9 +121,6 @@ export function WeekView({
 				timed.push(e);
 			}
 		});
-
-		console.log("AllDay events count:", allDay.length);
-		console.log("Timed events count:", timed.length);
 
 		return { allDayEvents: allDay, timedEvents: timed };
 	}, [events]);
@@ -297,6 +300,8 @@ export function WeekView({
 												onEventClick={onEventClick}
 												currentUserId={currentUserId}
 												resources={resources}
+												renderEventContent={renderEventContent}
+												components={components}
 											/>
 										),
 									)}
