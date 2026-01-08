@@ -9,7 +9,10 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/Tooltip";
-import type { ScheduleEvent } from "../../FacilitySchedule.schema";
+import type {
+	EventCardComponentProps,
+	ScheduleEvent,
+} from "../../FacilitySchedule.schema";
 
 interface ScheduleEventCardProps {
 	event: ScheduleEvent;
@@ -19,6 +22,9 @@ interface ScheduleEventCardProps {
 	leftPercent?: number; // % left
 	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 	isDragging?: boolean;
+	components?: {
+		EventCard?: React.ComponentType<EventCardComponentProps>;
+	};
 }
 
 export function ScheduleEventCard({
@@ -29,6 +35,7 @@ export function ScheduleEventCard({
 	leftPercent = 0,
 	onClick,
 	isDragging = false,
+	components,
 }: ScheduleEventCardProps) {
 	const startTime = event.startDate.toLocaleTimeString("ja-JP", {
 		hour: "2-digit",
@@ -95,36 +102,47 @@ export function ScheduleEventCard({
 						onClick={onClick}
 					>
 						<div className="p-[var(--ui-space-2)] h-full flex flex-col items-center justify-start overflow-hidden">
-							{/* Conflict Warning */}
-							{event.hasConflict && (
-								<div className="text-xs font-bold mb-[var(--ui-space-1)]">
-									⚠️ Double Booking
-								</div>
-							)}
-
-							{/* Title */}
-							<div className="font-semibold text-sm leading-snug break-words">
-								{event.title}
-							</div>
-
-							{/* Time */}
-							{!event.isAllDay && (
-								<div className="flex items-center justify-center gap-[var(--ui-space-1)] text-[10px] opacity-90 mt-[var(--ui-space-1)] overflow-hidden whitespace-nowrap">
-									<span className="font-mono tabular-nums tracking-tight">
-										{formatTime(event.startDate)}
-									</span>
-									{durationHours >= 0.5 && (
-										<>
-											<span>-</span>
-											<span className="font-mono tabular-nums tracking-tight">
-												{formatTime(event.endDate)}
-											</span>
-											<span className="ml-[var(--ui-space-0-5)] opacity-75">
-												({displayDuration})
-											</span>
-										</>
+							{components?.EventCard ? (
+								<components.EventCard
+									event={event}
+									viewMode="day"
+									onClick={onClick}
+									className="w-full h-full"
+								/>
+							) : (
+								<>
+									{/* Conflict Warning */}
+									{event.hasConflict && (
+										<div className="text-xs font-bold mb-[var(--ui-space-1)]">
+											⚠️ Double Booking
+										</div>
 									)}
-								</div>
+
+									{/* Title */}
+									<div className="font-semibold text-sm leading-snug break-words">
+										{event.title}
+									</div>
+
+									{/* Time */}
+									{!event.isAllDay && (
+										<div className="flex items-center justify-center gap-[var(--ui-space-1)] text-[10px] opacity-90 mt-[var(--ui-space-1)] overflow-hidden whitespace-nowrap">
+											<span className="font-mono tabular-nums tracking-tight">
+												{formatTime(event.startDate)}
+											</span>
+											{durationHours >= 0.5 && (
+												<>
+													<span>-</span>
+													<span className="font-mono tabular-nums tracking-tight">
+														{formatTime(event.endDate)}
+													</span>
+													<span className="ml-[var(--ui-space-0-5)] opacity-75">
+														({displayDuration})
+													</span>
+												</>
+											)}
+										</div>
+									)}
+								</>
 							)}
 						</div>
 					</button>

@@ -175,6 +175,15 @@ export interface EventModalComponentProps {
 	customFields?: CustomField[];
 }
 
+export interface EventCardComponentProps {
+	event: ScheduleEvent;
+	viewMode: ViewMode;
+	isCompact?: boolean;
+	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+	className?: string;
+	style?: React.CSSProperties;
+}
+
 export interface FacilityScheduleProps {
 	// Data
 	events: ScheduleEvent[];
@@ -208,6 +217,7 @@ export interface FacilityScheduleProps {
 	 */
 	components?: {
 		EventModal?: React.ComponentType<EventModalComponentProps>;
+		EventCard?: React.ComponentType<EventCardComponentProps>;
 	};
 
 	// Custom header slots

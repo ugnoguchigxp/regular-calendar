@@ -160,6 +160,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 					viewMode={viewMode || "week"}
 					isDragging={isDragging}
 					onClick={handleClick}
+					isCompact={position.height < 50}
 				/>
 			) : renderEventContent ? (
 				renderEventContent(event, (viewMode as ViewMode) || "week")
@@ -230,6 +231,7 @@ export const MonthEventItem: React.FC<MonthEventItemProps> = ({
 					viewMode="month"
 					isDragging={false}
 					onClick={handleClick}
+					isCompact={true}
 				/>
 			) : renderEventContent ? (
 				renderEventContent(event, "month")

@@ -20,21 +20,17 @@ import { DayView } from "./components/DayView/DayView";
 import { MonthView } from "./components/MonthView/MonthView";
 import { WeekView } from "./components/WeekView/WeekView";
 import type {
+	EventCardComponentProps,
 	FacilityScheduleSettings,
 	Resource,
 	ScheduleEvent,
 	ViewMode,
 } from "./RegularCalendar.schema";
 
-export interface EventCardProps {
-	event: ScheduleEvent;
-	viewMode: ViewMode | "resource";
-	isDragging: boolean;
-	onClick?: (e: React.MouseEvent) => void;
-}
+export type EventCardProps = EventCardComponentProps;
 
 export interface RegularCalendarComponents {
-	EventCard?: ComponentType<EventCardProps>;
+	EventCard?: ComponentType<EventCardComponentProps>;
 	EventModal?: ComponentType<Record<string, unknown>>;
 }
 

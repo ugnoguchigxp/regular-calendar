@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { Resource } from "../../FacilitySchedule.schema";
+import type { Resource } from "../FacilitySchedule.schema";
 import { useResourcePagination } from "./useResourcePagination";
 
 const createMockResources = (count: number): Resource[] => {

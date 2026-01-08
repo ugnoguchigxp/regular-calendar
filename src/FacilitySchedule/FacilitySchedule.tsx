@@ -140,6 +140,7 @@ export function FacilitySchedule({
 						settings={settings}
 						onEventClick={handleEventClick}
 						onEmptySlotClick={handleEmptySlotClick}
+						components={components}
 					/>
 				)}
 
@@ -152,6 +153,7 @@ export function FacilitySchedule({
 						groups={groups}
 						onEventClick={handleEventClick}
 						onEmptySlotClick={handleEmptySlotClick}
+						components={components}
 					/>
 				)}
 

@@ -196,7 +196,16 @@ export function DayView({
 										onEventClick?.(event);
 									}}
 								>
-									{event.title}
+									{components?.EventCard ? (
+										<components.EventCard
+											event={event}
+											viewMode="day"
+											isCompact={true}
+											onClick={() => onEventClick?.(event)}
+										/>
+									) : (
+										event.title
+									)}
 								</button>
 							))}
 						</div>
@@ -254,6 +263,7 @@ export function DayView({
 								resources={resources}
 								renderEventContent={renderEventContent}
 								components={components}
+								viewMode="day"
 							/>
 						))}
 					</div>

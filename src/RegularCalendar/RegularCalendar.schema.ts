@@ -102,6 +102,16 @@ export interface ScheduleConflict {
 	conflictType: "double-booking" | "overlap";
 }
 
+export interface EventCardComponentProps {
+	event: ScheduleEvent;
+	viewMode: ViewMode | "resource";
+	isDragging?: boolean;
+	isCompact?: boolean;
+	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+	className?: string;
+	style?: React.CSSProperties;
+}
+
 // ==========================================
 // Inferred Types
 // ==========================================

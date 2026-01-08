@@ -5,6 +5,7 @@
 import { useMemo } from "react";
 import { DAY_VIEW } from "../../constants";
 import type {
+	EventCardComponentProps,
 	FacilityScheduleSettings,
 	Resource,
 	ScheduleEvent,
@@ -28,6 +29,9 @@ export interface DayViewProps {
 	settings: FacilityScheduleSettings;
 	onEventClick?: (event: ScheduleEvent) => void;
 	onEmptySlotClick?: (resourceId: string, startTime: Date) => void;
+	components?: {
+		EventCard?: React.ComponentType<EventCardComponentProps>;
+	};
 }
 
 export function DayView({
@@ -37,6 +41,7 @@ export function DayView({
 	settings,
 	onEventClick,
 	onEmptySlotClick,
+	components,
 }: DayViewProps) {
 	// Calculate Grid Height and Hours
 	const startParts = settings.startTime.split(":");
@@ -108,6 +113,7 @@ export function DayView({
 								slotHeight={DAY_VIEW.SLOT_HEIGHT}
 								onEventClick={onEventClick}
 								onEmptySlotClick={onEmptySlotClick}
+								components={components}
 							/>
 						))}
 					</div>

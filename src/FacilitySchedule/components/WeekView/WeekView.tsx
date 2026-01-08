@@ -11,6 +11,7 @@ import { DateDisplay } from "@/components/ui/DateDisplay";
 import { addDays } from "@/utils/dateUtils";
 import { WEEK_VIEW } from "../../constants";
 import type {
+	EventCardComponentProps,
 	FacilityScheduleSettings,
 	Resource,
 	ResourceGroup,
@@ -40,6 +41,9 @@ interface WeekViewProps {
 	groups?: ResourceGroup[];
 	onEventClick?: (event: ScheduleEvent) => void;
 	onEmptySlotClick?: (resourceId: string, date: Date) => void;
+	components?: {
+		EventCard?: React.ComponentType<EventCardComponentProps>;
+	};
 }
 
 export function WeekView({
@@ -50,6 +54,7 @@ export function WeekView({
 	groups = [],
 	onEventClick,
 	onEmptySlotClick,
+	components,
 }: WeekViewProps) {
 	const weekStartsOn = useMemo(
 		() => normalizeWeekStartsOn(settings.weekStartsOn),
@@ -268,7 +273,11 @@ export function WeekView({
 																minute: "2-digit",
 															});
 
-														return (
+														const CardContainer = ({
+															children,
+														}: {
+															children: React.ReactNode;
+														}) => (
 															<button
 																key={event.id}
 																type="button"
@@ -279,12 +288,31 @@ export function WeekView({
 																	onEventClick?.(event);
 																}}
 															>
+																{children}
+															</button>
+														);
+
+														if (components?.EventCard) {
+															return (
+																<CardContainer key={event.id}>
+																	<components.EventCard
+																		event={event}
+																		viewMode="week"
+																		isCompact={true}
+																		onClick={() => onEventClick?.(event)}
+																	/>
+																</CardContainer>
+															);
+														}
+
+														return (
+															<CardContainer key={event.id}>
 																<span className="font-medium">
 																	{event.hasConflict && "⚠️ "}
 																	{!event.isAllDay && `${startTime} `}
 																	{event.title}
 																</span>
-															</button>
+															</CardContainer>
 														);
 													})}
 												{cellEvents.length > WEEK_VIEW.MAX_VISIBLE_EVENTS && (

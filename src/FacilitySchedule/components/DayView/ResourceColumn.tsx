@@ -5,7 +5,11 @@
 
 import { useMemo, useRef } from "react";
 import { Button } from "@/components/ui/Button";
-import type { Resource, ScheduleEvent } from "../../FacilitySchedule.schema";
+import type {
+	EventCardComponentProps,
+	Resource,
+	ScheduleEvent,
+} from "../../FacilitySchedule.schema";
 import { hasTimeOverlap } from "../../utils/scheduleHelpers";
 import { ScheduleEventCard } from "./ScheduleEventCard";
 
@@ -19,6 +23,9 @@ interface ResourceColumnProps {
 	slotHeight: number; // pixels per hour
 	onEventClick?: (event: ScheduleEvent) => void;
 	onEmptySlotClick?: (resourceId: string, startTime: Date) => void;
+	components?: {
+		EventCard?: React.ComponentType<EventCardComponentProps>;
+	};
 }
 
 interface EventWithLayout extends ScheduleEvent {
@@ -36,6 +43,7 @@ export function ResourceColumn({
 	slotHeight,
 	onEventClick,
 	onEmptySlotClick,
+	components,
 }: ResourceColumnProps) {
 	// Duplicate logic from TimeGrid to ensure alignment
 	const startParts = startTime.split(":");
@@ -244,6 +252,7 @@ export function ResourceColumn({
 									e.stopPropagation();
 									onEventClick?.(layoutEvent);
 								}}
+								components={components}
 							/>
 						);
 					})}

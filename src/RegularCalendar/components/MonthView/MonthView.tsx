@@ -94,7 +94,7 @@ export function MonthView({
 							const isCurrentMonth = date.getMonth() === currentMonth;
 							const isSelected =
 								date.toDateString() === currentDate.toDateString();
-							const dayEvents = getEventsForDate(events, date);
+							const dayEvents = getEventsForDate(events, date, 0, 24);
 
 							return (
 								<div

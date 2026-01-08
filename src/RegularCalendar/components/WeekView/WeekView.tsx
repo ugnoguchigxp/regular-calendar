@@ -225,7 +225,16 @@ export function WeekView({
 												onEventClick?.(event);
 											}}
 										>
-											{event.title}
+											{components?.EventCard ? (
+												<components.EventCard
+													event={event}
+													viewMode="week"
+													isCompact={true}
+													onClick={() => onEventClick?.(event)}
+												/>
+											) : (
+												event.title
+											)}
 										</button>
 									))}
 								</div>
@@ -302,6 +311,7 @@ export function WeekView({
 												resources={resources}
 												renderEventContent={renderEventContent}
 												components={components}
+												viewMode="week"
 											/>
 										),
 									)}
