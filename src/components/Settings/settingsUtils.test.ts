@@ -22,6 +22,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -48,6 +50,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -74,6 +78,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -93,6 +99,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -112,6 +120,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -131,6 +141,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -151,6 +163,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -194,6 +208,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -237,6 +253,8 @@ describe("settingsUtils", () => {
 			closedDays: [0],
 			language: "ja",
 			timeZone: "Asia/Tokyo",
+			paginationEnabled: false,
+			paginationPageSize: 8,
 		};
 
 		const originalSetProperty = document.documentElement.style.setProperty;

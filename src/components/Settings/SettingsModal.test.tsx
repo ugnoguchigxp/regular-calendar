@@ -22,6 +22,8 @@ describe("SettingsModal", () => {
 		businessHoursEnd: "18:00",
 		closedDays: [0, 6],
 		timeZone: "Asia/Tokyo",
+		paginationEnabled: false,
+		paginationPageSize: 8,
 	};
 
 	const mockOnUpdateSettings = vi.fn();
