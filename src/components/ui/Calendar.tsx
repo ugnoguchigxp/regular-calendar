@@ -11,6 +11,7 @@ import {
 	isSameDay,
 	isSameMonth,
 	isWithinInterval,
+	startOfDay,
 	startOfMonth,
 	startOfWeek,
 	subMonths,
@@ -52,31 +53,49 @@ export function Calendar({
 	numberOfMonths: _numberOfMonths = 1, // Unused for now
 	defaultMonth,
 }: CalendarProps) {
-	// --- State ---
 	const [currentMonth, setCurrentMonth] = React.useState(
-		defaultMonth || new Date(),
+		defaultMonth ||
+			(selected instanceof Date ? selected : (selected as DateRange)?.from) ||
+			new Date(),
 	);
+
+	// Sync currentMonth ONLY when selected date prop changes externally
+	const lastSelected = React.useRef(selected);
+	React.useEffect(() => {
+		if (selected !== lastSelected.current) {
+			const newDate =
+				selected instanceof Date ? selected : (selected as DateRange)?.from;
+			if (newDate) {
+				setCurrentMonth(startOfMonth(newDate));
+			}
+			lastSelected.current = selected;
+		}
+	}, [selected]);
 
 	// --- Helpers ---
 	const isDisabled = (date: Date) => {
 		if (!disabled) return false;
+
+		const targetDate = startOfDay(date);
+
 		if (Array.isArray(disabled)) {
 			// Check array of modifiers
 			return disabled.some((d) => {
-				if (d instanceof Date) return isSameDay(date, d);
+				if (d instanceof Date) return isSameDay(targetDate, startOfDay(d));
 				// Check for { before: Date }
 				if (typeof d === "object" && "before" in d && d.before) {
-					return date < d.before;
+					return targetDate.getTime() < startOfDay(d.before).getTime();
 				}
 				// Check for { after: Date }
 				if (typeof d === "object" && "after" in d && d.after) {
-					return date > d.after;
+					return targetDate.getTime() > startOfDay(d.after).getTime();
 				}
 				return false;
 			});
 		}
 		// Single Date
-		if (disabled instanceof Date) return isSameDay(date, disabled);
+		if (disabled instanceof Date)
+			return isSameDay(targetDate, startOfDay(disabled));
 		// Function
 		if (typeof disabled === "function") return disabled(date);
 		return false;
@@ -164,8 +183,10 @@ export function Calendar({
 		}
 	};
 
-	const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-	const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+	const nextMonth = () =>
+		setCurrentMonth((prev) => addMonths(new Date(prev), 1));
+	const prevMonth = () =>
+		setCurrentMonth((prev) => subMonths(new Date(prev), 1));
 
 	// --- Render ---
 	// Generate grid for currentMonth
@@ -185,6 +206,7 @@ export function Calendar({
 				<button
 					type="button"
 					onClick={prevMonth}
+					aria-label="Go to previous month"
 					className={cn(
 						buttonVariants({ variant: "outline" }),
 						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
@@ -202,6 +224,7 @@ export function Calendar({
 				<button
 					type="button"
 					onClick={nextMonth}
+					aria-label="Go to next month"
 					className={cn(
 						buttonVariants({ variant: "outline" }),
 						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
