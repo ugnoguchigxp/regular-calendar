@@ -5,6 +5,9 @@
 // Time slot height (px)
 export const TIME_SLOT_HEIGHT = 60;
 
+// Time slot width (px) - for horizontal timeline
+export const TIME_SLOT_WIDTH = 50;
+
 // Color Theme
 export const CALENDAR_COLORS = {
 	// Event Colors

@@ -22,21 +22,39 @@ export function PersonnelPanel({
 }: PersonnelPanelProps) {
 	const { t } = useAppTranslation();
 	const [searchQuery, setSearchQuery] = useState("");
+	const [selectedDepartment, setSelectedDepartment] = useState<string>("ALL");
 	const [contextMenu, setContextMenu] = useState<{
 		personnel: Personnel | null;
 		position: { x: number; y: number } | null;
 	}>({ personnel: null, position: null });
 
-	// Filter personnel by search query
+	// Extract unique departments
+	const availableDepartments = useMemo(() => {
+		const depts = new Set(personnel.map((p) => p.department).filter(Boolean));
+		return Array.from(depts).sort();
+	}, [personnel]);
+
+	// Filter personnel by search query and department
 	const filteredPersonnel = useMemo(() => {
-		if (!searchQuery.trim()) return personnel;
-		const query = searchQuery.toLowerCase();
-		return personnel.filter(
-			(p) =>
-				p.name.toLowerCase().includes(query) ||
-				p.email.toLowerCase().includes(query),
-		);
-	}, [personnel, searchQuery]);
+		let result = personnel;
+
+		// Filter by Department
+		if (selectedDepartment !== "ALL") {
+			result = result.filter((p) => p.department === selectedDepartment);
+		}
+
+		// Filter by Search Query
+		if (searchQuery.trim()) {
+			const query = searchQuery.toLowerCase();
+			result = result.filter(
+				(p) =>
+					p.name.toLowerCase().includes(query) ||
+					p.email.toLowerCase().includes(query),
+			);
+		}
+
+		return result;
+	}, [personnel, searchQuery, selectedDepartment]);
 
 	// Group by priority for visual separation
 	const groupedPersonnel = useMemo(() => {
@@ -70,15 +88,14 @@ export function PersonnelPanel({
 			<button
 				key={p.id}
 				type="button"
-				className={`flex items-center gap-[var(--ui-space-2)] px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] rounded cursor-pointer text-sm transition-colors ${
-					isSelected ? "border" : "hover:bg-muted/50 border border-transparent"
-				}`}
+				className={`flex items-center gap-[var(--ui-space-2)] px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] rounded cursor-pointer text-sm transition-colors ${isSelected ? "border" : "hover:bg-muted/50 border border-transparent"
+					}`}
 				style={
 					isSelected && color
 						? {
-								backgroundColor: `${color}20`, // 20% opacity
-								borderColor: color,
-							}
+							backgroundColor: `${color}20`, // 20% opacity
+							borderColor: color,
+						}
 						: {}
 				}
 				onClick={() => handleToggle(p.id)}
@@ -118,10 +135,25 @@ export function PersonnelPanel({
 			className={`flex flex-col h-full bg-background border-r border-border ${className}`}
 		>
 			{/* Header */}
-			<div className="p-[var(--ui-space-2)] border-b border-border">
-				<div className="text-sm font-semibold mb-[var(--ui-space-2)]">
+			<div className="p-[var(--ui-space-2)] border-b border-border space-y-[var(--ui-space-2)]">
+				<div className="text-sm font-semibold">
 					{t("personnel_list_title")}
 				</div>
+
+				{/* Department Filter */}
+				<select
+					value={selectedDepartment}
+					onChange={(e) => setSelectedDepartment(e.target.value)}
+					className="w-full px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+				>
+					<option value="ALL">{t("personnel_all_departments")}</option>
+					{availableDepartments.map((dept) => (
+						<option key={dept} value={dept}>
+							{dept}
+						</option>
+					))}
+				</select>
+
 				<input
 					type="text"
 					placeholder={t("personnel_search_placeholder")}
@@ -173,9 +205,9 @@ export function PersonnelPanel({
 			<div className="p-[var(--ui-space-2)] border-t border-border text-xs text-muted-foreground">
 				{selectedIds.length > 0
 					? t("personnel_selected_count", {
-							count: selectedIds.length,
-							defaultValue: `${selectedIds.length} selected`,
-						})
+						count: selectedIds.length,
+						defaultValue: `${selectedIds.length} selected`,
+					})
 					: t("personnel_context_hint")}
 			</div>
 

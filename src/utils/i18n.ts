@@ -76,12 +76,13 @@ const EN_MESSAGES: Record<string, string> = {
 	date_time_label: "Date & Time",
 	attendee_self: "Only me",
 	date_picker_label: "Select date",
-	personnel_list_title: "Personnel",
+	personnel_list_title: "職員一覧",
 	personnel_search_placeholder: "Search by name or email...",
 	personnel_priority_high: "High Priority",
 	personnel_priority_normal: "Normal",
 	personnel_priority_low: "Low Priority",
 	personnel_no_results: "No matching personnel found",
+	personnel_all_departments: "All Departments",
 	personnel_selected_count: "{{count}} selected",
 	personnel_context_hint: "Right-click to set priority",
 	keypad_title_number: "Enter number",
@@ -101,7 +102,7 @@ export function useAppTranslation() {
 
 	const translate = (
 		key: string,
-		options?: string | { defaultValue?: string; [key: string]: unknown },
+		options?: string | { defaultValue?: string;[key: string]: unknown },
 	) => {
 		const resolvedOptions =
 			typeof options === "string" ? { defaultValue: options } : (options ?? {});

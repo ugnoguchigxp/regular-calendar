@@ -46,6 +46,8 @@ interface EventItemProps {
 	) => React.ReactNode;
 	components?: RegularCalendarComponents;
 	viewMode?: ViewMode | "resource";
+	orientation?: "horizontal" | "vertical";
+	usePercentagePosition?: boolean;
 }
 
 const getDisplayAttendee = (
@@ -83,7 +85,7 @@ const getDisplayAttendee = (
 			// User said "自分は表示しなくていい", so empty is better.
 			return "";
 		}
-	} catch {}
+	} catch { }
 	return typeof attendee === "string" ? attendee : "";
 };
 
@@ -98,6 +100,8 @@ export const EventItem: React.FC<EventItemProps> = ({
 	renderEventContent,
 	components,
 	viewMode = "week",
+	orientation = "horizontal",
+	usePercentagePosition = false,
 }) => {
 	// Note: Drag functionality depends on DndContext being present in parent
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -117,11 +121,40 @@ export const EventItem: React.FC<EventItemProps> = ({
 	// Resolve resource name from ID or fallback to locationText
 	const resource = resources.find((r) => r.id === event.resourceId);
 	const resourceName = resource?.name || getEventLocation(event);
-	const showLocation = position.height >= 60;
+
+	// Check visibility based on orientation
+	const isVertical = orientation === "vertical";
+	const showLocation = isVertical ? position.top >= 40 : position.height >= 60; // Approximate
 
 	// Calculate width and left position for overlapping events
 	const widthPercent = 100 / totalColumns;
 	const leftPercent = column * widthPercent;
+
+	const style: React.CSSProperties = isVertical
+		? {
+			left: usePercentagePosition ? `${position.top}%` : `${position.top}px`,
+			width: usePercentagePosition
+				? `${position.height}%`
+				: `${position.height}px`,
+			top: `calc(${leftPercent}% + 2px)`,
+			height: `calc(${widthPercent}% - 4px)`,
+			minWidth: usePercentagePosition ? undefined : "44px",
+			backgroundColor: event.color || "#3b82f6",
+			color: "white",
+			zIndex: isDragging ? 50 : 10 + column,
+		}
+		: {
+			top: usePercentagePosition ? `${position.top}%` : `${position.top}px`,
+			height: usePercentagePosition
+				? `${position.height}%`
+				: `${position.height}px`,
+			minHeight: usePercentagePosition ? undefined : "44px",
+			left: `calc(${leftPercent}% + 2px)`,
+			width: `calc(${widthPercent}% - 4px)`,
+			backgroundColor: event.color || "#3b82f6",
+			color: "white",
+			zIndex: isDragging ? 50 : 10 + column,
+		};
 
 	return (
 		<button
@@ -143,16 +176,7 @@ export const EventItem: React.FC<EventItemProps> = ({
         active:scale-95
         ${isDragging ? "opacity-50" : "hover:shadow-md"}
       `}
-			style={{
-				top: `${position.top}px`,
-				height: `${position.height}px`,
-				minHeight: "44px",
-				left: `calc(${leftPercent}% + 2px)`,
-				width: `calc(${widthPercent}% - 4px)`,
-				backgroundColor: event.color || "#3b82f6",
-				color: "white",
-				zIndex: isDragging ? 50 : 10 + column,
-			}}
+			style={style}
 		>
 			{components?.EventCard ? (
 				<components.EventCard

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -44,6 +44,20 @@ vi.mock("react-i18next", () => ({
 			language: "en",
 		},
 	}),
+}));
+
+let lastDndProps: Record<string, unknown> | null = null;
+vi.mock("@dnd-kit/core", () => ({
+	DndContext: ({ children, ...props }: { children: React.ReactNode }) => {
+		lastDndProps = props;
+		return <div data-testid="dnd-context">{children}</div>;
+	},
+	DragOverlay: ({ children }: { children: React.ReactNode }) => (
+		<div data-testid="drag-overlay">{children}</div>
+	),
+	PointerSensor: vi.fn(),
+	useSensor: vi.fn(),
+	useSensors: vi.fn(() => []),
 }));
 
 vi.mock("@/components/ui/Icons", () => ({
@@ -311,7 +325,28 @@ describe("RegularCalendar", () => {
 		expect(screen.getByTestId("month-view")).toBeInTheDocument();
 	});
 
+	it("falls back to defaultView when storage value is invalid", () => {
+		const storage = {
+			getItem: vi.fn().mockReturnValue("invalid"),
+			setItem: vi.fn(),
+			removeItem: vi.fn(),
+		};
+
+		render(
+			<RegularCalendar
+				events={mockEvents}
+				settings={mockSettings}
+				enablePersistence={true}
+				defaultView="month"
+				storage={storage}
+			/>,
+		);
+
+		expect(screen.getByTestId("month-view")).toBeInTheDocument();
+	});
+
 	it("falls back to defaultView when storage access fails", () => {
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 		const storage = {
 			getItem: vi.fn(() => {
 				throw new Error("storage error");
@@ -331,6 +366,38 @@ describe("RegularCalendar", () => {
 		);
 
 		expect(screen.getByTestId("day-view")).toBeInTheDocument();
+		expect(warnSpy).toHaveBeenCalled();
+		warnSpy.mockRestore();
+	});
+
+	it("warns when persistence save fails", async () => {
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const storage = {
+			getItem: vi.fn().mockReturnValue(null),
+			setItem: vi.fn(() => {
+				throw new Error("save error");
+			}),
+			removeItem: vi.fn(),
+		};
+
+		render(
+			<RegularCalendar
+				events={mockEvents}
+				settings={mockSettings}
+				enablePersistence={true}
+				storage={storage}
+			/>,
+		);
+
+		const viewButtons = screen
+			.getByTestId("view-selector")
+			.querySelectorAll("button");
+		fireEvent.click(viewButtons[0]);
+
+		await waitFor(() => {
+			expect(warnSpy).toHaveBeenCalled();
+		});
+		warnSpy.mockRestore();
 	});
 
 	it("persists view changes when uncontrolled", async () => {
@@ -435,7 +502,8 @@ describe("RegularCalendar", () => {
 			/>,
 		);
 
-		expect(container.firstChild).toHaveClass("custom-class");
+		const root = container.querySelector(".flex.flex-col");
+		expect(root).toHaveClass("custom-class");
 	});
 
 	it("passes renderEventContent to views", () => {
@@ -464,5 +532,70 @@ describe("RegularCalendar", () => {
 		);
 
 		expect(screen.getByTestId("has-custom-event-card")).toBeInTheDocument();
+	});
+
+	it("handles drag start and drop logic", () => {
+		const onEventDrop = vi.fn();
+		const dragEvents: ScheduleEvent[] = [
+			{
+				id: "drag-1",
+				title: "Drag Event",
+				resourceId: "r1",
+				groupId: "g1",
+				startDate: new Date("2025-02-10T09:15:00"),
+				endDate: new Date("2025-02-10T10:15:00"),
+				status: "booked",
+				attendee: JSON.stringify([{ name: "Alice", personnelId: "p1" }]),
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		];
+
+		render(
+			<RegularCalendar
+				events={dragEvents}
+				settings={mockSettings}
+				onEventDrop={onEventDrop}
+				resources={[{ id: "r1", name: "Room 1" }]}
+			/>,
+		);
+
+		const onDragStart = lastDndProps?.onDragStart as (event: unknown) => void;
+		const onDragEnd = lastDndProps?.onDragEnd as (event: unknown) => void;
+
+		act(() => {
+			onDragStart?.({ active: { id: "drag-1" } });
+		});
+		expect(screen.getByTestId("drag-overlay").textContent).toContain("Drag Event");
+
+		act(() => {
+			onDragEnd?.({ active: { id: "drag-1" }, over: null });
+		});
+		expect(onEventDrop).not.toHaveBeenCalled();
+
+		act(() => {
+			onDragEnd?.({ active: { id: "drag-1" }, over: { id: "invalid" } });
+		});
+		expect(onEventDrop).not.toHaveBeenCalled();
+
+		act(() => {
+			onDragEnd?.({
+				active: { id: "drag-1" },
+				over: { id: "2025-02-12" },
+			});
+		});
+		expect(onEventDrop).toHaveBeenCalled();
+		const [, droppedDateNoTime] = onEventDrop.mock.calls.at(-1) ?? [];
+		expect(droppedDateNoTime.getHours()).toBe(9);
+		expect(droppedDateNoTime.getMinutes()).toBe(15);
+
+		act(() => {
+			onDragEnd?.({
+				active: { id: "drag-1" },
+				over: { id: "2025-02-13T11:00" },
+			});
+		});
+		const [, droppedDateWithTime] = onEventDrop.mock.calls.at(-1) ?? [];
+		expect(droppedDateWithTime.getHours()).toBe(11);
 	});
 });

@@ -81,4 +81,35 @@ describe("ScheduleHeader", () => {
 			screen.queryByRole("button", { name: "Select Group" }),
 		).not.toBeInTheDocument();
 	});
+
+	it("renders pagination controls and handles page changes", async () => {
+		const user = userEvent.setup();
+		const onPageChange = vi.fn();
+
+		render(
+			<ScheduleHeader
+				currentDate={new Date("2024-01-10T00:00:00Z")}
+				viewMode="week"
+				groups={[]}
+				selectedGroupId="ALL"
+				isLoading={true}
+				onNavigate={vi.fn()}
+				onToday={vi.fn()}
+				onViewChange={vi.fn()}
+				onGroupChange={vi.fn()}
+				isPaginated={true}
+				currentPage={0}
+				totalPages={2}
+				onPageChange={onPageChange}
+				pageInfo={[
+					{ page: 0, startResource: "A", endResource: "B" },
+					{ page: 1, startResource: "C", endResource: "D" },
+				]}
+			/>,
+		);
+
+		expect(screen.getByText("All Facilities")).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: "2" }));
+		expect(onPageChange).toHaveBeenCalledWith(1);
+	});
 });

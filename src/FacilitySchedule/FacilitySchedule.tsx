@@ -138,6 +138,7 @@ export function FacilitySchedule({
 						resources={paginatedResources}
 						events={filteredEvents}
 						settings={settings}
+						groups={groups}
 						onEventClick={handleEventClick}
 						onEmptySlotClick={handleEmptySlotClick}
 						components={components}

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { DateDisplay, DateFormat } from "./DateDisplay";
 
 vi.mock("react-i18next", () => ({
@@ -13,6 +13,11 @@ vi.mock("react-i18next", () => ({
 }));
 
 describe("DateDisplay", () => {
+	afterEach(() => {
+		document.documentElement.removeAttribute("data-secondary-calendar");
+		document.documentElement.removeAttribute("data-prefer-local-calendar");
+	});
+
 	it("renders formatted date", () => {
 		render(<DateDisplay date={new Date("2025-01-01")} />);
 		expect(screen.getByText(/2025/)).toBeInTheDocument();
@@ -91,5 +96,56 @@ describe("DateDisplay", () => {
 	it("handles DateFormat alias", () => {
 		render(<DateFormat date={new Date("2025-01-01")} />);
 		expect(screen.getByText(/2025/)).toBeInTheDocument();
+	});
+
+	it("renders secondary calendar when enabled", () => {
+		document.documentElement.setAttribute("data-secondary-calendar", "buddhist");
+		const { container } = render(
+			<DateDisplay
+				date={new Date("2025-01-01")}
+				format="date"
+				showSecondary={true}
+			/>,
+		);
+		expect(container.textContent).toContain("(");
+	});
+
+	it("skips secondary calendar when matching primary calendar", () => {
+		document.documentElement.setAttribute("data-prefer-local-calendar", "true");
+		document.documentElement.setAttribute(
+			"data-secondary-calendar",
+			"japanese",
+		);
+		const { container } = render(
+			<DateDisplay
+				date={new Date("2025-01-01")}
+				format="date"
+				showSecondary={true}
+			/>,
+		);
+		expect(container.textContent).not.toContain("(");
+	});
+
+	it("formats with local calendar for monthDayShort", () => {
+		document.documentElement.setAttribute("data-prefer-local-calendar", "true");
+		const { container } = render(
+			<DateDisplay date={new Date("2025-01-15")} format="monthDayShort" />,
+		);
+		expect(container.textContent).toMatch(/\d/);
+	});
+
+	it("formats with local calendar for full format", () => {
+		document.documentElement.setAttribute("data-prefer-local-calendar", "true");
+		const { container } = render(
+			<DateDisplay date={new Date("2025-01-15")} format="full" />,
+		);
+		expect(container.textContent).toMatch(/\d/);
+	});
+
+	it("falls back when format is not recognized", () => {
+		const { container } = render(
+			<DateDisplay date={new Date("2025-01-15")} format={"unknown" as any} />,
+		);
+		expect(container.textContent).toMatch(/2025/);
 	});
 });

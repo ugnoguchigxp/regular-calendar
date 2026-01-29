@@ -122,4 +122,49 @@ describe("DayView", () => {
 			"text-primary",
 		);
 	});
+
+	it("renders vertical orientation and handles time slot clicks", () => {
+		const onTimeSlotClick = vi.fn();
+		const currentDate = new Date("2025-01-15T00:00:00");
+		render(
+			<DayView
+				currentDate={currentDate}
+				events={[baseEvent]}
+				settings={{ ...settings, orientation: "vertical" }}
+				onTimeSlotClick={onTimeSlotClick}
+			/>,
+		);
+
+		fireEvent.click(screen.getByLabelText("Time slot 09:00"));
+		expect(onTimeSlotClick).toHaveBeenCalledWith(currentDate, "09:00");
+	});
+
+	it("uses custom EventCard for all-day events", () => {
+		const onEventClick = vi.fn();
+		const allDayEvent: ScheduleEvent = {
+			...baseEvent,
+			id: "event-3",
+			title: "Custom All Day",
+			isAllDay: true,
+		};
+
+		render(
+			<DayView
+				currentDate={new Date("2025-01-15T00:00:00")}
+				events={[allDayEvent]}
+				settings={settings}
+				onEventClick={onEventClick}
+				components={{
+					EventCard: ({ event, onClick }) => (
+						<span role="button" tabIndex={0} onClick={onClick}>
+							Custom: {event.title}
+						</span>
+					),
+				}}
+			/>,
+		);
+
+		fireEvent.click(screen.getByText("Custom: Custom All Day"));
+		expect(onEventClick).toHaveBeenCalledWith(allDayEvent);
+	});
 });

@@ -150,6 +150,90 @@ export function SettingsModal({
 					</div>
 				</div>
 
+				{/* Calendar Orientation */}
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_calendar_orientation", "Calendar Orientation")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
+						{(["horizontal", "vertical"] as const).map((orient) => (
+							<Button
+								key={orient}
+								variant={
+									settings.calendarOrientation === orient ? "default" : "outline"
+								}
+								onClick={() => update({ calendarOrientation: orient })}
+							>
+								{orient === "horizontal"
+									? t("option_horizontal", "Horizontal")
+									: t("option_vertical", "Vertical")}
+							</Button>
+						))}
+					</div>
+				</div>
+
+				{/* Calendar Slot Interval */}
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_calendar_interval", "Calendar Slot Interval")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
+						{([15, 30, 60, 120] as const).map((interval) => (
+							<Button
+								key={interval}
+								variant={settings.calendarSlotInterval === interval ? "default" : "outline"}
+								onClick={() => update({ calendarSlotInterval: interval })}
+							>
+								{interval === 15 && t("option_15m", "15m")}
+								{interval === 30 && t("option_30m", "30m")}
+								{interval === 60 && t("option_1h", "1h")}
+								{interval === 120 && t("option_2h", "2h")}
+							</Button>
+						))}
+					</div>
+				</div>
+
+				{/* Facility Orientation */}
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_facility_orientation", "Facility Orientation")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
+						{(["horizontal", "vertical"] as const).map((orient) => (
+							<Button
+								key={orient}
+								variant={settings.facilityOrientation === orient ? "default" : "outline"}
+								onClick={() => update({ facilityOrientation: orient })}
+							>
+								{orient === "horizontal"
+									? t("option_horizontal", "Horizontal")
+									: t("option_vertical", "Vertical")}
+							</Button>
+						))}
+					</div>
+				</div>
+
+				{/* Facility Slot Interval */}
+				<div className="mb-[var(--ui-space-6)]">
+					<div className="block mb-[var(--ui-space-2)] text-sm font-bold">
+						{t("settings_facility_interval", "Facility Slot Interval")}
+					</div>
+					<div className="flex flex-wrap gap-[var(--ui-space-2)]">
+						{([15, 30, 60, 120] as const).map((interval) => (
+							<Button
+								key={interval}
+								variant={settings.facilitySlotInterval === interval ? "default" : "outline"}
+								onClick={() => update({ facilitySlotInterval: interval })}
+							>
+								{interval === 15 && t("option_15m", "15m")}
+								{interval === 30 && t("option_30m", "30m")}
+								{interval === 60 && t("option_1h", "1h")}
+								{interval === 120 && t("option_2h", "2h")}
+							</Button>
+						))}
+					</div>
+				</div>
+
 				{/* Border Radius */}
 				<div className="mb-[var(--ui-space-6)]">
 					<label
@@ -322,6 +406,6 @@ export function SettingsModal({
 					</div>
 				)}
 			</div>
-		</div>
+		</div >
 	);
 }

@@ -21,13 +21,13 @@ export interface CustomField {
 	name: string;
 	label: string;
 	type:
-		| "text"
-		| "textarea"
-		| "number"
-		| "date"
-		| "select"
-		| "boolean"
-		| "checkbox";
+	| "text"
+	| "textarea"
+	| "number"
+	| "date"
+	| "select"
+	| "boolean"
+	| "checkbox";
 	options?: { label: string; value: string }[]; // For select
 	required?: boolean;
 	defaultValue?: unknown;
@@ -119,6 +119,8 @@ export const FacilityScheduleSettingsSchema = z.object({
 	// Pagination
 	paginationEnabled: z.boolean().optional(),
 	paginationPageSize: z.number().optional(),
+	orientation: z.enum(["horizontal", "vertical"]).optional(),
+	slotInterval: z.number().optional(),
 });
 
 export const DensityDataSchema = z.object({

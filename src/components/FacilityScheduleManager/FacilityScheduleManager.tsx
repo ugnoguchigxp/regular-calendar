@@ -274,8 +274,14 @@ export function FacilityScheduleManager({
 		// Use API settings as base, then override with local props
 		...apiSettings,
 		weekStartsOn: settings.weekStartsOn ?? apiSettings.weekStartsOn,
-		startTime: settings.businessHoursStart ?? apiSettings.startTime,
-		endTime: settings.businessHoursEnd ?? apiSettings.endTime,
+		startTime: settings.businessHoursStart !== undefined
+			? `${settings.businessHoursStart.toString().padStart(2, "0")}:00`
+			: apiSettings.startTime,
+		endTime: settings.businessHoursEnd !== undefined
+			? `${settings.businessHoursEnd.toString().padStart(2, "0")}:00`
+			: apiSettings.endTime,
+		orientation: settings.facilityOrientation as any,
+		slotInterval: (settings.facilitySlotInterval as number) || 60,
 	};
 
 	// Determine effective pagination options

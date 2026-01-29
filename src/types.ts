@@ -11,6 +11,10 @@ export interface AppSettings {
 	timeZone: string;
 	paginationEnabled: boolean;
 	paginationPageSize: number;
+	calendarOrientation: "horizontal" | "vertical";
+	facilityOrientation: "horizontal" | "vertical";
+	calendarSlotInterval: 15 | 30 | 60 | 120;
+	facilitySlotInterval: 15 | 30 | 60 | 120;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -26,4 +30,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
 	timeZone: "Asia/Tokyo",
 	paginationEnabled: false,
 	paginationPageSize: 8,
+	calendarOrientation: "horizontal",
+	facilityOrientation: "horizontal",
+	calendarSlotInterval: 60,
+	facilitySlotInterval: 60,
 };

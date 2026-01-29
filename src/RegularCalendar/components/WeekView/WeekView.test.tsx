@@ -204,4 +204,58 @@ describe("WeekView", () => {
 		const allDates = screen.getAllByText(/^\d+$/);
 		expect(allDates.length).toBeGreaterThan(0);
 	});
+
+	it("renders vertical orientation and handles time slot clicks", () => {
+		const onTimeSlotClick = vi.fn();
+		const currentDate = new Date("2025-01-15");
+
+		render(
+			<WeekView
+				currentDate={currentDate}
+				events={mockEvents}
+				settings={{
+					startTime: "08:00",
+					endTime: "10:00",
+					defaultDuration: 60,
+					closedDays: [],
+					weekStartsOn: 0,
+					orientation: "vertical",
+				}}
+				onTimeSlotClick={onTimeSlotClick}
+			/>,
+		);
+
+		fireEvent.click(screen.getAllByLabelText("Time slot 08:00")[0]);
+		expect(onTimeSlotClick).toHaveBeenCalled();
+	});
+
+	it("uses extendedProps for all-day events and custom EventCard", () => {
+		const onEventClick = vi.fn();
+		const allDayEvent: ScheduleEvent = {
+			...mockEvents[0],
+			id: "all-day-extended",
+			title: "Extended All Day",
+			extendedProps: { isAllDay: true },
+			color: "#ffcc00",
+		};
+
+		render(
+			<WeekView
+				currentDate={new Date("2025-01-15")}
+				events={[allDayEvent]}
+				settings={mockSettings}
+				onEventClick={onEventClick}
+				components={{
+					EventCard: ({ event, onClick }) => (
+						<span role="button" tabIndex={0} onClick={onClick}>
+							Custom {event.title}
+						</span>
+					),
+				}}
+			/>,
+		);
+
+		fireEvent.click(screen.getByText("Custom Extended All Day"));
+		expect(onEventClick).toHaveBeenCalledWith(allDayEvent);
+	});
 });

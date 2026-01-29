@@ -12,32 +12,66 @@ type EventFormProps = {
 	event?: ScheduleEvent;
 };
 
+const modalPropsSpy = vi.fn();
+const confirmPropsSpy = vi.fn();
+const eventFormPropsSpy = vi.fn();
+
+vi.mock("@/components/ui/Modal", () => ({
+	Modal: ({ children, ...props }: { children: React.ReactNode }) => {
+		modalPropsSpy(props);
+		return <div data-testid="modal">{children}</div>;
+	},
+	ConfirmModal: ({
+		onConfirm,
+		onOpenChange,
+		...props
+	}: {
+		onConfirm: () => void;
+		onOpenChange: (open: boolean) => void;
+	}) => {
+		confirmPropsSpy(props);
+		return (
+			<div>
+				<button type="button" onClick={onConfirm}>
+					Confirm
+				</button>
+				<button type="button" onClick={() => onOpenChange(false)}>
+					CloseConfirm
+				</button>
+			</div>
+		);
+	},
+}));
+
 vi.mock("./EventForm", () => ({
-	EventForm: ({ onSubmit, onCancel, onDelete, event }: EventFormProps) => (
-		<div>
-			<div>{event ? "edit" : "create"}</div>
-			<button
-				type="button"
-				onClick={() =>
-					onSubmit({
-						title: "Test",
-						attendee: "[]",
-						startDate: new Date(),
-						endDate: new Date(),
-						durationHours: 1,
-					})
-				}
-			>
-				Submit
-			</button>
-			<button type="button" onClick={onCancel}>
-				Cancel
-			</button>
-			<button type="button" onClick={() => onDelete?.()}>
-				Delete
-			</button>
-		</div>
-	),
+	EventForm: ({ onSubmit, onCancel, onDelete, event }: EventFormProps) => {
+		eventFormPropsSpy({ onSubmit, onCancel, onDelete, event });
+		return (
+			<div>
+				<div>{event ? "edit" : "create"}</div>
+				<button
+					type="button"
+					onClick={() =>
+						onSubmit({
+							title: "Test",
+							attendee: "[]",
+							startDate: new Date(),
+							endDate: new Date(),
+							durationHours: 1,
+						})
+					}
+				>
+					Submit
+				</button>
+				<button type="button" onClick={onCancel}>
+					Cancel
+				</button>
+				<button type="button" onClick={() => onDelete?.()}>
+					Delete
+				</button>
+			</div>
+		);
+	},
 }));
 
 const resources = [
@@ -112,5 +146,32 @@ describe("EventModal", () => {
 		expect(onClose).toHaveBeenCalled();
 
 		vi.useRealTimers();
+	});
+
+	it("closes when modal is dismissed and omits delete in create mode", () => {
+		modalPropsSpy.mockClear();
+		eventFormPropsSpy.mockClear();
+		const onClose = vi.fn();
+
+		render(
+			<EventModal
+				isOpen={false}
+				resources={resources}
+				groups={groups}
+				events={events}
+				onClose={onClose}
+				onSave={vi.fn()}
+			/>,
+		);
+
+		modalPropsSpy.mock.calls.at(-1)?.[0].onOpenChange(false);
+		expect(onClose).toHaveBeenCalled();
+
+		const formProps = eventFormPropsSpy.mock.calls.at(-1)?.[0];
+		expect(formProps.onDelete).toBeUndefined();
+
+		const pointerContainer =
+			screen.getByTestId("modal").querySelector("div[style]");
+		expect(pointerContainer).toHaveStyle({ pointerEvents: "none" });
 	});
 });

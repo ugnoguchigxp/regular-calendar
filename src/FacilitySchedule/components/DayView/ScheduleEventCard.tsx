@@ -25,6 +25,7 @@ interface ScheduleEventCardProps {
 	components?: {
 		EventCard?: React.ComponentType<EventCardComponentProps>;
 	};
+	orientation?: "horizontal" | "vertical";
 }
 
 export function ScheduleEventCard({
@@ -36,6 +37,7 @@ export function ScheduleEventCard({
 	onClick,
 	isDragging = false,
 	components,
+	orientation = "vertical",
 }: ScheduleEventCardProps) {
 	const startTime = event.startDate.toLocaleTimeString("ja-JP", {
 		hour: "2-digit",
@@ -50,7 +52,7 @@ export function ScheduleEventCard({
 		Math.round(
 			((event.endDate.getTime() - event.startDate.getTime()) /
 				(1000 * 60 * 60)) *
-				10,
+			10,
 		) / 10;
 
 	// Determine styling
@@ -71,15 +73,26 @@ export function ScheduleEventCard({
 
 	const displayDuration = `${durationHours}h`;
 
+	const isHorizontal = orientation === "horizontal";
+
 	// Custom style overrides
-	const customStyle: React.CSSProperties = {
-		top: `${top}px`,
-		height: `${height}px`,
-		left: `${leftPercent}%`,
-		width: `${widthPercent}%`,
-		paddingLeft: leftPercent > 0 ? "2px" : "4px",
-		paddingRight: leftPercent + widthPercent < 100 ? "2px" : "4px",
-	};
+	const customStyle: React.CSSProperties = isHorizontal
+		? {
+			left: `${top}px`,
+			width: `${height}px`,
+			top: `${leftPercent}%`,
+			height: `${widthPercent}%`,
+			paddingTop: leftPercent > 0 ? "1px" : "2px",
+			paddingBottom: leftPercent + widthPercent < 100 ? "1px" : "2px",
+		}
+		: {
+			top: `${top}px`,
+			height: `${height}px`,
+			left: `${leftPercent}%`,
+			width: `${widthPercent}%`,
+			paddingLeft: leftPercent > 0 ? "2px" : "4px",
+			paddingRight: leftPercent + widthPercent < 100 ? "2px" : "4px",
+		};
 
 	if (event.color && !event.hasConflict) {
 		customStyle.backgroundColor = event.color;
@@ -125,7 +138,7 @@ export function ScheduleEventCard({
 
 									{/* Time */}
 									{!event.isAllDay && (
-										<div className="flex items-center justify-center gap-[var(--ui-space-1)] text-[10px] opacity-90 mt-[var(--ui-space-1)] overflow-hidden whitespace-nowrap">
+										<div className="flex flex-wrap justify-center items-center gap-x-[var(--ui-space-1)] text-[10px] opacity-90 mt-[var(--ui-space-1)] w-full text-center leading-tight">
 											<span className="font-mono tabular-nums tracking-tight">
 												{formatTime(event.startDate)}
 											</span>

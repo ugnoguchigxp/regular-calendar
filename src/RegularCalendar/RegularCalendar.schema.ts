@@ -5,6 +5,7 @@ import { z } from "zod";
 // ==========================================
 
 export const ViewModeSchema = z.enum(["day", "week", "month"]);
+export const CalendarOrientationSchema = z.enum(["horizontal", "vertical"]);
 
 // ==========================================
 // Entity Schemas
@@ -85,6 +86,8 @@ export const FacilityScheduleSettingsSchema = z.object({
 
 	// Time slots
 	timeSlots: z.array(TimeSlotSchema).optional(),
+	orientation: CalendarOrientationSchema.optional(),
+	slotInterval: z.number().optional(),
 });
 
 export const DensityDataSchema = z.object({
@@ -117,6 +120,7 @@ export interface EventCardComponentProps {
 // ==========================================
 
 export type ViewMode = z.infer<typeof ViewModeSchema>;
+export type CalendarOrientation = z.infer<typeof CalendarOrientationSchema>;
 export type ScheduleEvent = z.infer<typeof ScheduleEventSchema>;
 export type Resource = z.infer<typeof ResourceSchema>;
 export type ResourceGroup = z.infer<typeof ResourceGroupSchema>;

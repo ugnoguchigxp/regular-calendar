@@ -47,6 +47,8 @@ export function ConnectedCalendar({
 		businessHoursStart: settings.businessHoursStart,
 		businessHoursEnd: settings.businessHoursEnd,
 		timeZone: settings.timeZone,
+		orientation: settings.calendarOrientation as any,
+		slotInterval: settings.calendarSlotInterval as number,
 	}), [apiSettings, settings]);
 
 	if (error) return <div className="p-[var(--ui-space-4)] text-red-500">Error: {error}</div>;

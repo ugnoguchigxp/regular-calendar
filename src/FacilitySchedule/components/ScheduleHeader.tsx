@@ -93,10 +93,13 @@ export function ScheduleHeader({
 					>
 						<SelectTrigger className="w-[var(--ui-space-50)]">
 							<SelectValue placeholder="Select Group">
-								{groups.find((g) => g.id === selectedGroupId)?.name || ""}
+								{selectedGroupId === "ALL"
+									? "All Facilities"
+									: groups.find((g) => g.id === selectedGroupId)?.name || ""}
 							</SelectValue>
 						</SelectTrigger>
 						<SelectContent>
+							<SelectItem value="ALL">All Facilities</SelectItem>
 							{groups.map((g) => (
 								<SelectItem key={g.id} value={g.id}>
 									{g.name}
