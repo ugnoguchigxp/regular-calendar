@@ -22,7 +22,7 @@ import {
 	useResourceDisplayNames,
 } from "./useEventForm";
 
-interface DefaultEventModalProps {
+export interface DefaultEventModalProps {
 	isOpen: boolean;
 	event?: ScheduleEvent;
 	resources: Resource[];

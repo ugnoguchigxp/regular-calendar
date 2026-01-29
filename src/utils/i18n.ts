@@ -102,7 +102,7 @@ export function useAppTranslation() {
 
 	const translate = (
 		key: string,
-		options?: string | { defaultValue?: string;[key: string]: unknown },
+		options?: string | { defaultValue?: string; [key: string]: unknown },
 	) => {
 		const resolvedOptions =
 			typeof options === "string" ? { defaultValue: options } : (options ?? {});

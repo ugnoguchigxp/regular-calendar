@@ -8,8 +8,8 @@ import type {
 	EventCardComponentProps,
 	FacilityScheduleSettings,
 	Resource,
-	ScheduleEvent,
 	ResourceGroup,
+	ScheduleEvent,
 } from "../../FacilitySchedule.schema";
 import {
 	calculateViewRange,
@@ -49,14 +49,16 @@ export function DayView({
 	// ... (calculate gridHeight/Width omitted for brevity, keep existing code if not shown here, proceed to rendering logic)
 	const getTotalHours = (timeStr: string) => {
 		const [h, m] = timeStr.split(":").map(Number);
-		return h + (m / 60);
+		return h + m / 60;
 	};
 	const startTotalHours = getTotalHours(settings.startTime);
 	const endTotalHours = getTotalHours(settings.endTime);
 	const startTotalMinutes = Math.round(startTotalHours * 60);
 	const endTotalMinutes = Math.round(endTotalHours * 60);
 	const slotInterval = settings.slotInterval ?? 60;
-	const slotCount = Math.ceil((endTotalMinutes - startTotalMinutes) / slotInterval);
+	const slotCount = Math.ceil(
+		(endTotalMinutes - startTotalMinutes) / slotInterval,
+	);
 	const gridHeight = slotCount * DAY_VIEW.SLOT_HEIGHT + DAY_VIEW.HEADER_HEIGHT;
 	const gridWidth = slotCount * DAY_VIEW.SLOT_WIDTH;
 
@@ -103,13 +105,18 @@ export function DayView({
 			{isVertical ? (
 				/* Horizontal Timeline (vertical Resources) */
 				<div className="flex-1 overflow-auto relative">
-					<div className="flex flex-col min-w-max" style={{ minWidth: `${gridWidth + 128}px` }}>
+					<div
+						className="flex flex-col min-w-max"
+						style={{ minWidth: `${gridWidth + 128}px` }}
+					>
 						{/* Header - Time Slots Row */}
 						<div className="flex border-b border-border bg-muted/40 sticky top-0 z-30">
 							{/* Header Spacer (Matches Group + Resource Column) */}
 							<div className="flex-shrink-0 bg-background border-r border-b border-border sticky left-0 z-50 flex">
-								<div className="w-[var(--ui-space-12)] border-r border-border shrink-0" /> {/* Group Column Header placeholder */}
-								<div className="w-[var(--ui-space-32)] flex-1 shrink-0" /> {/* Resource Name Header placeholder */}
+								<div className="w-[var(--ui-space-12)] border-r border-border shrink-0" />{" "}
+								{/* Group Column Header placeholder */}
+								<div className="w-[var(--ui-space-32)] flex-1 shrink-0" />{" "}
+								{/* Resource Name Header placeholder */}
 							</div>
 							<TimeGrid
 								startTime={settings.startTime}
@@ -124,7 +131,10 @@ export function DayView({
 						<div className="flex flex-col">
 							{(() => {
 								// Restructure: Chunk resources by group
-								const groupedResources: { group: ResourceGroup | undefined; resources: Resource[] }[] = [];
+								const groupedResources: {
+									group: ResourceGroup | undefined;
+									resources: Resource[];
+								}[] = [];
 								let currentGroup: ResourceGroup | undefined;
 								let currentChunk: Resource[] = [];
 
@@ -133,8 +143,14 @@ export function DayView({
 									const prevResource = i > 0 ? resources[i - 1] : null;
 
 									// If group changes, push current chunk
-									if (prevResource && prevResource.groupId !== resource.groupId) {
-										groupedResources.push({ group: currentGroup, resources: currentChunk });
+									if (
+										prevResource &&
+										prevResource.groupId !== resource.groupId
+									) {
+										groupedResources.push({
+											group: currentGroup,
+											resources: currentChunk,
+										});
 										currentChunk = [];
 									}
 									currentGroup = group;
@@ -142,11 +158,17 @@ export function DayView({
 								});
 								// Push last chunk
 								if (currentChunk.length > 0) {
-									groupedResources.push({ group: currentGroup, resources: currentChunk });
+									groupedResources.push({
+										group: currentGroup,
+										resources: currentChunk,
+									});
 								}
 
 								return groupedResources.map((chunk, chunkIndex) => (
-									<div key={`${chunk.group?.id}-${chunkIndex}`} className="flex border-b border-border relative">
+									<div
+										key={`${chunk.group?.id}-${chunkIndex}`}
+										className="flex border-b border-border relative"
+									>
 										{/* Group Header Column (Sticky) */}
 										<div className="sticky left-0 z-20 w-[var(--ui-space-12)] flex-shrink-0 bg-background border-r border-border flex items-center justify-center font-bold text-muted-foreground writing-mode-vertical-rl">
 											<div className="sticky top-[var(--ui-space-14)] py-2 max-h-screen">
@@ -157,11 +179,16 @@ export function DayView({
 										{/* Resources List for this Group */}
 										<div className="flex flex-col flex-1 min-w-0">
 											{chunk.resources.map((resource, resIndex) => (
-												<div key={resource.id} className={`${resIndex < chunk.resources.length - 1 ? "border-b border-border" : ""}`}>
+												<div
+													key={resource.id}
+													className={`${resIndex < chunk.resources.length - 1 ? "border-b border-border" : ""}`}
+												>
 													<ResourceColumn
 														resource={resource}
 														events={eventsByResource.get(resource.id) || []}
-														allDayEvents={allDayEvents.filter((e) => e.resourceId === resource.id)}
+														allDayEvents={allDayEvents.filter(
+															(e) => e.resourceId === resource.id,
+														)}
 														startTime={settings.startTime}
 														endTime={settings.endTime}
 														currentDate={currentDate}
@@ -191,7 +218,8 @@ export function DayView({
 							className="sticky left-[var(--ui-space-0)] z-30 bg-background"
 							style={{ width: `${DAY_VIEW.TIME_COLUMN_WIDTH}px` }}
 						>
-							<div className="sticky top-0 z-40 bg-background border-b border-r border-border h-[var(--ui-space-8)]" /> {/* Group Header Corner */}
+							<div className="sticky top-0 z-40 bg-background border-b border-r border-border h-[var(--ui-space-8)]" />{" "}
+							{/* Group Header Corner */}
 							<TimeGrid
 								startTime={settings.startTime}
 								endTime={settings.endTime}
@@ -213,7 +241,10 @@ export function DayView({
 										const group = groupMap.get(resource.groupId);
 										let colSpan = 1;
 										// Calculate span
-										while (i + colSpan < resources.length && resources[i + colSpan].groupId === resource.groupId) {
+										while (
+											i + colSpan < resources.length &&
+											resources[i + colSpan].groupId === resource.groupId
+										) {
 											colSpan++;
 										}
 
@@ -224,7 +255,7 @@ export function DayView({
 												style={{ flex: `${colSpan} ${colSpan} 0%` }}
 											>
 												{group?.name || "-"}
-											</div>
+											</div>,
 										);
 										i += colSpan - 1; // Skip handled resources
 									}

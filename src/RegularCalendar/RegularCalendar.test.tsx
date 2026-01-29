@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import type React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -556,7 +562,17 @@ describe("RegularCalendar", () => {
 				events={dragEvents}
 				settings={mockSettings}
 				onEventDrop={onEventDrop}
-				resources={[{ id: "r1", name: "Room 1" }]}
+				resources={[
+					{
+						id: "r1",
+						name: "Room 1",
+						order: 1,
+						groupId: "g1",
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						isAvailable: true,
+					},
+				]}
 			/>,
 		);
 
@@ -566,7 +582,9 @@ describe("RegularCalendar", () => {
 		act(() => {
 			onDragStart?.({ active: { id: "drag-1" } });
 		});
-		expect(screen.getByTestId("drag-overlay").textContent).toContain("Drag Event");
+		expect(screen.getByTestId("drag-overlay").textContent).toContain(
+			"Drag Event",
+		);
 
 		act(() => {
 			onDragEnd?.({ active: { id: "drag-1" }, over: null });
@@ -585,7 +603,8 @@ describe("RegularCalendar", () => {
 			});
 		});
 		expect(onEventDrop).toHaveBeenCalled();
-		const [, droppedDateNoTime] = onEventDrop.mock.calls.at(-1) ?? [];
+		const [, droppedDateNoTime] =
+			onEventDrop.mock.calls[onEventDrop.mock.calls.length - 1] ?? [];
 		expect(droppedDateNoTime.getHours()).toBe(9);
 		expect(droppedDateNoTime.getMinutes()).toBe(15);
 
@@ -595,7 +614,8 @@ describe("RegularCalendar", () => {
 				over: { id: "2025-02-13T11:00" },
 			});
 		});
-		const [, droppedDateWithTime] = onEventDrop.mock.calls.at(-1) ?? [];
+		const [, droppedDateWithTime] =
+			onEventDrop.mock.calls[onEventDrop.mock.calls.length - 1] ?? [];
 		expect(droppedDateWithTime.getHours()).toBe(11);
 	});
 });

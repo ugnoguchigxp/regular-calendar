@@ -7,8 +7,8 @@ import type {
 	ResourceGroup,
 	ScheduleEvent,
 } from "../FacilitySchedule/FacilitySchedule.schema";
-import type { ScheduleApiClient, ScheduleContextType } from "./types";
 import { ScheduleProvider, useScheduleContext } from "./ScheduleContext";
+import type { ScheduleApiClient, ScheduleContextType } from "./types";
 
 const baseSettings: FacilityScheduleSettings = {
 	defaultDuration: 1,
@@ -45,8 +45,20 @@ const groups: ResourceGroup[] = [
 ];
 
 const personnel: Personnel[] = [
-	{ id: "p1", name: "Alice", priority: 1 },
-	{ id: "p2", name: "Bob", priority: 2 },
+	{
+		id: "p1",
+		name: "Alice",
+		priority: 1,
+		department: "Dept A",
+		email: "alice@example.com",
+	},
+	{
+		id: "p2",
+		name: "Bob",
+		priority: 2,
+		department: "Dept B",
+		email: "bob@example.com",
+	},
 ];
 
 const makeEvent = (overrides: Partial<ScheduleEvent> = {}): ScheduleEvent =>
@@ -62,7 +74,7 @@ const makeEvent = (overrides: Partial<ScheduleEvent> = {}): ScheduleEvent =>
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		...overrides,
-	} as ScheduleEvent);
+	}) as ScheduleEvent;
 
 const baseApiClient = (): ScheduleApiClient => ({
 	getConfig: vi.fn().mockResolvedValue({
@@ -70,12 +82,16 @@ const baseApiClient = (): ScheduleApiClient => ({
 		resources,
 		settings: baseSettings,
 	}),
-	getEvents: vi.fn().mockResolvedValue([
-		makeEvent({ id: "e1" }),
-		makeEvent({ id: "e2", resourceId: "" }),
-	]),
+	getEvents: vi
+		.fn()
+		.mockResolvedValue([
+			makeEvent({ id: "e1" }),
+			makeEvent({ id: "e2", resourceId: "" }),
+		]),
 	createEvent: vi.fn().mockResolvedValue(makeEvent({ id: "e3" })),
-	updateEvent: vi.fn().mockResolvedValue(makeEvent({ id: "e1", title: "Updated" })),
+	updateEvent: vi
+		.fn()
+		.mockResolvedValue(makeEvent({ id: "e1", title: "Updated" })),
 	deleteEvent: vi.fn().mockResolvedValue(undefined),
 	createGroup: vi.fn().mockResolvedValue(groups[0]),
 	updateGroup: vi.fn().mockResolvedValue(groups[0]),
@@ -107,7 +123,9 @@ function ContextCapture() {
 		<div>
 			<div data-testid="loading">{String(ctx.loading)}</div>
 			<div data-testid="events-count">{ctx.events.length}</div>
-			<div data-testid="personnel">{ctx.personnel.map((p) => p.id).join(",")}</div>
+			<div data-testid="personnel">
+				{ctx.personnel.map((p) => p.id).join(",")}
+			</div>
 		</div>
 	);
 }
@@ -257,7 +275,9 @@ describe("ScheduleContext", () => {
 			"day",
 		);
 		expect(result).toEqual([]);
-		expect(latestCtx?.getResourceAvailabilityFromCache(new Date(), "day")).toBeUndefined();
+		expect(
+			latestCtx?.getResourceAvailabilityFromCache(new Date(), "day"),
+		).toBeUndefined();
 
 		expect(errorSpy).toHaveBeenCalled();
 		errorSpy.mockRestore();

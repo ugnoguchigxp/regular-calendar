@@ -45,7 +45,7 @@ describe("ResourceColumn", () => {
 				startTime="08:00"
 				endTime="10:00"
 				currentDate={new Date("2024-01-10T00:00:00Z")}
-				slotHeight={60}
+				slotSize={60}
 				onEventClick={onEventClick}
 				onEmptySlotClick={onEmptySlotClick}
 			/>,
@@ -86,7 +86,7 @@ describe("ResourceColumn", () => {
 				startTime="08:00"
 				endTime="10:00"
 				currentDate={new Date("2024-01-10T00:00:00Z")}
-				slotHeight={60}
+				slotSize={60}
 			/>,
 		);
 
@@ -101,7 +101,7 @@ describe("ResourceColumn", () => {
 				startTime="08:00"
 				endTime="10:00"
 				currentDate={new Date("2024-01-10T00:00:00Z")}
-				slotHeight={60}
+				slotSize={60}
 			/>,
 		);
 
@@ -130,7 +130,7 @@ describe("ResourceColumn", () => {
 				startTime="08:00"
 				endTime="10:00"
 				currentDate={new Date("2024-01-10T00:00:00Z")}
-				slotHeight={60}
+				slotSize={60}
 			/>,
 		);
 
@@ -149,7 +149,7 @@ describe("ResourceColumn", () => {
 				startTime="08:00"
 				endTime="10:00"
 				currentDate={new Date("2024-01-10T00:00:00Z")}
-				slotHeight={60}
+				slotSize={60}
 				onEmptySlotClick={onEmptySlotClick}
 			/>,
 		);

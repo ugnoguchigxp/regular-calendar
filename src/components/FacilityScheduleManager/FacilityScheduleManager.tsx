@@ -15,6 +15,7 @@ import type {
 	ScheduleEvent,
 	ViewMode,
 } from "../../FacilitySchedule/FacilitySchedule.schema";
+import type { CalendarOrientation } from "../../RegularCalendar/RegularCalendar.schema";
 import { transformBookingsToEvents } from "../../utils/transformHelpers";
 import { EventModal } from "../EventModal/EventModal";
 
@@ -274,13 +275,15 @@ export function FacilityScheduleManager({
 		// Use API settings as base, then override with local props
 		...apiSettings,
 		weekStartsOn: settings.weekStartsOn ?? apiSettings.weekStartsOn,
-		startTime: settings.businessHoursStart !== undefined
-			? `${settings.businessHoursStart.toString().padStart(2, "0")}:00`
-			: apiSettings.startTime,
-		endTime: settings.businessHoursEnd !== undefined
-			? `${settings.businessHoursEnd.toString().padStart(2, "0")}:00`
-			: apiSettings.endTime,
-		orientation: settings.facilityOrientation as any,
+		startTime:
+			settings.businessHoursStart !== undefined
+				? `${settings.businessHoursStart.toString().padStart(2, "0")}:00`
+				: apiSettings.startTime,
+		endTime:
+			settings.businessHoursEnd !== undefined
+				? `${settings.businessHoursEnd.toString().padStart(2, "0")}:00`
+				: apiSettings.endTime,
+		orientation: settings.facilityOrientation as CalendarOrientation,
 		slotInterval: (settings.facilitySlotInterval as number) || 60,
 	};
 

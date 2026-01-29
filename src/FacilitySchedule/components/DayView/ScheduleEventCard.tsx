@@ -52,7 +52,7 @@ export function ScheduleEventCard({
 		Math.round(
 			((event.endDate.getTime() - event.startDate.getTime()) /
 				(1000 * 60 * 60)) *
-			10,
+				10,
 		) / 10;
 
 	// Determine styling
@@ -78,21 +78,21 @@ export function ScheduleEventCard({
 	// Custom style overrides
 	const customStyle: React.CSSProperties = isHorizontal
 		? {
-			left: `${top}px`,
-			width: `${height}px`,
-			top: `${leftPercent}%`,
-			height: `${widthPercent}%`,
-			paddingTop: leftPercent > 0 ? "1px" : "2px",
-			paddingBottom: leftPercent + widthPercent < 100 ? "1px" : "2px",
-		}
+				left: `${top}px`,
+				width: `${height}px`,
+				top: `${leftPercent}%`,
+				height: `${widthPercent}%`,
+				paddingTop: leftPercent > 0 ? "1px" : "2px",
+				paddingBottom: leftPercent + widthPercent < 100 ? "1px" : "2px",
+			}
 		: {
-			top: `${top}px`,
-			height: `${height}px`,
-			left: `${leftPercent}%`,
-			width: `${widthPercent}%`,
-			paddingLeft: leftPercent > 0 ? "2px" : "4px",
-			paddingRight: leftPercent + widthPercent < 100 ? "2px" : "4px",
-		};
+				top: `${top}px`,
+				height: `${height}px`,
+				left: `${leftPercent}%`,
+				width: `${widthPercent}%`,
+				paddingLeft: leftPercent > 0 ? "2px" : "4px",
+				paddingRight: leftPercent + widthPercent < 100 ? "2px" : "4px",
+			};
 
 	if (event.color && !event.hasConflict) {
 		customStyle.backgroundColor = event.color;

@@ -24,6 +24,10 @@ describe("SettingsModal", () => {
 		timeZone: "Asia/Tokyo",
 		paginationEnabled: false,
 		paginationPageSize: 8,
+		calendarOrientation: "horizontal",
+		facilityOrientation: "horizontal",
+		calendarSlotInterval: 30,
+		facilitySlotInterval: 60,
 	};
 
 	const mockOnUpdateSettings = vi.fn();

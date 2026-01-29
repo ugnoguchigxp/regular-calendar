@@ -164,14 +164,20 @@ describe("EventModal", () => {
 			/>,
 		);
 
-		modalPropsSpy.mock.calls.at(-1)?.[0].onOpenChange(false);
+		modalPropsSpy.mock.calls[
+			modalPropsSpy.mock.calls.length - 1
+		]?.[0].onOpenChange(false);
 		expect(onClose).toHaveBeenCalled();
 
-		const formProps = eventFormPropsSpy.mock.calls.at(-1)?.[0];
+		const formProps =
+			eventFormPropsSpy.mock.calls[
+				eventFormPropsSpy.mock.calls.length - 1
+			]?.[0];
 		expect(formProps.onDelete).toBeUndefined();
 
-		const pointerContainer =
-			screen.getByTestId("modal").querySelector("div[style]");
+		const pointerContainer = screen
+			.getByTestId("modal")
+			.querySelector("div[style]");
 		expect(pointerContainer).toHaveStyle({ pointerEvents: "none" });
 	});
 });

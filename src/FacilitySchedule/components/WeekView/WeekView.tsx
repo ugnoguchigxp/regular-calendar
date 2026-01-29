@@ -170,7 +170,10 @@ export function WeekView({
 						{/* Resource Rows */}
 						<div className="flex flex-col">
 							{(() => {
-								const groupedResources: { group: ResourceGroup | undefined; resources: Resource[] }[] = [];
+								const groupedResources: {
+									group: ResourceGroup | undefined;
+									resources: Resource[];
+								}[] = [];
 								let currentGroup: ResourceGroup | undefined;
 								let currentChunk: Resource[] = [];
 
@@ -178,24 +181,38 @@ export function WeekView({
 									const group = groupMap.get(resource.groupId);
 									const prevResource = i > 0 ? resources[i - 1] : null;
 
-									if (prevResource && prevResource.groupId !== resource.groupId) {
-										groupedResources.push({ group: currentGroup, resources: currentChunk });
+									if (
+										prevResource &&
+										prevResource.groupId !== resource.groupId
+									) {
+										groupedResources.push({
+											group: currentGroup,
+											resources: currentChunk,
+										});
 										currentChunk = [];
 									}
 									currentGroup = group;
 									currentChunk.push(resource);
 								});
 								if (currentChunk.length > 0) {
-									groupedResources.push({ group: currentGroup, resources: currentChunk });
+									groupedResources.push({
+										group: currentGroup,
+										resources: currentChunk,
+									});
 								}
 
 								return groupedResources.map((chunk, chunkIndex) => (
-									<div key={`${chunk.group?.id}-${chunkIndex}`} className="flex border-b border-border relative">
+									<div
+										key={`${chunk.group?.id}-${chunkIndex}`}
+										className="flex border-b border-border relative"
+									>
 										{/* Group Column (Sticky) */}
-										<div className="sticky left-0 z-21 w-[var(--ui-space-12)] flex-shrink-0 bg-background border-r border-border flex items-center justify-center font-bold text-muted-foreground writing-mode-vertical-rl"
+										<div
+											className="sticky left-0 z-21 w-[var(--ui-space-12)] flex-shrink-0 bg-background border-r border-border flex items-center justify-center font-bold text-muted-foreground writing-mode-vertical-rl"
 											style={{
 												left: 0,
-											}}>
+											}}
+										>
 											<div className="sticky top-0 py-2 max-h-screen">
 												{chunk.group?.name || "-"}
 											</div>
@@ -222,8 +239,12 @@ export function WeekView({
 													{weekDays.map((day) => {
 														const normalizedDay = new Date(day);
 														normalizedDay.setHours(0, 0, 0, 0);
-														const isToday = normalizedDay.getTime() === today.getTime();
-														const isClosed = isClosedDay(day, settings.closedDays);
+														const isToday =
+															normalizedDay.getTime() === today.getTime();
+														const isClosed = isClosedDay(
+															day,
+															settings.closedDays,
+														);
 
 														const dayKey = getDayKey(day);
 														const dayEvents = eventsByDay.get(dayKey) ?? [];
@@ -249,19 +270,19 @@ export function WeekView({
 																	className="absolute inset-0 z-0 p-0 hover:bg-accent/30"
 																	aria-label={`Add event to ${resource.name}`}
 																	disabled={isClosed || !onEmptySlotClick}
-																	onClick={() => onEmptySlotClick?.(resource.id, day)}
+																	onClick={() =>
+																		onEmptySlotClick?.(resource.id, day)
+																	}
 																/>
 																<div className="relative z-10 flex flex-col gap-0.5 h-full overflow-hidden pointer-events-none">
-																	{cellEvents
-																		.slice(0, 3)
-																		.map((event) => (
-																			<EventCell
-																				key={event.id}
-																				event={event}
-																				onClick={onEventClick}
-																				components={components}
-																			/>
-																		))}
+																	{cellEvents.slice(0, 3).map((event) => (
+																		<EventCell
+																			key={event.id}
+																			event={event}
+																			onClick={onEventClick}
+																			components={components}
+																		/>
+																	))}
 																	{cellEvents.length > 3 && (
 																		<div className="text-[9px] text-muted-foreground text-center">
 																			+{cellEvents.length - 3}
@@ -297,7 +318,10 @@ export function WeekView({
 										const group = groupMap.get(resource.groupId);
 										let colSpan = 1;
 										// Calculate span
-										while (i + colSpan < resources.length && resources[i + colSpan].groupId === resource.groupId) {
+										while (
+											i + colSpan < resources.length &&
+											resources[i + colSpan].groupId === resource.groupId
+										) {
 											colSpan++;
 										}
 
@@ -308,7 +332,7 @@ export function WeekView({
 												style={{ minWidth: `${colSpan * 80}px` }} // Approximate
 											>
 												{group?.name || "-"}
-											</div>
+											</div>,
 										);
 										i += colSpan - 1; // Skip handled resources
 									}
@@ -351,7 +375,10 @@ export function WeekView({
 							const eventsForDay = eventsByDay.get(dayKey) ?? [];
 
 							return (
-								<div key={day.toISOString()} className={`flex border-b border-border ${isToday ? "bg-primary/5" : ""}`}>
+								<div
+									key={day.toISOString()}
+									className={`flex border-b border-border ${isToday ? "bg-primary/5" : ""}`}
+								>
 									{/* Date Cell (Sticky) */}
 									<div
 										className={`flex-shrink-0 border-r border-border px-[var(--ui-space-1)] py-[var(--ui-space-2)] flex items-center justify-center sticky left-0 z-20 ${isClosed ? "bg-muted" : "bg-card"}`}
@@ -406,7 +433,8 @@ export function WeekView({
 														))}
 													{cellEvents.length > WEEK_VIEW.MAX_VISIBLE_EVENTS && (
 														<div className="text-[9px] text-muted-foreground text-center">
-															+{cellEvents.length - WEEK_VIEW.MAX_VISIBLE_EVENTS}
+															+
+															{cellEvents.length - WEEK_VIEW.MAX_VISIBLE_EVENTS}
 														</div>
 													)}
 												</div>

@@ -150,7 +150,15 @@ export function ResourceColumn({
 		}
 
 		return result;
-	}, [events, allDayEvents, currentDate, startHour, startMinute, endHour, endMinute]);
+	}, [
+		events,
+		allDayEvents,
+		currentDate,
+		startHour,
+		startMinute,
+		endHour,
+		endMinute,
+	]);
 
 	function calculateCardPosition(eventWithLayout: EventWithLayout) {
 		const event = eventWithLayout;
@@ -164,7 +172,8 @@ export function ResourceColumn({
 		};
 
 		const startMinutes = getMinutesFromStart(event.startDate);
-		const durationMinutes = (event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60);
+		const durationMinutes =
+			(event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60);
 
 		// Position based on slots: (minutes / interval) * pixels_per_slot
 		const pos = (startMinutes / slotInterval) * slotSize;
@@ -174,7 +183,12 @@ export function ResourceColumn({
 		const offsetPercent =
 			(eventWithLayout.column * 100) / eventWithLayout.totalColumns;
 
-		return { top: pos, height: size, widthPercent: depthPercent, leftPercent: offsetPercent };
+		return {
+			top: pos,
+			height: size,
+			widthPercent: depthPercent,
+			leftPercent: offsetPercent,
+		};
 	}
 
 	function handleColumnPointerUp(e: React.PointerEvent<HTMLDivElement>) {
@@ -209,7 +223,9 @@ export function ResourceColumn({
 					className="w-[var(--ui-space-32)] flex-shrink-0 border-r border-border bg-background flex flex-col items-center justify-center sticky z-30 shrink-0 p-2"
 					style={{ left: headerLeftOffset }}
 				>
-					<div className="font-semibold text-xs text-center">{resource.name}</div>
+					<div className="font-semibold text-xs text-center">
+						{resource.name}
+					</div>
 					<div className="text-[10px] text-muted-foreground">
 						{events.length + allDayEvents.length} events
 					</div>

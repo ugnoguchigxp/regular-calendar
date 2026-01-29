@@ -34,8 +34,20 @@ const groups: ResourceGroup[] = [
 ];
 
 const personnel: Personnel[] = [
-	{ id: "p1", name: "Alice", priority: 1 },
-	{ id: "p2", name: "Bob", priority: 2 },
+	{
+		id: "p1",
+		name: "Alice",
+		priority: 1,
+		department: "Dept A",
+		email: "alice@example.com",
+	},
+	{
+		id: "p2",
+		name: "Bob",
+		priority: 2,
+		department: "Dept B",
+		email: "bob@example.com",
+	},
 ];
 
 describe("DefaultEventModal", () => {
@@ -111,7 +123,9 @@ describe("DefaultEventModal", () => {
 		const payload = onSave.mock.calls[0]?.[0];
 		expect(payload.title).toBe("Demo Event");
 		expect(payload.startDate).toBeInstanceOf(Date);
-		expect(payload.endDate.getTime()).toBeGreaterThan(payload.startDate.getTime());
+		expect(payload.endDate.getTime()).toBeGreaterThan(
+			payload.startDate.getTime(),
+		);
 		expect(payload.attendee).toContain("John Doe");
 	});
 
@@ -200,9 +214,9 @@ describe("DefaultEventModal", () => {
 				"You cannot edit this event because you are not the owner.",
 			),
 		).toBeInTheDocument();
-		expect(screen.getAllByText("View Event (Read Only)").length).toBeGreaterThan(
-			0,
-		);
+		expect(
+			screen.getAllByText("View Event (Read Only)").length,
+		).toBeGreaterThan(0);
 	});
 
 	it("falls back to resource name when group is missing", async () => {

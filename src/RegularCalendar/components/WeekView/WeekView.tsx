@@ -56,11 +56,11 @@ export function WeekView({
 	const timeInterval = settings.slotInterval || settings.defaultDuration || 60;
 	const startHour = Number(
 		(settings.startTime || settings.businessHoursStart)?.split(":")[0] ||
-		DEFAULT_VIEW_HOURS.start,
+			DEFAULT_VIEW_HOURS.start,
 	);
 	const endHour = Number(
 		(settings.endTime || settings.businessHoursEnd)?.split(":")[0] ||
-		DEFAULT_VIEW_HOURS.end,
+			DEFAULT_VIEW_HOURS.end,
 	);
 	const weekStart = settings.weekStartsOn ?? 1;
 
@@ -407,8 +407,12 @@ export function WeekView({
 													key={event.id}
 													event={event}
 													position={{
-														top: (position.top / TIME_SLOT_HEIGHT) * TIME_SLOT_WIDTH,
-														height: (position.height / TIME_SLOT_HEIGHT) * TIME_SLOT_WIDTH,
+														top:
+															(position.top / TIME_SLOT_HEIGHT) *
+															TIME_SLOT_WIDTH,
+														height:
+															(position.height / TIME_SLOT_HEIGHT) *
+															TIME_SLOT_WIDTH,
 													}}
 													column={column}
 													totalColumns={totalColumns}

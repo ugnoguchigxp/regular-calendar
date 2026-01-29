@@ -85,7 +85,7 @@ const getDisplayAttendee = (
 			// User said "自分は表示しなくていい", so empty is better.
 			return "";
 		}
-	} catch { }
+	} catch {}
 	return typeof attendee === "string" ? attendee : "";
 };
 
@@ -132,29 +132,29 @@ export const EventItem: React.FC<EventItemProps> = ({
 
 	const style: React.CSSProperties = isVertical
 		? {
-			left: usePercentagePosition ? `${position.top}%` : `${position.top}px`,
-			width: usePercentagePosition
-				? `${position.height}%`
-				: `${position.height}px`,
-			top: `calc(${leftPercent}% + 2px)`,
-			height: `calc(${widthPercent}% - 4px)`,
-			minWidth: usePercentagePosition ? undefined : "44px",
-			backgroundColor: event.color || "#3b82f6",
-			color: "white",
-			zIndex: isDragging ? 50 : 10 + column,
-		}
+				left: usePercentagePosition ? `${position.top}%` : `${position.top}px`,
+				width: usePercentagePosition
+					? `${position.height}%`
+					: `${position.height}px`,
+				top: `calc(${leftPercent}% + 2px)`,
+				height: `calc(${widthPercent}% - 4px)`,
+				minWidth: usePercentagePosition ? undefined : "44px",
+				backgroundColor: event.color || "#3b82f6",
+				color: "white",
+				zIndex: isDragging ? 50 : 10 + column,
+			}
 		: {
-			top: usePercentagePosition ? `${position.top}%` : `${position.top}px`,
-			height: usePercentagePosition
-				? `${position.height}%`
-				: `${position.height}px`,
-			minHeight: usePercentagePosition ? undefined : "44px",
-			left: `calc(${leftPercent}% + 2px)`,
-			width: `calc(${widthPercent}% - 4px)`,
-			backgroundColor: event.color || "#3b82f6",
-			color: "white",
-			zIndex: isDragging ? 50 : 10 + column,
-		};
+				top: usePercentagePosition ? `${position.top}%` : `${position.top}px`,
+				height: usePercentagePosition
+					? `${position.height}%`
+					: `${position.height}px`,
+				minHeight: usePercentagePosition ? undefined : "44px",
+				left: `calc(${leftPercent}% + 2px)`,
+				width: `calc(${widthPercent}% - 4px)`,
+				backgroundColor: event.color || "#3b82f6",
+				color: "white",
+				zIndex: isDragging ? 50 : 10 + column,
+			};
 
 	return (
 		<button

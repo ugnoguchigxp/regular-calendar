@@ -192,7 +192,12 @@ describe("EventForm", () => {
 				onCancel={vi.fn()}
 				onAvailabilityRequest={onAvailabilityRequest}
 				customFields={[
-					{ name: "priority", label: "Priority", type: "number", required: true },
+					{
+						name: "priority",
+						label: "Priority",
+						type: "number",
+						required: true,
+					},
 					{ name: "notes", label: "Notes", type: "text" },
 					{
 						name: "flag",

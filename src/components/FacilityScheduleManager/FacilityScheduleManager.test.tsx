@@ -1,6 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { ScheduleEvent } from "../../FacilitySchedule/FacilitySchedule.schema";
+import type {
+	FacilityScheduleProps,
+	ScheduleEvent,
+} from "../../FacilitySchedule/FacilitySchedule.schema";
 import { getPersonnelColor } from "../../PersonnelPanel/personnelColors";
 import { FacilityScheduleManager } from "./FacilityScheduleManager";
 
@@ -12,7 +15,7 @@ vi.mock("../../contexts/ScheduleContext", () => ({
 }));
 
 vi.mock("../../FacilitySchedule/FacilitySchedule", () => ({
-	FacilitySchedule: (props: any) => {
+	FacilitySchedule: (props: FacilityScheduleProps) => {
 		schedulePropsSpy(props);
 		return <div data-testid="facility-schedule" />;
 	},
@@ -175,7 +178,10 @@ describe("FacilityScheduleManager", () => {
 
 		await waitFor(() => expect(fetchResourceAvailability).toHaveBeenCalled());
 		await waitFor(() => {
-			const props = schedulePropsSpy.mock.calls.at(-1)?.[0];
+			const props =
+				schedulePropsSpy.mock.calls[
+					schedulePropsSpy.mock.calls.length - 1
+				]?.[0];
 			expect(props).toBeTruthy();
 			expect(props.settings.startTime).toBe("08:00");
 			expect(props.settings.endTime).toBe("17:00");
@@ -308,7 +314,8 @@ describe("FacilityScheduleManager", () => {
 
 		await waitFor(() => expect(fetchResourceAvailability).toHaveBeenCalled());
 
-		const props = schedulePropsSpy.mock.calls.at(-1)?.[0];
+		const props =
+			schedulePropsSpy.mock.calls[schedulePropsSpy.mock.calls.length - 1]?.[0];
 		expect(props.settings.startTime).toBe("07:00");
 		expect(props.settings.endTime).toBe("19:00");
 		expect(props.settings.slotInterval).toBe(60);

@@ -22,7 +22,7 @@ export function PersonnelPanel({
 }: PersonnelPanelProps) {
 	const { t } = useAppTranslation();
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedDepartment, setSelectedDepartment] = useState<string>("ALL");
+	const [isSearchFocused, setIsSearchFocused] = useState(false);
 	const [contextMenu, setContextMenu] = useState<{
 		personnel: Personnel | null;
 		position: { x: number; y: number } | null;
@@ -34,27 +34,16 @@ export function PersonnelPanel({
 		return Array.from(depts).sort();
 	}, [personnel]);
 
-	// Filter personnel by search query and department
+	// Filter personnel by search query (Name or Department)
 	const filteredPersonnel = useMemo(() => {
-		let result = personnel;
-
-		// Filter by Department
-		if (selectedDepartment !== "ALL") {
-			result = result.filter((p) => p.department === selectedDepartment);
-		}
-
-		// Filter by Search Query
-		if (searchQuery.trim()) {
-			const query = searchQuery.toLowerCase();
-			result = result.filter(
-				(p) =>
-					p.name.toLowerCase().includes(query) ||
-					p.email.toLowerCase().includes(query),
-			);
-		}
-
-		return result;
-	}, [personnel, searchQuery, selectedDepartment]);
+		if (!searchQuery.trim()) return personnel;
+		const query = searchQuery.toLowerCase();
+		return personnel.filter(
+			(p) =>
+				p.name.toLowerCase().includes(query) ||
+				p.department?.toLowerCase().includes(query),
+		);
+	}, [personnel, searchQuery]);
 
 	// Group by priority for visual separation
 	const groupedPersonnel = useMemo(() => {
@@ -88,14 +77,15 @@ export function PersonnelPanel({
 			<button
 				key={p.id}
 				type="button"
-				className={`flex items-center gap-[var(--ui-space-2)] px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] rounded cursor-pointer text-sm transition-colors ${isSelected ? "border" : "hover:bg-muted/50 border border-transparent"
-					}`}
+				className={`flex items-center gap-[var(--ui-space-2)] px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] rounded cursor-pointer text-sm transition-colors w-full ${
+					isSelected ? "border" : "hover:bg-muted/50 border border-transparent"
+				}`}
 				style={
 					isSelected && color
 						? {
-							backgroundColor: `${color}20`, // 20% opacity
-							borderColor: color,
-						}
+								backgroundColor: `${color}20`, // 20% opacity
+								borderColor: color,
+							}
 						: {}
 				}
 				onClick={() => handleToggle(p.id)}
@@ -104,13 +94,13 @@ export function PersonnelPanel({
 				{/* Color badge for selected */}
 				{isSelected && color ? (
 					<div
-						className="w-[var(--ui-space-4)] h-[var(--ui-space-4)] rounded-sm flex-shrink-0"
+						className="w-[var(--ui-space-3)] h-[var(--ui-space-3)] rounded-full flex-shrink-0"
 						style={{ backgroundColor: color }}
 					/>
 				) : (
-					<div className="w-[var(--ui-space-4)] h-[var(--ui-space-4)] rounded border border-border flex-shrink-0" />
+					<div className="w-[var(--ui-space-3)] h-[var(--ui-space-3)] rounded-full flex-shrink-0 bg-transparent" />
 				)}
-				<div className="flex-1 min-w-[var(--ui-space-0)]">
+				<div className="flex-1 min-w-[var(--ui-space-0)] text-left">
 					<div className="truncate font-medium">{p.name}</div>
 					<div className="truncate text-xs text-muted-foreground">
 						{p.department}
@@ -136,31 +126,96 @@ export function PersonnelPanel({
 		>
 			{/* Header */}
 			<div className="p-[var(--ui-space-2)] border-b border-border space-y-[var(--ui-space-2)]">
-				<div className="text-sm font-semibold">
-					{t("personnel_list_title")}
+				<div className="text-sm font-semibold">{t("personnel_list_title")}</div>
+
+				{/* Search Input with Department Suggestions */}
+				<div className="relative">
+					<input
+						type="text"
+						placeholder={t("personnel_search_placeholder")}
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						onFocus={() => setIsSearchFocused(true)}
+						onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+						className="w-full px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+					/>
+
+					{/* Dropdown Logic */}
+					{isSearchFocused && (
+						<div className="absolute top-full left-0 w-full mt-1 bg-popover border border-border rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+							<div className="p-1">
+								{(() => {
+									if (!searchQuery.trim()) {
+										// Case 1: Empty input -> Show all departments
+										return (
+											<>
+												<div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+													{t("personnel_all_departments")}
+												</div>
+												{availableDepartments.map((dept) => (
+													<button
+														key={dept}
+														type="button"
+														className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+														onClick={() => setSearchQuery(dept)}
+													>
+														{dept}
+													</button>
+												))}
+											</>
+										);
+									}
+
+									const query = searchQuery.toLowerCase();
+									const nameMatches = personnel.filter((p) =>
+										p.name.toLowerCase().includes(query),
+									);
+
+									if (nameMatches.length > 0) {
+										// Case 2: Name matches -> Show matching personnel
+										return nameMatches.map((p) => (
+											<button
+												key={p.id}
+												type="button"
+												className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+												onClick={() => setSearchQuery(p.name)}
+											>
+												<span className="font-medium">{p.name}</span>
+												<span className="text-xs text-muted-foreground ml-2">
+													({p.department})
+												</span>
+											</button>
+										));
+									}
+
+									// Case 3: No name matches -> Show matching departments
+									const deptMatches = availableDepartments.filter((d) =>
+										d.toLowerCase().includes(query),
+									);
+
+									if (deptMatches.length > 0) {
+										return deptMatches.map((dept) => (
+											<button
+												key={dept}
+												type="button"
+												className="w-full text-left px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground rounded-sm cursor-pointer"
+												onClick={() => setSearchQuery(dept)}
+											>
+												{dept}
+											</button>
+										));
+									}
+
+									return (
+										<div className="px-2 py-2 text-sm text-muted-foreground text-center">
+											{t("personnel_no_results")}
+										</div>
+									);
+								})()}
+							</div>
+						</div>
+					)}
 				</div>
-
-				{/* Department Filter */}
-				<select
-					value={selectedDepartment}
-					onChange={(e) => setSelectedDepartment(e.target.value)}
-					className="w-full px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-				>
-					<option value="ALL">{t("personnel_all_departments")}</option>
-					{availableDepartments.map((dept) => (
-						<option key={dept} value={dept}>
-							{dept}
-						</option>
-					))}
-				</select>
-
-				<input
-					type="text"
-					placeholder={t("personnel_search_placeholder")}
-					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full px-[var(--ui-space-2)] py-[var(--ui-space-1-5)] text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-				/>
 			</div>
 
 			{/* List */}
@@ -205,9 +260,9 @@ export function PersonnelPanel({
 			<div className="p-[var(--ui-space-2)] border-t border-border text-xs text-muted-foreground">
 				{selectedIds.length > 0
 					? t("personnel_selected_count", {
-						count: selectedIds.length,
-						defaultValue: `${selectedIds.length} selected`,
-					})
+							count: selectedIds.length,
+							defaultValue: `${selectedIds.length} selected`,
+						})
 					: t("personnel_context_hint")}
 			</div>
 

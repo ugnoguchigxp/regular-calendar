@@ -96,11 +96,11 @@ export function DayView({
 	const timeInterval = settings.slotInterval || settings.defaultDuration || 60;
 	const startHour = Number(
 		(settings.startTime || settings.businessHoursStart)?.split(":")[0] ||
-		DEFAULT_VIEW_HOURS.start,
+			DEFAULT_VIEW_HOURS.start,
 	);
 	const endHour = Number(
 		(settings.endTime || settings.businessHoursEnd)?.split(":")[0] ||
-		DEFAULT_VIEW_HOURS.end,
+			DEFAULT_VIEW_HOURS.end,
 	);
 
 	const timeSlots = useMemo(
@@ -169,8 +169,9 @@ export function DayView({
 				<>
 					{/* Date Header */}
 					<div
-						className={`border-b border-border p-[var(--ui-space-2)] sticky top-[var(--ui-space-0)] z-30 text-center ${isToday ? "bg-muted/50" : "bg-muted/40"
-							}`}
+						className={`border-b border-border p-[var(--ui-space-2)] sticky top-[var(--ui-space-0)] z-30 text-center ${
+							isToday ? "bg-muted/50" : "bg-muted/40"
+						}`}
 						style={{ paddingRight: scrollbarPadding || undefined }}
 					>
 						<div className="text-xs font-medium text-muted-foreground">
@@ -352,7 +353,8 @@ export function DayView({
 										event={event}
 										position={{
 											top: (position.top / TIME_SLOT_HEIGHT) * TIME_SLOT_WIDTH,
-											height: (position.height / TIME_SLOT_HEIGHT) * TIME_SLOT_WIDTH,
+											height:
+												(position.height / TIME_SLOT_HEIGHT) * TIME_SLOT_WIDTH,
 										}}
 										onEventClick={onEventClick}
 										currentUserId={currentUserId}

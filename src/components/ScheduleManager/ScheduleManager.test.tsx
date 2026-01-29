@@ -1,27 +1,31 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { ScheduleEvent } from "../../FacilitySchedule/FacilitySchedule.schema";
+import type { RegularCalendarProps } from "../../RegularCalendar/RegularCalendar";
+import type { ScheduleEvent as RegularCalendarEvent } from "../../RegularCalendar/RegularCalendar.schema";
+import type { DefaultEventModalProps } from "./DefaultEventModal/DefaultEventModal";
 import { ScheduleManager } from "./ScheduleManager";
 
 const calendarPropsSpy = vi.fn();
 const modalPropsSpy = vi.fn();
 
 vi.mock("../../RegularCalendar/RegularCalendar", () => ({
-	RegularCalendar: (props: any) => {
+	RegularCalendar: (props: RegularCalendarProps) => {
 		calendarPropsSpy(props);
 		return (
 			<div data-testid="calendar">
 				<button
 					type="button"
-					onClick={() => props.onTimeSlotClick(new Date("2026-01-02T09:00:00"))}
+					onClick={() =>
+						props.onTimeSlotClick?.(new Date("2026-01-02T09:00:00"))
+					}
 				>
 					open-create
 				</button>
 				<button
 					type="button"
 					onClick={() =>
-						props.onEventClick({
+						props.onEventClick?.({
 							id: "e1",
 							title: "Existing",
 							resourceId: "r1",
@@ -32,7 +36,7 @@ vi.mock("../../RegularCalendar/RegularCalendar", () => ({
 							attendee: "[]",
 							createdAt: new Date(),
 							updatedAt: new Date(),
-						} as ScheduleEvent)
+						} as RegularCalendarEvent)
 					}
 				>
 					open-edit
@@ -43,7 +47,7 @@ vi.mock("../../RegularCalendar/RegularCalendar", () => ({
 }));
 
 vi.mock("./DefaultEventModal/DefaultEventModal", () => ({
-	DefaultEventModal: (props: any) => {
+	DefaultEventModal: (props: DefaultEventModalProps) => {
 		modalPropsSpy(props);
 		return <div data-testid="default-event-modal" />;
 	},
@@ -68,6 +72,13 @@ describe("ScheduleManager", () => {
 					endTime: "18:00",
 					closedDays: [],
 					weekStartsOn: 0,
+					businessHoursStart: "08:00",
+					businessHoursEnd: "18:00",
+					timeZone: "Asia/Tokyo",
+					calendarOrientation: "horizontal",
+					facilityOrientation: "horizontal",
+					calendarSlotInterval: 30,
+					facilitySlotInterval: 60,
 				}}
 				isLoading={false}
 				onEventCreate={onEventCreate}
@@ -78,7 +89,8 @@ describe("ScheduleManager", () => {
 		);
 
 		await user.click(screen.getByRole("button", { name: "open-create" }));
-		const createProps = modalPropsSpy.mock.calls.at(-1)?.[0];
+		const createProps =
+			modalPropsSpy.mock.calls[modalPropsSpy.mock.calls.length - 1]?.[0];
 		await act(async () => {
 			await createProps.onSave({
 				title: "New",
@@ -96,7 +108,8 @@ describe("ScheduleManager", () => {
 		);
 
 		await user.click(screen.getByRole("button", { name: "open-edit" }));
-		const updateProps = modalPropsSpy.mock.calls.at(-1)?.[0];
+		const updateProps =
+			modalPropsSpy.mock.calls[modalPropsSpy.mock.calls.length - 1]?.[0];
 		await act(async () => {
 			await updateProps.onSave({
 				title: "Updated",
@@ -143,6 +156,13 @@ describe("ScheduleManager", () => {
 					endTime: "18:00",
 					closedDays: [],
 					weekStartsOn: 0,
+					businessHoursStart: "08:00",
+					businessHoursEnd: "18:00",
+					timeZone: "Asia/Tokyo",
+					calendarOrientation: "horizontal",
+					facilityOrientation: "horizontal",
+					calendarSlotInterval: 30,
+					facilitySlotInterval: 60,
 				}}
 				isLoading={false}
 				onEventCreate={onEventCreate}
@@ -152,7 +172,9 @@ describe("ScheduleManager", () => {
 		);
 
 		await act(async () => {
-			await modalPropsSpy.mock.calls.at(-1)?.[0].onDelete();
+			await modalPropsSpy.mock.calls[
+				modalPropsSpy.mock.calls.length - 1
+			]?.[0].onDelete();
 		});
 
 		expect(onEventDelete).not.toHaveBeenCalled();
@@ -176,6 +198,13 @@ describe("ScheduleManager", () => {
 					endTime: "18:00",
 					closedDays: [],
 					weekStartsOn: 0,
+					businessHoursStart: "08:00",
+					businessHoursEnd: "18:00",
+					timeZone: "Asia/Tokyo",
+					calendarOrientation: "horizontal",
+					facilityOrientation: "horizontal",
+					calendarSlotInterval: 30,
+					facilitySlotInterval: 60,
 				}}
 				isLoading={false}
 				onEventCreate={onEventCreate}
@@ -186,11 +215,15 @@ describe("ScheduleManager", () => {
 		);
 
 		await act(async () => {
-			await modalPropsSpy.mock.calls.at(-1)?.[0].onDelete();
+			await modalPropsSpy.mock.calls[
+				modalPropsSpy.mock.calls.length - 1
+			]?.[0].onDelete();
 		});
 
 		await act(async () => {
-			await modalPropsSpy.mock.calls.at(-1)?.[0].onSave({
+			await modalPropsSpy.mock.calls[
+				modalPropsSpy.mock.calls.length - 1
+			]?.[0].onSave({
 				title: "Create Fail",
 				startDate: new Date("2026-01-02T09:00:00"),
 				endDate: new Date("2026-01-02T10:00:00"),
@@ -202,7 +235,9 @@ describe("ScheduleManager", () => {
 		expect(onToast).toHaveBeenCalledWith("Failed to save event", "error");
 
 		await act(async () => {
-			await calendarPropsSpy.mock.calls.at(-1)?.[0].onEventClick({
+			await calendarPropsSpy.mock.calls[
+				calendarPropsSpy.mock.calls.length - 1
+			]?.[0].onEventClick({
 				id: "e1",
 				title: "Existing",
 				resourceId: "r1",
@@ -217,7 +252,9 @@ describe("ScheduleManager", () => {
 		});
 
 		await act(async () => {
-			await modalPropsSpy.mock.calls.at(-1)?.[0].onSave({
+			await modalPropsSpy.mock.calls[
+				modalPropsSpy.mock.calls.length - 1
+			]?.[0].onSave({
 				title: "Fail",
 				startDate: new Date("2026-01-02T09:00:00"),
 				endDate: new Date("2026-01-02T10:00:00"),
@@ -229,11 +266,15 @@ describe("ScheduleManager", () => {
 		expect(onToast).toHaveBeenCalledWith("Failed to save event", "error");
 
 		await act(async () => {
-			await modalPropsSpy.mock.calls.at(-1)?.[0].onDelete();
+			await modalPropsSpy.mock.calls[
+				modalPropsSpy.mock.calls.length - 1
+			]?.[0].onDelete();
 		});
 
 		await act(async () => {
-			await modalPropsSpy.mock.calls.at(-1)?.[0].onDelete();
+			await modalPropsSpy.mock.calls[
+				modalPropsSpy.mock.calls.length - 1
+			]?.[0].onDelete();
 		});
 		expect(onToast).toHaveBeenCalledWith("Failed to delete event", "error");
 		expect(errorSpy).toHaveBeenCalled();

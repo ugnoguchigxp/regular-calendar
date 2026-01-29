@@ -39,7 +39,9 @@ describe("PersonnelPanel", () => {
 		const searchInput = screen.getByRole("textbox");
 		await user.type(searchInput, "bob");
 		expect(screen.queryByText("Alice")).not.toBeInTheDocument();
-		expect(screen.getByText("Bob")).toBeInTheDocument();
+		const bobs = screen.getAllByText("Bob");
+		expect(bobs.length).toBeGreaterThan(0);
+		expect(bobs[0]).toBeInTheDocument();
 	});
 
 	it("opens context menu and updates priority", () => {

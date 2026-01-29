@@ -160,7 +160,9 @@ export function SettingsModal({
 							<Button
 								key={orient}
 								variant={
-									settings.calendarOrientation === orient ? "default" : "outline"
+									settings.calendarOrientation === orient
+										? "default"
+										: "outline"
 								}
 								onClick={() => update({ calendarOrientation: orient })}
 							>
@@ -181,7 +183,11 @@ export function SettingsModal({
 						{([15, 30, 60, 120] as const).map((interval) => (
 							<Button
 								key={interval}
-								variant={settings.calendarSlotInterval === interval ? "default" : "outline"}
+								variant={
+									settings.calendarSlotInterval === interval
+										? "default"
+										: "outline"
+								}
 								onClick={() => update({ calendarSlotInterval: interval })}
 							>
 								{interval === 15 && t("option_15m", "15m")}
@@ -202,7 +208,11 @@ export function SettingsModal({
 						{(["horizontal", "vertical"] as const).map((orient) => (
 							<Button
 								key={orient}
-								variant={settings.facilityOrientation === orient ? "default" : "outline"}
+								variant={
+									settings.facilityOrientation === orient
+										? "default"
+										: "outline"
+								}
 								onClick={() => update({ facilityOrientation: orient })}
 							>
 								{orient === "horizontal"
@@ -222,7 +232,11 @@ export function SettingsModal({
 						{([15, 30, 60, 120] as const).map((interval) => (
 							<Button
 								key={interval}
-								variant={settings.facilitySlotInterval === interval ? "default" : "outline"}
+								variant={
+									settings.facilitySlotInterval === interval
+										? "default"
+										: "outline"
+								}
 								onClick={() => update({ facilitySlotInterval: interval })}
 							>
 								{interval === 15 && t("option_15m", "15m")}
@@ -406,6 +420,6 @@ export function SettingsModal({
 					</div>
 				)}
 			</div>
-		</div >
+		</div>
 	);
 }

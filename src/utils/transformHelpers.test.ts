@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { getPersonnelColor } from "../PersonnelPanel/personnelColors";
-import type { ScheduleEvent } from "../FacilitySchedule/FacilitySchedule.schema";
 import type { ResourceAvailabilityResponse } from "../contexts/types";
+import type { ScheduleEvent } from "../FacilitySchedule/FacilitySchedule.schema";
+import { getPersonnelColor } from "../PersonnelPanel/personnelColors";
 import {
 	cleanEventId,
 	formatEventTitleWithAttendees,
@@ -24,7 +24,7 @@ const baseEvent = (overrides: Partial<ScheduleEvent> = {}): ScheduleEvent =>
 		createdAt: new Date("2026-01-02T08:00:00"),
 		updatedAt: new Date("2026-01-02T08:00:00"),
 		...overrides,
-	} as ScheduleEvent);
+	}) as ScheduleEvent;
 
 describe("transformHelpers", () => {
 	it("parses attendee names from JSON and legacy strings", () => {
@@ -109,7 +109,13 @@ describe("transformHelpers", () => {
 		];
 
 		const events = transformBookingsToEvents(availability, [
-			{ id: "p1", name: "Alice", priority: 1 },
+			{
+				id: "p1",
+				name: "Alice",
+				priority: 1,
+				department: "Dept A",
+				email: "alice@example.com",
+			},
 		]);
 		expect(events).toHaveLength(1);
 		expect(events[0]?.title).toBe("Standup (Alice)");

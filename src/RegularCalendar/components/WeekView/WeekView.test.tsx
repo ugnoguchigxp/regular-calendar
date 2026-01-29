@@ -247,9 +247,9 @@ describe("WeekView", () => {
 				onEventClick={onEventClick}
 				components={{
 					EventCard: ({ event, onClick }) => (
-						<span role="button" tabIndex={0} onClick={onClick}>
+						<button type="button" onClick={onClick}>
 							Custom {event.title}
-						</span>
+						</button>
 					),
 				}}
 			/>,

@@ -99,7 +99,10 @@ describe("DateDisplay", () => {
 	});
 
 	it("renders secondary calendar when enabled", () => {
-		document.documentElement.setAttribute("data-secondary-calendar", "buddhist");
+		document.documentElement.setAttribute(
+			"data-secondary-calendar",
+			"buddhist",
+		);
 		const { container } = render(
 			<DateDisplay
 				date={new Date("2025-01-01")}
@@ -144,6 +147,7 @@ describe("DateDisplay", () => {
 
 	it("falls back when format is not recognized", () => {
 		const { container } = render(
+			// biome-ignore lint/suspicious/noExplicitAny: Testing invalid props
 			<DateDisplay date={new Date("2025-01-15")} format={"unknown" as any} />,
 		);
 		expect(container.textContent).toMatch(/2025/);

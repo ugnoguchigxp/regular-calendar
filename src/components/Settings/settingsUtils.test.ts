@@ -24,6 +24,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -52,6 +56,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -80,6 +88,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -101,6 +113,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -122,6 +138,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -143,6 +163,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -165,6 +189,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -210,6 +238,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		applyThemeSettings(settings, mockElement);
@@ -255,6 +287,10 @@ describe("settingsUtils", () => {
 			timeZone: "Asia/Tokyo",
 			paginationEnabled: false,
 			paginationPageSize: 8,
+			calendarOrientation: "horizontal",
+			facilityOrientation: "horizontal",
+			calendarSlotInterval: 30,
+			facilitySlotInterval: 60,
 		};
 
 		const originalSetProperty = document.documentElement.style.setProperty;

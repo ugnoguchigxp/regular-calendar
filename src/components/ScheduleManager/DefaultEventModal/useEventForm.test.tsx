@@ -6,6 +6,7 @@ import type {
 	ScheduleEvent,
 } from "../../../FacilitySchedule/FacilitySchedule.schema";
 import {
+	type EventFormValues,
 	prepareEventFormData,
 	useAvailableResources,
 	useConflictCheck,
@@ -87,7 +88,7 @@ describe("useEventForm helpers", () => {
 		};
 
 		const result = prepareEventFormData(
-			data as any,
+			data as unknown as EventFormValues,
 			undefined,
 			"p1",
 			[{ name: "customField", label: "Custom", type: "text" }],
@@ -122,9 +123,9 @@ describe("useEventForm helpers", () => {
 			useResourceDisplayNames(resources, groups),
 		);
 		expect(namesResult.current.get("r1")).toBe("Room 1 (Group A)");
-		expect(useAvailableResources(resources, [], new Date(), new Date())).toEqual(
-			resources,
-		);
+		expect(
+			useAvailableResources(resources, [], new Date(), new Date()),
+		).toEqual(resources);
 	});
 
 	it("returns null conflict for invalid date and handles bad attendee JSON", () => {
@@ -167,13 +168,13 @@ describe("useEventForm helpers", () => {
 		};
 
 		const result = prepareEventFormData(
-			data as any,
+			data as unknown as EventFormValues,
 			undefined,
 			"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
 			[],
 		);
 
-		const attendees = JSON.parse(result.attendee);
+		const attendees = JSON.parse(result.attendee as string);
 		expect(attendees[0]?.name).toBe("John Doe");
 	});
 });
