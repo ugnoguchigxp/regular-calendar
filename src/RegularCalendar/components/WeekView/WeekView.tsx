@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppTranslation } from "@/utils/i18n";
 import {
+	DEFAULT_TIME_ZONE,
 	DEFAULT_VIEW_HOURS,
 	TIME_SLOT_HEIGHT,
 	TIME_SLOT_WIDTH,
@@ -53,16 +54,21 @@ export function WeekView({
 	components,
 }: WeekViewProps) {
 	const { t } = useAppTranslation();
-	const timeInterval = settings.slotInterval || settings.defaultDuration || 60;
-	const startHour = Number(
-		(settings.startTime || settings.businessHoursStart)?.split(":")[0] ||
-			DEFAULT_VIEW_HOURS.start,
-	);
-	const endHour = Number(
-		(settings.endTime || settings.businessHoursEnd)?.split(":")[0] ||
-			DEFAULT_VIEW_HOURS.end,
-	);
+	const timeInterval = settings.slotInterval ?? settings.defaultDuration ?? 60;
+	const startHourStr = (
+		settings.startTime || settings.businessHoursStart
+	)?.split(":")[0];
+	const endHourStr = (settings.endTime || settings.businessHoursEnd)?.split(
+		":",
+	)[0];
+	const startHour =
+		startHourStr !== undefined
+			? Number(startHourStr)
+			: DEFAULT_VIEW_HOURS.start;
+	const endHour =
+		endHourStr !== undefined ? Number(endHourStr) : DEFAULT_VIEW_HOURS.end;
 	const weekStart = settings.weekStartsOn ?? 1;
+	const timeZone = settings.timeZone || DEFAULT_TIME_ZONE;
 
 	const weekDates = useMemo(
 		() => getWeekDates(currentDate, weekStart),
@@ -136,18 +142,11 @@ export function WeekView({
 					dayEvents,
 					timeInterval,
 					startHour,
-					settings.timeZone,
+					timeZone,
 				),
 			};
 		});
-	}, [
-		weekDates,
-		timedEvents,
-		timeInterval,
-		startHour,
-		settings.timeZone,
-		endHour,
-	]);
+	}, [weekDates, timedEvents, timeInterval, startHour, timeZone, endHour]);
 
 	const orientation = settings.orientation || "horizontal";
 	const isVertical = orientation === "vertical";
@@ -217,13 +216,15 @@ export function WeekView({
 									>
 										<div className="flex flex-col gap-[var(--ui-space-0-5)]">
 											{dayAllDayEvents.map((event) => (
-												<button
+												// biome-ignore lint/a11y/useSemanticElements: Used div to avoid nested button error when custom EventCard contains a button
+												<div
 													key={event.id}
-													type="button"
+													role="button"
+													tabIndex={0}
 													className={`
                                                 text-[9px] px-[var(--ui-space-1)] py-[var(--ui-space-0-5)] rounded w-full text-left truncate leading-tight
                                                 bg-primary text-primary-foreground
-                                                hover:brightness-110 transition-colors
+                                                hover:brightness-110 transition-colors cursor-pointer
                                             `}
 													style={
 														event.color ? { backgroundColor: event.color } : {}
@@ -231,6 +232,13 @@ export function WeekView({
 													onClick={(e) => {
 														e.stopPropagation();
 														onEventClick?.(event);
+													}}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															e.stopPropagation();
+															onEventClick?.(event);
+														}
 													}}
 												>
 													{components?.EventCard ? (
@@ -243,7 +251,7 @@ export function WeekView({
 													) : (
 														event.title
 													)}
-												</button>
+												</div>
 											))}
 										</div>
 									</div>
@@ -293,7 +301,7 @@ export function WeekView({
 												startHour={startHour}
 												endHour={endHour}
 												relative={true}
-												timeZone={settings.timeZone}
+												timeZone={timeZone}
 											/>
 
 											{timeSlots.map((timeSlot) => (

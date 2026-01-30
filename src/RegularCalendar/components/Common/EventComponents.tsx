@@ -157,12 +157,14 @@ export const EventItem: React.FC<EventItemProps> = ({
 			};
 
 	return (
-		<button
+		// biome-ignore lint/a11y/useSemanticElements: Used div to avoid nested button error when custom EventCard contains a button
+		<div
 			ref={setNodeRef}
 			{...listeners}
 			{...attributes}
+			role="button"
+			tabIndex={0}
 			onClick={handleClick}
-			type="button"
 			onKeyDown={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
 					e.preventDefault();
@@ -203,7 +205,7 @@ export const EventItem: React.FC<EventItemProps> = ({
 					)}
 				</>
 			)}
-		</button>
+		</div>
 	);
 };
 

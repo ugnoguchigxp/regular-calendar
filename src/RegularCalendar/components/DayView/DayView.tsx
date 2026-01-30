@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DateDisplay } from "@/components/ui/DateDisplay";
 import { useAppTranslation } from "@/utils/i18n";
 import {
+	DEFAULT_TIME_ZONE,
 	DEFAULT_VIEW_HOURS,
 	TIME_SLOT_HEIGHT,
 	TIME_SLOT_WIDTH,
@@ -93,15 +94,20 @@ export function DayView({
 	components,
 }: DayViewProps) {
 	const { t } = useAppTranslation();
-	const timeInterval = settings.slotInterval || settings.defaultDuration || 60;
-	const startHour = Number(
-		(settings.startTime || settings.businessHoursStart)?.split(":")[0] ||
-			DEFAULT_VIEW_HOURS.start,
-	);
-	const endHour = Number(
-		(settings.endTime || settings.businessHoursEnd)?.split(":")[0] ||
-			DEFAULT_VIEW_HOURS.end,
-	);
+	const timeInterval = settings.slotInterval ?? settings.defaultDuration ?? 60;
+	const startHourStr = (
+		settings.startTime || settings.businessHoursStart
+	)?.split(":")[0];
+	const endHourStr = (settings.endTime || settings.businessHoursEnd)?.split(
+		":",
+	)[0];
+	const startHour =
+		startHourStr !== undefined
+			? Number(startHourStr)
+			: DEFAULT_VIEW_HOURS.start;
+	const endHour =
+		endHourStr !== undefined ? Number(endHourStr) : DEFAULT_VIEW_HOURS.end;
+	const timeZone = settings.timeZone || DEFAULT_TIME_ZONE;
 
 	const timeSlots = useMemo(
 		() => generateTimeSlots(timeInterval, startHour, endHour),
@@ -131,10 +137,10 @@ export function DayView({
 					event,
 					timeInterval,
 					startHour,
-					settings.timeZone,
+					timeZone,
 				),
 			})),
-		[timeEvents, timeInterval, startHour, settings.timeZone],
+		[timeEvents, timeInterval, startHour, timeZone],
 	);
 
 	const today = new Date();
@@ -198,13 +204,15 @@ export function DayView({
 							<div className="flex-1 p-[var(--ui-space-0-5)] min-w-[var(--ui-space-0)]">
 								<div className="flex flex-col gap-[var(--ui-space-0-5)]">
 									{allDayEvents.map((event) => (
-										<button
+										// biome-ignore lint/a11y/useSemanticElements: Used div to avoid nested button error when custom EventCard contains a button
+										<div
 											key={event.id}
-											type="button"
+											role="button"
+											tabIndex={0}
 											className={`
                                         text-[9px] px-[var(--ui-space-1)] py-[var(--ui-space-0-5)] rounded w-full text-left truncate leading-tight
                                         bg-primary text-primary-foreground
-                                        hover:brightness-110 transition-colors
+                                        hover:brightness-110 transition-colors cursor-pointer
                                     `}
 											style={
 												event.color ? { backgroundColor: event.color } : {}
@@ -212,6 +220,13 @@ export function DayView({
 											onClick={(e) => {
 												e.stopPropagation();
 												onEventClick?.(event);
+											}}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													e.stopPropagation();
+													onEventClick?.(event);
+												}
 											}}
 										>
 											{components?.EventCard ? (
@@ -224,7 +239,7 @@ export function DayView({
 											) : (
 												event.title
 											)}
-										</button>
+										</div>
 									))}
 								</div>
 							</div>
@@ -260,7 +275,7 @@ export function DayView({
 									startHour={startHour}
 									endHour={endHour}
 									relative={true}
-									timeZone={settings.timeZone}
+									timeZone={timeZone}
 								/>
 
 								{/* Slots Background */}

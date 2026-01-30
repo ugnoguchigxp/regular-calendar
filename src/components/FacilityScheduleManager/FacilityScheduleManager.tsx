@@ -284,7 +284,10 @@ export function FacilityScheduleManager({
 				? `${settings.businessHoursEnd.toString().padStart(2, "0")}:00`
 				: apiSettings.endTime,
 		orientation: settings.facilityOrientation as CalendarOrientation,
-		slotInterval: (settings.facilitySlotInterval as number) || 60,
+		slotInterval:
+			(settings.facilitySlotInterval as number) ??
+			apiSettings.slotInterval ??
+			60,
 	};
 
 	// Determine effective pagination options
@@ -299,7 +302,7 @@ export function FacilityScheduleManager({
 			pagination?.pageSize ??
 			(settings.paginationPageSize as number) ??
 			apiSettings.paginationPageSize ??
-			8,
+			10, // Increased default to 10
 	};
 
 	return (

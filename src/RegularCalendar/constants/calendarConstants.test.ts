@@ -54,11 +54,11 @@ describe("RegularCalendar Calendar Constants", () => {
 
 	describe("DEFAULT_VIEW_HOURS", () => {
 		it("has correct start hour", () => {
-			expect(DEFAULT_VIEW_HOURS.start).toBe(8);
+			expect(DEFAULT_VIEW_HOURS.start).toBe(0);
 		});
 
 		it("has correct end hour", () => {
-			expect(DEFAULT_VIEW_HOURS.end).toBe(20);
+			expect(DEFAULT_VIEW_HOURS.end).toBe(24);
 		});
 	});
 

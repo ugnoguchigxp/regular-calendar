@@ -2,7 +2,11 @@
  * Standard Calendar Helpers
  */
 
-import { TIME_SLOT_HEIGHT } from "../constants/calendarConstants";
+import {
+	DEFAULT_TIME_ZONE,
+	DEFAULT_VIEW_HOURS,
+	TIME_SLOT_HEIGHT,
+} from "../constants/calendarConstants";
 import type { ScheduleEvent } from "../RegularCalendar.schema";
 
 /**
@@ -41,8 +45,8 @@ export const getWeekDates = (date: Date, weekStartsOn: 0 | 1): Date[] => {
  */
 export const generateTimeSlots = (
 	interval: number, // minutes
-	startHour = 8,
-	endHour = 20,
+	startHour: number = DEFAULT_VIEW_HOURS.start,
+	endHour: number = DEFAULT_VIEW_HOURS.end,
 ): string[] => {
 	const slots: string[] = [];
 	for (let hour = startHour; hour < endHour; hour++) {
@@ -59,8 +63,8 @@ export const generateTimeSlots = (
  */
 export const getCurrentTimePosition = (
 	interval = 30,
-	startHour = 8,
-	timeZone = "Asia/Tokyo",
+	startHour: number = DEFAULT_VIEW_HOURS.start,
+	timeZone = DEFAULT_TIME_ZONE,
 ): number => {
 	const now = new Date();
 	const { hour, minute } = getTimeInTimeZone(now, timeZone);
@@ -76,9 +80,9 @@ export const getCurrentTimePosition = (
 };
 
 export const isCurrentTimeInRange = (
-	startHour = 8,
-	endHour = 20,
-	timeZone = "Asia/Tokyo",
+	startHour: number = DEFAULT_VIEW_HOURS.start,
+	endHour: number = DEFAULT_VIEW_HOURS.end,
+	timeZone = DEFAULT_TIME_ZONE,
 ): boolean => {
 	const now = new Date();
 	const { hour } = getTimeInTimeZone(now, timeZone);
@@ -88,8 +92,8 @@ export const isCurrentTimeInRange = (
 export const getEventsForDate = (
 	events: ScheduleEvent[],
 	date: Date,
-	startHour = 8,
-	endHour = 20,
+	startHour: number = DEFAULT_VIEW_HOURS.start,
+	endHour: number = DEFAULT_VIEW_HOURS.end,
 ): ScheduleEvent[] => {
 	const dayStart = new Date(date);
 	dayStart.setHours(0, 0, 0, 0);
@@ -170,7 +174,7 @@ export const getMonthCalendarGrid = (
  */
 export const getTimeInTimeZone = (
 	date: Date,
-	timeZone: string = "Asia/Tokyo",
+	timeZone: string = DEFAULT_TIME_ZONE,
 ): { hour: number; minute: number } => {
 	try {
 		const formatter = new Intl.DateTimeFormat("en-US", {
@@ -204,8 +208,8 @@ export const getTimeInTimeZone = (
 export const calculateEventPosition = (
 	event: ScheduleEvent,
 	timeInterval = 30,
-	startHour = 8,
-	timeZone = "Asia/Tokyo",
+	startHour: number = DEFAULT_VIEW_HOURS.start,
+	timeZone = DEFAULT_TIME_ZONE,
 ): { top: number; height: number } => {
 	const startTime = event.startDate;
 	const endTime = event.endDate;
@@ -288,7 +292,7 @@ export const calculateEventsWithLayout = (
 	events: ScheduleEvent[],
 	timeInterval: number,
 	startHour: number,
-	timeZone: string = "Asia/Tokyo",
+	timeZone: string = DEFAULT_TIME_ZONE,
 ): EventWithLayout[] => {
 	if (events.length === 0) return [];
 

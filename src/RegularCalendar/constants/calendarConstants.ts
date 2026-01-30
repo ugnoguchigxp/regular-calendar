@@ -44,9 +44,11 @@ export const CALENDAR_COLORS = {
 
 // Default Settings
 export const DEFAULT_VIEW_HOURS = {
-	start: 8,
-	end: 20,
+	start: 0,
+	end: 24,
 } as const;
+
+export const DEFAULT_TIME_ZONE = "Asia/Tokyo";
 
 // Time Constants
 export const TIME_CONSTANTS = {

@@ -3,6 +3,7 @@
  */
 
 import React from "react";
+import { DEFAULT_TIME_ZONE } from "../../constants/calendarConstants";
 import {
 	getCurrentTimePosition,
 	isCurrentTimeInRange,
@@ -32,7 +33,7 @@ export const CurrentTimeLine: React.FC<CurrentTimeLineProps> = ({
 	startHour,
 	endHour,
 	relative = false,
-	timeZone = "Asia/Tokyo",
+	timeZone = DEFAULT_TIME_ZONE,
 }) => {
 	// State to force re-render/update position
 	const [now, setNow] = React.useState(new Date());

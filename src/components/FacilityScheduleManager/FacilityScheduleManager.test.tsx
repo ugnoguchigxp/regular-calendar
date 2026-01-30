@@ -307,7 +307,7 @@ describe("FacilityScheduleManager", () => {
 					weekStartsOn: undefined as unknown as 0,
 					businessHoursStart: undefined as unknown as string,
 					businessHoursEnd: undefined as unknown as string,
-					facilitySlotInterval: 0,
+					facilitySlotInterval: undefined as unknown as number,
 				}}
 			/>,
 		);
