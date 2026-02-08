@@ -7,7 +7,7 @@ export function ShiftSelectorHeader({
 	onToday,
 }: ShiftSelectorHeaderProps) {
 	return (
-		<div className="px-[var(--ui-space-3)] py-[var(--ui-space-2)] flex items-center gap-[var(--ui-space-2)]">
+		<div className="flex items-center gap-[var(--ui-space-2)]">
 			<CalendarDateNavigator
 				currentDate={monthCursor}
 				onNavigate={onNavigate}

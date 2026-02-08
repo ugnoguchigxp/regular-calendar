@@ -95,6 +95,7 @@ const EN_MESSAGES: Record<string, string> = {
 	keypad_error_value_required: "Please enter a value",
 	keypad_error_decimal_end: "Value cannot end with a decimal point",
 	keypad_error_hyphen_end: "Value cannot end with a hyphen",
+	personnel_all_professions: "All Professions",
 };
 
 export function useAppTranslation() {

@@ -1,3 +1,4 @@
+import { ChevronDown, Filter } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useAppTranslation } from "@/utils/i18n";
 import { PersonnelContextMenu } from "./PersonnelContextMenu";
@@ -10,6 +11,7 @@ interface PersonnelPanelProps {
 	onPriorityChange: (id: string, priority: number) => void;
 	className?: string;
 	colorMap?: Map<string, string>;
+	filterType?: "button" | "select";
 }
 
 export function PersonnelPanel({
@@ -19,6 +21,7 @@ export function PersonnelPanel({
 	onPriorityChange,
 	className = "",
 	colorMap = new Map(),
+	filterType = "select",
 }: PersonnelPanelProps) {
 	const { t } = useAppTranslation();
 	const [searchQuery, setSearchQuery] = useState("");
@@ -146,11 +149,9 @@ export function PersonnelPanel({
 	};
 
 	return (
-		<div
-			className={`flex flex-col h-full bg-background border-r border-border ${className}`}
-		>
+		<div className={`flex flex-col h-full bg-background ${className}`}>
 			{/* Header */}
-			<div className="p-[var(--ui-space-2)] border-b border-border space-y-[var(--ui-space-2)]">
+			<div className="flex flex-col gap-[var(--ui-space-2)] px-[var(--ui-space-4)] border-b border-border">
 				<div className="text-sm font-semibold">{t("personnel_list_title")}</div>
 
 				{/* Search Input with Department Suggestions */}
@@ -242,31 +243,56 @@ export function PersonnelPanel({
 					)}
 				</div>
 
-				{availableDepartments.length > 0 && (
-					<div className="flex flex-wrap gap-[var(--ui-space-1)] max-h-[var(--ui-space-20)] overflow-auto">
-						{availableDepartments.map((dept) => {
-							const active = selectedDepartments.has(dept);
-							return (
-								<button
-									key={dept}
-									type="button"
-									className={`text-xs px-[var(--ui-space-2)] py-[var(--ui-space-1)] rounded border cursor-pointer ${
-										active
-											? "bg-primary text-primary-foreground border-primary"
-											: "bg-background border-border hover:bg-muted/40"
-									}`}
-									onClick={() => handleDepartmentToggle(dept)}
-								>
-									{dept}
-								</button>
-							);
-						})}
-					</div>
-				)}
+				{availableDepartments.length > 0 &&
+					(filterType === "select" ? (
+						<div className="relative">
+							<Filter className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+							<select
+								value={Array.from(selectedDepartments)[0] || ""}
+								onChange={(e) => {
+									const val = e.target.value;
+									const next = new Set<string>();
+									if (val) {
+										next.add(val);
+									}
+									setSelectedDepartments(next);
+								}}
+								className="w-full pl-7 pr-8 py-1.5 text-sm border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+							>
+								<option value="">{t("personnel_all_professions")}</option>
+								{availableDepartments.map((dept) => (
+									<option key={dept} value={dept}>
+										{dept}
+									</option>
+								))}
+							</select>
+							<ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+						</div>
+					) : (
+						<div className="flex flex-wrap gap-[var(--ui-space-1)] max-h-[var(--ui-space-20)] overflow-auto">
+							{availableDepartments.map((dept) => {
+								const active = selectedDepartments.has(dept);
+								return (
+									<button
+										key={dept}
+										type="button"
+										className={`text-xs px-[var(--ui-space-2)] py-[var(--ui-space-1)] rounded border cursor-pointer ${
+											active
+												? "bg-primary text-primary-foreground border-primary"
+												: "bg-background border-border hover:bg-muted/40"
+										}`}
+										onClick={() => handleDepartmentToggle(dept)}
+									>
+										{dept}
+									</button>
+								);
+							})}
+						</div>
+					))}
 			</div>
 
 			{/* List */}
-			<div className="flex-1 overflow-y-auto p-[var(--ui-space-1)]">
+			<div className="flex-1 overflow-y-auto px-[var(--ui-space-2)] py-[var(--ui-space-2)]">
 				{groupedPersonnel.high.length > 0 && (
 					<div className="mb-[var(--ui-space-2)]">
 						<div className="px-[var(--ui-space-2)] py-[var(--ui-space-1)] text-xs font-semibold text-muted-foreground">
@@ -301,16 +327,6 @@ export function PersonnelPanel({
 						{t("personnel_no_results")}
 					</div>
 				)}
-			</div>
-
-			{/* Footer - Selection count */}
-			<div className="p-[var(--ui-space-2)] border-t border-border text-xs text-muted-foreground">
-				{selectedIds.length > 0
-					? t("personnel_selected_count", {
-							count: selectedIds.length,
-							defaultValue: `${selectedIds.length} selected`,
-						})
-					: t("personnel_context_hint")}
 			</div>
 
 			{/* Context Menu */}

@@ -15,7 +15,7 @@ export function ShiftSelectorFilterBar({
 	onToggleEraseMode,
 }: ShiftSelectorFilterBarProps) {
 	return (
-		<div className="border-t border-border px-[var(--ui-space-3)] py-[var(--ui-space-2)] flex flex-wrap items-center gap-[var(--ui-space-2)]">
+		<div className="flex flex-wrap items-center gap-[var(--ui-space-2)]">
 			{SLOT_ORDER.map((slot) => {
 				const checked = selectedSlots.has(slot);
 				return (

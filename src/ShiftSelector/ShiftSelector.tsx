@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Personnel } from "../PersonnelPanel/PersonnelPanel.schema";
 import { navigateDate } from "../utils/dateNavigation";
 import { ShiftSelectorFilterBar } from "./components/ShiftSelectorFilterBar";
 import { ShiftSelectorHeader } from "./components/ShiftSelectorHeader";
 import { ShiftSelectorMonthGrid } from "./components/ShiftSelectorMonthGrid";
-import { ShiftSelectorStaffPanel } from "./components/ShiftSelectorStaffPanel";
 import { SLOT_ORDER, SLOT_ORDER_INDEX } from "./ShiftSelector.constants";
 import type {
 	ShiftAssignment,
@@ -16,10 +14,13 @@ import type {
 	ShiftDayCellView,
 	ShiftSelectorComponents,
 } from "./ShiftSelector.types";
+import type { ShiftAssignmentDiff } from "./ShiftSelector.utils";
 import {
 	areAssignmentsEqual,
+	calculateAssignmentDiff,
 	getMonthGridDates,
 	getWeekdayLabels,
+	hasDiff,
 	mapFromAssignments,
 	mapToAssignments,
 	normalizeSlots,
@@ -33,18 +34,23 @@ const EMPTY_ASSIGNMENTS: ShiftAssignment[] = [];
 
 export interface ShiftSelectorProps {
 	staff: ShiftStaff[];
+	selectedStaffIds?: string[];
 	targetMonth?: Date;
 	initialAssignments?: ShiftAssignment[];
 	onChange?: (assignments: ShiftAssignment[]) => void;
+	/** Called when user clicks confirm button with diff data */
+	onConfirm?: (diff: ShiftAssignmentDiff) => void;
 	className?: string;
 	components?: ShiftSelectorComponents;
 }
 
 export function ShiftSelector({
 	staff,
+	selectedStaffIds = [],
 	targetMonth = new Date(),
 	initialAssignments = EMPTY_ASSIGNMENTS,
 	onChange,
+	onConfirm,
 	className = "",
 	components,
 }: ShiftSelectorProps) {
@@ -54,7 +60,6 @@ export function ShiftSelector({
 	const [assignmentMap, setAssignmentMap] = useState<
 		Map<string, ShiftAssignment>
 	>(() => mapFromAssignments(initialAssignments));
-	const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([]);
 	const [selectedSlots, setSelectedSlots] = useState<Set<ShiftSlot>>(
 		new Set(["morning"]),
 	);
@@ -84,17 +89,6 @@ export function ShiftSelector({
 		}
 		onChange(allAssignments);
 	}, [allAssignments, onChange]);
-
-	const personnelList = useMemo<Personnel[]>(() => {
-		return staff.map((member) => ({
-			id: member.id,
-			name: member.name,
-			department:
-				member.department ?? member.attributes?.department ?? "未設定",
-			email: `${member.id}@shift.local`,
-			priority: Number(member.attributes?.priority ?? 0) || 0,
-		}));
-	}, [staff]);
 
 	const monthDates = useMemo(
 		() => getMonthGridDates(monthCursor),
@@ -226,29 +220,21 @@ export function ShiftSelector({
 	const HeaderComponent = components?.Header ?? ShiftSelectorHeader;
 	const FilterBarComponent = components?.FilterBar ?? ShiftSelectorFilterBar;
 	const MonthGridComponent = components?.MonthGrid ?? ShiftSelectorMonthGrid;
-	const StaffPanelComponent = components?.StaffPanel ?? ShiftSelectorStaffPanel;
 
 	return (
-		<div className={`h-full flex gap-[var(--ui-space-3)] ${className}`}>
-			<aside className="w-[256px] min-w-[180px] max-w-[400px] h-full">
-				<StaffPanelComponent
-					personnel={personnelList}
-					selectedIds={selectedStaffIds}
-					onSelectionChange={setSelectedStaffIds}
+		<div className={`flex flex-col h-full bg-background ${className}`}>
+			{/* Header - same structure as RegularCalendar */}
+			<header className="border-b border-border px-[var(--ui-space-4)] py-[var(--ui-space-3)] flex items-center justify-between gap-[var(--ui-space-4)]">
+				<HeaderComponent
+					monthCursor={monthCursor}
+					onNavigate={(direction) =>
+						setMonthCursor((prev) =>
+							toMonthStart(navigateDate(prev, "month", direction)),
+						)
+					}
+					onToday={() => setMonthCursor(toMonthStart(new Date()))}
 				/>
-			</aside>
-
-			<section className="flex-1 border border-border rounded-md bg-background overflow-auto">
-				<div className="sticky top-0 z-20 bg-background border-b border-border">
-					<HeaderComponent
-						monthCursor={monthCursor}
-						onNavigate={(direction) =>
-							setMonthCursor((prev) =>
-								toMonthStart(navigateDate(prev, "month", direction)),
-							)
-						}
-						onToday={() => setMonthCursor(toMonthStart(new Date()))}
-					/>
+				<div className="flex items-center gap-[var(--ui-space-3)]">
 					<FilterBarComponent
 						selectedSlots={selectedSlots}
 						visibleSlots={visibleSlots}
@@ -257,8 +243,27 @@ export function ShiftSelector({
 						onToggleVisibleSlot={toggleVisibleSlot}
 						onToggleEraseMode={() => setEraseMode((prev) => !prev)}
 					/>
+					{onConfirm && (
+						<button
+							type="button"
+							onClick={() => {
+								const diff = calculateAssignmentDiff(
+									initialAssignments,
+									allAssignments,
+								);
+								onConfirm(diff);
+							}}
+							disabled={!hasDiff(initialAssignments, allAssignments)}
+							className="px-[var(--ui-space-4)] py-[var(--ui-space-2)] text-sm font-medium rounded border border-primary bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							確定
+						</button>
+					)}
 				</div>
+			</header>
 
+			{/* Content */}
+			<div className="flex-1 overflow-auto">
 				<MonthGridComponent
 					weekLabels={weekLabels}
 					dayCells={dayCells}
@@ -267,7 +272,7 @@ export function ShiftSelector({
 					onClearDateAssignments={clearDateAssignments}
 					onDeleteAssignment={deleteAssignment}
 				/>
-			</section>
+			</div>
 		</div>
 	);
 }

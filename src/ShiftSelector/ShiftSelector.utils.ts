@@ -112,3 +112,71 @@ export function getWeekdayLabels(): string[] {
 		);
 	});
 }
+
+/**
+ * Diff result for shift assignments
+ */
+export interface ShiftAssignmentDiff {
+	/** New assignments (not in original) */
+	added: ShiftAssignment[];
+	/** Updated assignments (same staffId+date, different slots) */
+	updated: ShiftAssignment[];
+	/** Deleted assignments (in original but not in current) */
+	deleted: Array<{ staffId: string; date: string }>;
+}
+
+/**
+ * Calculate diff between original and current assignments
+ */
+export function calculateAssignmentDiff(
+	original: ShiftAssignment[],
+	current: ShiftAssignment[],
+): ShiftAssignmentDiff {
+	const originalMap = mapFromAssignments(original);
+	const currentMap = mapFromAssignments(current);
+
+	const added: ShiftAssignment[] = [];
+	const updated: ShiftAssignment[] = [];
+	const deleted: Array<{ staffId: string; date: string }> = [];
+
+	// Check for added and updated
+	for (const [key, currentAssignment] of currentMap) {
+		const originalAssignment = originalMap.get(key);
+		if (!originalAssignment) {
+			// New assignment
+			added.push(currentAssignment);
+		} else {
+			// Check if slots changed
+			const currentSlots = currentAssignment.slots.join(",");
+			const originalSlots = originalAssignment.slots.join(",");
+			if (currentSlots !== originalSlots) {
+				updated.push(currentAssignment);
+			}
+		}
+	}
+
+	// Check for deleted
+	for (const [key, originalAssignment] of originalMap) {
+		if (!currentMap.has(key)) {
+			deleted.push({
+				staffId: originalAssignment.staffId,
+				date: originalAssignment.date,
+			});
+		}
+	}
+
+	return { added, updated, deleted };
+}
+
+/**
+ * Check if there are any changes between original and current assignments
+ */
+export function hasDiff(
+	original: ShiftAssignment[],
+	current: ShiftAssignment[],
+): boolean {
+	const diff = calculateAssignmentDiff(original, current);
+	return (
+		diff.added.length > 0 || diff.updated.length > 0 || diff.deleted.length > 0
+	);
+}

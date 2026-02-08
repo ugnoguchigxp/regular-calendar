@@ -162,7 +162,11 @@ function create24HourMockAssignments(
 	return result;
 }
 
-export function ConnectedShiftSelector() {
+interface ConnectedShiftSelectorProps {
+	selectedStaffIds?: string[];
+}
+
+export function ConnectedShiftSelector({ selectedStaffIds = [] }: ConnectedShiftSelectorProps) {
 	const { personnel, loading } = useScheduleContext();
 	const monthStart = useMemo(() => toMonthStart(new Date()), []);
 
@@ -179,10 +183,15 @@ export function ConnectedShiftSelector() {
 		}));
 	}, [personnel]);
 
+	// savedAssignments: represents what's "saved" (initial or after confirm)
+	const [savedAssignments, setSavedAssignments] = useState<ShiftAssignment[]>([]);
+	// assignments: current working state (may have unsaved changes)
 	const [assignments, setAssignments] = useState<ShiftAssignment[]>([]);
+
+	// Initialize both savedAssignments and assignments when staff changes
 	useEffect(() => {
 		const staffIdSet = new Set(staff.map((member) => member.id));
-		setAssignments((prev) => {
+		const updateFn = (prev: ShiftAssignment[]) => {
 			const filtered = prev.filter((assignment) =>
 				staffIdSet.has(assignment.staffId),
 			);
@@ -196,11 +205,13 @@ export function ConnectedShiftSelector() {
 				return prev;
 			}
 			return create24HourMockAssignments(staff, monthStart);
-		});
+		};
+		setSavedAssignments(updateFn);
+		setAssignments(updateFn);
 	}, [staff, monthStart]);
 
 	return (
-		<div className="h-full overflow-auto p-[var(--ui-space-2)] bg-background">
+		<div className="h-full overflow-hidden bg-background">
 			{staff.length === 0 ? (
 				<div className="border border-border rounded-md bg-card p-[var(--ui-space-3)] text-sm text-muted-foreground">
 					{loading ? "読み込み中..." : "スタッフなし"}
@@ -208,9 +219,21 @@ export function ConnectedShiftSelector() {
 			) : (
 				<ShiftSelector
 					staff={staff}
+					selectedStaffIds={selectedStaffIds}
 					targetMonth={monthStart}
-					initialAssignments={assignments}
+					initialAssignments={savedAssignments}
 					onChange={setAssignments}
+					onConfirm={(diff) => {
+						// diff contains: added, updated, deleted
+						console.log("=== Shift Assignment Diff ===");
+						console.log("Added:", JSON.stringify(diff.added, null, 2));
+						console.log("Updated:", JSON.stringify(diff.updated, null, 2));
+						console.log("Deleted:", JSON.stringify(diff.deleted, null, 2));
+						// Here you would typically send to server:
+						// await api.saveShiftAssignments(diff);
+						// After successful save, update savedAssignments to current
+						setSavedAssignments([...assignments]);
+					}}
 				/>
 			)}
 		</div>

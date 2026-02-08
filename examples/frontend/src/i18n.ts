@@ -127,6 +127,7 @@ i18n
 					personnel_no_results: "No matching staff found",
 					personnel_all_departments: "All Departments",
 					personnel_context_hint: "Right-click to set priority",
+					personnel_all_professions: "All Professions",
 				},
 			},
 			ja: {
@@ -240,6 +241,7 @@ i18n
 					date_time_label: "予定日時",
 					date_picker_label: "日付を選択",
 					keypad_title_time: "時間を入力",
+					personnel_all_professions: "すべて",
 				},
 			},
 		},

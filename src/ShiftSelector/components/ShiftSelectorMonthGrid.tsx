@@ -15,7 +15,7 @@ export function ShiftSelectorMonthGrid({
 				{weekLabels.map((label) => (
 					<div
 						key={label}
-						className="px-[var(--ui-space-2)] py-[var(--ui-space-1)] text-xs font-medium text-muted-foreground border-r border-border last:border-r-0"
+						className="px-[var(--ui-space-4)] py-[var(--ui-space-2)] text-xs font-medium text-muted-foreground border-r border-border last:border-r-0"
 					>
 						{label}
 					</div>
@@ -25,7 +25,7 @@ export function ShiftSelectorMonthGrid({
 			<div className="grid grid-cols-7">
 				{dayCells.map((dayCell) => {
 					const isCellClickable = !eraseMode;
-					const cellClassName = `border-r border-b border-border last:border-r-0 p-[var(--ui-space-2)] min-h-[220px] flex flex-col gap-[var(--ui-space-1)] ${
+					const cellClassName = `border-r border-b border-border last:border-r-0 p-[var(--ui-space-2)] min-h-[80px] flex flex-col gap-[var(--ui-space-1)] ${
 						dayCell.inCurrentMonth
 							? "bg-background"
 							: "bg-muted/20 text-muted-foreground"

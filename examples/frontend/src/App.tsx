@@ -78,19 +78,19 @@ function AppContent() {
 		// When removing personnel, we don't fetch - just filter in coloredPersonnelEvents
 	}, [visiblePersonnelIds, fetchedPersonnelIds, fetchPersonnelEvents]);
 
-	// Create color map: "me" gets first color, then selected personnel
+	// Create color map: assign colors based on personnel array order (stable on load)
 	const personnelColorMap = useMemo(() => {
 		const map = new Map<string, string>();
 		// "Me" always gets the first color
 		map.set(MY_PERSONNEL_ID, getPersonnelColor(0));
-		// Other selected personnel get subsequent colors
-		selectedPersonnelIds.forEach((id, index) => {
-			if (id !== MY_PERSONNEL_ID) {
-				map.set(id, getPersonnelColor(index + 1));
+		// Other personnel get colors based on their index in the personnel list
+		personnel.forEach((p, index) => {
+			if (p.id !== MY_PERSONNEL_ID) {
+				map.set(p.id, getPersonnelColor(index + 1));
 			}
 		});
 		return map;
-	}, [selectedPersonnelIds]);
+	}, [personnel]);
 
 	// Filter and color personnel events based on visible personnel
 	const coloredPersonnelEvents = useMemo(() => {
@@ -197,7 +197,7 @@ function AppContent() {
 
 			<div className="flex-1 overflow-hidden flex">
 				{/* Left: PersonnelPanel - Desktop only, Resizable */}
-				{activeTab === "regular" && (
+				{(activeTab === "regular" || activeTab === "shift") && (
 					<ResizablePanel
 						defaultWidth={256}
 						minWidth={180}
@@ -221,7 +221,7 @@ function AppContent() {
 					{activeTab === "facility" ? (
 						<ConnectedFacilitySchedule settings={settings as any} />
 					) : activeTab === "shift" ? (
-						<ConnectedShiftSelector />
+						<ConnectedShiftSelector selectedStaffIds={selectedPersonnelIds} />
 					) : (
 						<ConnectedCalendar
 							settings={settings as any}

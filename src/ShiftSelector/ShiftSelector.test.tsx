@@ -1,64 +1,21 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useEffect } from "react";
 import type {
 	ShiftAssignment,
 	ShiftSelectorFilterBarProps,
 	ShiftSelectorHeaderProps,
 	ShiftSelectorMonthGridProps,
-	ShiftSelectorStaffPanelProps,
 	ShiftStaff,
 } from "./index";
 import { ShiftSelector } from "./ShiftSelector";
+import type { ShiftAssignmentDiff } from "./ShiftSelector.utils";
+import { calculateAssignmentDiff, hasDiff } from "./ShiftSelector.utils";
 
 const staff: ShiftStaff[] = [
 	{ id: "s1", name: "山田 NS", role: "NS", department: "看護" },
 	{ id: "s2", name: "佐藤 Dr", role: "Dr", department: "医師" },
 	{ id: "s3", name: "鈴木 Tech", role: "Tech", department: "技士" },
 ];
-
-function TestStaffPanel({ onSelectionChange }: ShiftSelectorStaffPanelProps) {
-	return (
-		<div>
-			<button type="button" onClick={() => onSelectionChange(["s1"])}>
-				select-s1
-			</button>
-			<button type="button" onClick={() => onSelectionChange(["s1", "s2"])}>
-				select-s1-s2
-			</button>
-		</div>
-	);
-}
-
-function AutoSelectS1Panel({
-	selectedIds,
-	onSelectionChange,
-}: ShiftSelectorStaffPanelProps) {
-	useEffect(() => {
-		if (selectedIds.length !== 1 || selectedIds[0] !== "s1") {
-			onSelectionChange(["s1"]);
-		}
-	}, [selectedIds, onSelectionChange]);
-
-	return <div data-testid="auto-select-s1">{selectedIds.join(",")}</div>;
-}
-
-function AutoSelectS1S2Panel({
-	selectedIds,
-	onSelectionChange,
-}: ShiftSelectorStaffPanelProps) {
-	useEffect(() => {
-		if (
-			selectedIds.length !== 2 ||
-			selectedIds[0] !== "s1" ||
-			selectedIds[1] !== "s2"
-		) {
-			onSelectionChange(["s1", "s2"]);
-		}
-	}, [selectedIds, onSelectionChange]);
-
-	return <div data-testid="auto-select-s1s2">{selectedIds.join(",")}</div>;
-}
 
 function TestMonthGrid({
 	dayCells,
@@ -112,18 +69,15 @@ describe("ShiftSelector", () => {
 		render(
 			<ShiftSelector
 				staff={staff}
+				selectedStaffIds={["s1", "s2"]}
 				targetMonth={new Date("2026-02-01T00:00:00")}
 				onChange={onChange}
 				components={{
-					StaffPanel: AutoSelectS1S2Panel,
 					MonthGrid: TestMonthGrid,
 				}}
 			/>,
 		);
 
-		await waitFor(() => {
-			expect(screen.getByTestId("auto-select-s1s2")).toHaveTextContent("s1,s2");
-		});
 		await user.click(screen.getByRole("button", { name: "assign-0210" }));
 
 		await waitFor(() => {
@@ -153,18 +107,15 @@ describe("ShiftSelector", () => {
 		render(
 			<ShiftSelector
 				staff={staff}
+				selectedStaffIds={["s1"]}
 				targetMonth={new Date("2026-02-01T00:00:00")}
 				onChange={onChange}
 				components={{
-					StaffPanel: AutoSelectS1Panel,
 					MonthGrid: TestMonthGrid,
 				}}
 			/>,
 		);
 
-		await waitFor(() => {
-			expect(screen.getByTestId("auto-select-s1")).toHaveTextContent("s1");
-		});
 		await user.click(screen.getAllByLabelText("午後")[0]);
 		await user.click(screen.getByRole("button", { name: "assign-0210" }));
 
@@ -207,7 +158,6 @@ describe("ShiftSelector", () => {
 				initialAssignments={initialAssignments}
 				components={{
 					MonthGrid: TestMonthGrid,
-					StaffPanel: TestStaffPanel,
 				}}
 			/>,
 		);
@@ -252,7 +202,6 @@ describe("ShiftSelector", () => {
 				]}
 				onChange={onChange}
 				components={{
-					StaffPanel: TestStaffPanel,
 					MonthGrid: TestMonthGrid,
 				}}
 			/>,
@@ -280,7 +229,7 @@ describe("ShiftSelector", () => {
 		});
 	});
 
-	it("accepts custom header / filter / month / staff components", () => {
+	it("accepts custom header / filter / month components", () => {
 		const Header = ({ onToday }: ShiftSelectorHeaderProps) => (
 			<button type="button" data-testid="custom-header" onClick={onToday}>
 				header
@@ -292,9 +241,6 @@ describe("ShiftSelector", () => {
 		const Month = ({ dayCells }: ShiftSelectorMonthGridProps) => (
 			<div data-testid="custom-month">{dayCells.length}</div>
 		);
-		const StaffPanel = ({ personnel }: ShiftSelectorStaffPanelProps) => (
-			<div data-testid="custom-staff">{personnel.length}</div>
-		);
 
 		render(
 			<ShiftSelector
@@ -304,7 +250,6 @@ describe("ShiftSelector", () => {
 					Header,
 					FilterBar: Filter,
 					MonthGrid: Month,
-					StaffPanel,
 				}}
 			/>,
 		);
@@ -312,6 +257,224 @@ describe("ShiftSelector", () => {
 		expect(screen.getByTestId("custom-header")).toBeInTheDocument();
 		expect(screen.getByTestId("custom-filter")).toBeInTheDocument();
 		expect(screen.getByTestId("custom-month")).toHaveTextContent("42");
-		expect(screen.getByTestId("custom-staff")).toHaveTextContent("3");
+	});
+
+	it("calls onConfirm with diff when confirm button is clicked", async () => {
+		const user = userEvent.setup();
+		const onConfirm = vi.fn();
+		const initialAssignments: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+
+		render(
+			<ShiftSelector
+				staff={staff}
+				selectedStaffIds={["s2"]}
+				targetMonth={new Date("2026-02-01T00:00:00")}
+				initialAssignments={initialAssignments}
+				onConfirm={onConfirm}
+				components={{
+					MonthGrid: TestMonthGrid,
+				}}
+			/>,
+		);
+
+		// Add a new assignment
+		await user.click(screen.getByRole("button", { name: "assign-0210" }));
+
+		// Click confirm button
+		await user.click(screen.getByRole("button", { name: "確定" }));
+
+		await waitFor(() => {
+			expect(onConfirm).toHaveBeenCalled();
+			const diff = onConfirm.mock.calls[0][0] as ShiftAssignmentDiff;
+			expect(diff.added).toHaveLength(1);
+			expect(diff.added[0]).toMatchObject({
+				staffId: "s2",
+				date: "2026-02-10",
+				slots: ["morning"],
+			});
+		});
+	});
+
+	it("disables confirm button when no changes", () => {
+		const onConfirm = vi.fn();
+		const initialAssignments: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+
+		render(
+			<ShiftSelector
+				staff={staff}
+				targetMonth={new Date("2026-02-01T00:00:00")}
+				initialAssignments={initialAssignments}
+				onConfirm={onConfirm}
+			/>,
+		);
+
+		const confirmButton = screen.getByRole("button", { name: "確定" });
+		expect(confirmButton).toBeDisabled();
+	});
+});
+
+describe("calculateAssignmentDiff", () => {
+	it("detects added assignments", () => {
+		const original: ShiftAssignment[] = [];
+		const current: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+
+		const diff = calculateAssignmentDiff(original, current);
+
+		expect(diff.added).toHaveLength(1);
+		expect(diff.added[0].staffId).toBe("s1");
+		expect(diff.updated).toHaveLength(0);
+		expect(diff.deleted).toHaveLength(0);
+	});
+
+	it("detects updated assignments", () => {
+		const original: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+		const current: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning", "afternoon"],
+				source: "manual",
+			},
+		];
+
+		const diff = calculateAssignmentDiff(original, current);
+
+		expect(diff.added).toHaveLength(0);
+		expect(diff.updated).toHaveLength(1);
+		expect(diff.updated[0].slots).toEqual(["morning", "afternoon"]);
+		expect(diff.deleted).toHaveLength(0);
+	});
+
+	it("detects deleted assignments", () => {
+		const original: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+		const current: ShiftAssignment[] = [];
+
+		const diff = calculateAssignmentDiff(original, current);
+
+		expect(diff.added).toHaveLength(0);
+		expect(diff.updated).toHaveLength(0);
+		expect(diff.deleted).toHaveLength(1);
+		expect(diff.deleted[0]).toEqual({ staffId: "s1", date: "2026-02-10" });
+	});
+
+	it("handles mixed changes", () => {
+		const original: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+			{
+				staffId: "s2",
+				date: "2026-02-10",
+				slots: ["afternoon"],
+				source: "manual",
+			},
+		];
+		const current: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning", "night"],
+				source: "manual",
+			},
+			{
+				staffId: "s3",
+				date: "2026-02-10",
+				slots: ["overnight"],
+				source: "manual",
+			},
+		];
+
+		const diff = calculateAssignmentDiff(original, current);
+
+		expect(diff.added).toHaveLength(1);
+		expect(diff.added[0].staffId).toBe("s3");
+		expect(diff.updated).toHaveLength(1);
+		expect(diff.updated[0].staffId).toBe("s1");
+		expect(diff.deleted).toHaveLength(1);
+		expect(diff.deleted[0].staffId).toBe("s2");
+	});
+
+	it("returns empty diff when no changes", () => {
+		const assignments: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+
+		const diff = calculateAssignmentDiff(assignments, assignments);
+
+		expect(diff.added).toHaveLength(0);
+		expect(diff.updated).toHaveLength(0);
+		expect(diff.deleted).toHaveLength(0);
+	});
+});
+
+describe("hasDiff", () => {
+	it("returns true when there are changes", () => {
+		const original: ShiftAssignment[] = [];
+		const current: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+
+		expect(hasDiff(original, current)).toBe(true);
+	});
+
+	it("returns false when no changes", () => {
+		const assignments: ShiftAssignment[] = [
+			{
+				staffId: "s1",
+				date: "2026-02-10",
+				slots: ["morning"],
+				source: "manual",
+			},
+		];
+
+		expect(hasDiff(assignments, assignments)).toBe(false);
 	});
 });

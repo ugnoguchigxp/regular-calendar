@@ -12,7 +12,8 @@ export function ShiftSelectorStaffPanel({
 			selectedIds={selectedIds}
 			onSelectionChange={onSelectionChange}
 			onPriorityChange={() => {}}
-			className="h-full rounded-md border border-border"
+			className="h-full"
+			filterType="select"
 		/>
 	);
 }

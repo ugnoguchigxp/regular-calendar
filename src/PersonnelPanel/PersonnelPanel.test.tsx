@@ -61,4 +61,59 @@ describe("PersonnelPanel", () => {
 
 		expect(onPriorityChange).toHaveBeenCalledWith("p2", 1);
 	});
+
+	it("filters by department using buttons (legacy mode)", async () => {
+		const user = userEvent.setup();
+		render(
+			<PersonnelPanel
+				personnel={personnel}
+				selectedIds={[]}
+				onSelectionChange={vi.fn()}
+				onPriorityChange={vi.fn()}
+				filterType="button"
+			/>,
+		);
+
+		// Check buttons are rendered
+		const salesBtn = screen.getByRole("button", { name: "Sales" });
+		const supportBtn = screen.getByRole("button", { name: "Support" });
+		expect(salesBtn).toBeInTheDocument();
+		expect(supportBtn).toBeInTheDocument();
+
+		// Filter by Sales
+		await user.click(salesBtn);
+		expect(screen.getByText("Alice")).toBeInTheDocument();
+		expect(screen.queryByText("Bob")).not.toBeInTheDocument();
+
+		// Toggle off
+		await user.click(salesBtn);
+		expect(screen.getByText("Alice")).toBeInTheDocument();
+		expect(screen.getByText("Bob")).toBeInTheDocument();
+	});
+
+	it("filters by department using select (new mode)", async () => {
+		const user = userEvent.setup();
+		render(
+			<PersonnelPanel
+				personnel={personnel}
+				selectedIds={[]}
+				onSelectionChange={vi.fn()}
+				onPriorityChange={vi.fn()}
+				filterType="select"
+			/>,
+		);
+
+		const select = screen.getByRole("combobox");
+		expect(select).toBeInTheDocument();
+
+		// Select Sales
+		await user.selectOptions(select, "Sales");
+		expect(screen.getByText("Alice")).toBeInTheDocument();
+		expect(screen.queryByText("Bob")).not.toBeInTheDocument();
+
+		// Select All Professions (empty value)
+		await user.selectOptions(select, "");
+		expect(screen.getByText("Alice")).toBeInTheDocument();
+		expect(screen.getByText("Bob")).toBeInTheDocument();
+	});
 });
