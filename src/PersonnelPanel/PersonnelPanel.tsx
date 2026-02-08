@@ -23,6 +23,9 @@ export function PersonnelPanel({
 	const { t } = useAppTranslation();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchFocused, setIsSearchFocused] = useState(false);
+	const [selectedDepartments, setSelectedDepartments] = useState<Set<string>>(
+		new Set(),
+	);
 	const [contextMenu, setContextMenu] = useState<{
 		personnel: Personnel | null;
 		position: { x: number; y: number } | null;
@@ -36,14 +39,24 @@ export function PersonnelPanel({
 
 	// Filter personnel by search query (Name or Department)
 	const filteredPersonnel = useMemo(() => {
-		if (!searchQuery.trim()) return personnel;
+		if (!searchQuery.trim() && selectedDepartments.size === 0) return personnel;
 		const query = searchQuery.toLowerCase();
-		return personnel.filter(
-			(p) =>
+		return personnel.filter((p) => {
+			if (
+				selectedDepartments.size > 0 &&
+				!selectedDepartments.has(p.department)
+			) {
+				return false;
+			}
+			if (!searchQuery.trim()) {
+				return true;
+			}
+			return (
 				p.name.toLowerCase().includes(query) ||
-				p.department?.toLowerCase().includes(query),
-		);
-	}, [personnel, searchQuery]);
+				p.department?.toLowerCase().includes(query)
+			);
+		});
+	}, [personnel, searchQuery, selectedDepartments]);
 
 	// Group by priority for visual separation
 	const groupedPersonnel = useMemo(() => {
@@ -59,6 +72,18 @@ export function PersonnelPanel({
 		} else {
 			onSelectionChange([...selectedIds, id]);
 		}
+	};
+
+	const handleDepartmentToggle = (department: string) => {
+		setSelectedDepartments((prev) => {
+			const next = new Set(prev);
+			if (next.has(department)) {
+				next.delete(department);
+			} else {
+				next.add(department);
+			}
+			return next;
+		});
 	};
 
 	const handleContextMenu = (e: React.MouseEvent, p: Personnel) => {
@@ -216,6 +241,28 @@ export function PersonnelPanel({
 						</div>
 					)}
 				</div>
+
+				{availableDepartments.length > 0 && (
+					<div className="flex flex-wrap gap-[var(--ui-space-1)] max-h-[var(--ui-space-20)] overflow-auto">
+						{availableDepartments.map((dept) => {
+							const active = selectedDepartments.has(dept);
+							return (
+								<button
+									key={dept}
+									type="button"
+									className={`text-xs px-[var(--ui-space-2)] py-[var(--ui-space-1)] rounded border cursor-pointer ${
+										active
+											? "bg-primary text-primary-foreground border-primary"
+											: "bg-background border-border hover:bg-muted/40"
+									}`}
+									onClick={() => handleDepartmentToggle(dept)}
+								>
+									{dept}
+								</button>
+							);
+						})}
+					</div>
+				)}
 			</div>
 
 			{/* List */}

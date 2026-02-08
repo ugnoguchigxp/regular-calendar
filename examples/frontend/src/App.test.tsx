@@ -28,6 +28,12 @@ vi.mock("./presets/ConnectedCalendar", () => ({
 	)),
 }));
 
+vi.mock("./presets/ConnectedShiftSelector", () => ({
+	ConnectedShiftSelector: vi.fn(() => (
+		<div data-testid="connected-shift-selector">Shift Selector</div>
+	)),
+}));
+
 vi.mock("regular-calendar", () => ({
 	ConnectedCalendar: vi.fn(() => (
 		<div data-testid="connected-calendar">Calendar</div>
@@ -85,6 +91,12 @@ describe("App", () => {
 				closedDays: [],
 				language: "en",
 				timeZone: "UTC",
+				paginationEnabled: false,
+				paginationPageSize: 8,
+				calendarOrientation: "horizontal",
+				facilityOrientation: "horizontal",
+				calendarSlotInterval: 60,
+				facilitySlotInterval: 60,
 			},
 			updateSettings: vi.fn(),
 			resetSettings: vi.fn(),
@@ -158,6 +170,18 @@ describe("App", () => {
 		expect(screen.getByTestId("connected-calendar")).toBeInTheDocument();
 	});
 
+	it("「シフト指定」タブをクリックするとシフト画面が表示されること", async () => {
+		const user = userEvent.setup();
+		render(<App />);
+
+		const shiftButton = screen.getByRole("button", {
+			name: /app_header_shift_selector/i,
+		});
+		await user.click(shiftButton);
+
+		expect(screen.getByTestId("connected-shift-selector")).toBeInTheDocument();
+	});
+
 	it("設定ボタンをクリックすると設定モーダルが表示されること", async () => {
 		const user = userEvent.setup();
 		render(<App />);
@@ -225,6 +249,18 @@ describe("App", () => {
 			name: /app_header_facility_schedule/i,
 		});
 		await user.click(facilityButton);
+
+		expect(screen.queryByTestId("personnel-panel")).not.toBeInTheDocument();
+	});
+
+	it("シフト指定タブが選択されている場合、PersonnelPanelが表示されないこと", async () => {
+		const user = userEvent.setup();
+		render(<App />);
+
+		const shiftButton = screen.getByRole("button", {
+			name: /app_header_shift_selector/i,
+		});
+		await user.click(shiftButton);
 
 		expect(screen.queryByTestId("personnel-panel")).not.toBeInTheDocument();
 	});

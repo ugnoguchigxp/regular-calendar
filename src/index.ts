@@ -77,6 +77,7 @@ export {
 
 export * from "./RegularCalendar/RegularCalendar";
 export * as RegularCalendarSchema from "./RegularCalendar/RegularCalendar.schema";
+export * from "./ShiftSelector";
 export * from "./types";
 export * from "./utils/dateFormats";
 export * from "./utils/dateNavigation";

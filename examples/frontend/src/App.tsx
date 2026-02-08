@@ -9,6 +9,7 @@ import {
 } from "regular-calendar";
 import { ConnectedCalendar } from "./presets/ConnectedCalendar";
 import { ConnectedFacilitySchedule } from "./presets/ConnectedFacilitySchedule";
+import { ConnectedShiftSelector } from "./presets/ConnectedShiftSelector";
 import {
 	AppScheduleProvider as ScheduleProvider,
 	useScheduleContext as useScheduleApi,
@@ -23,7 +24,9 @@ const MY_PERSONNEL_ID = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";
 
 function AppContent() {
 	const { t } = useTranslation();
-	const [activeTab, setActiveTab] = useState<"facility" | "regular">("regular");
+	const [activeTab, setActiveTab] = useState<"facility" | "regular" | "shift">(
+		"regular",
+	);
 	const { settings, updateSettings, resetSettings } = useSettings();
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const [isFacilitySettingsOpen, setIsFacilitySettingsOpen] = useState(false);
@@ -165,6 +168,14 @@ function AppContent() {
 					{t("app_header_regular_calendar")}
 				</Button>
 
+				<Button
+					onClick={() => setActiveTab("shift")}
+					variant={activeTab === "shift" ? "default" : "ghost"}
+					className="cursor-pointer"
+				>
+					{t("app_header_shift_selector")}
+				</Button>
+
 				<div className="flex-1" />
 
 				<Button
@@ -209,6 +220,8 @@ function AppContent() {
 				<div className="flex-1 overflow-hidden">
 					{activeTab === "facility" ? (
 						<ConnectedFacilitySchedule settings={settings as any} />
+					) : activeTab === "shift" ? (
+						<ConnectedShiftSelector />
 					) : (
 						<ConnectedCalendar
 							settings={settings as any}

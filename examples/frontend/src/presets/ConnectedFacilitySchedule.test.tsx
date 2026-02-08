@@ -1,5 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, render, waitFor } from "@testing-library/react";
 import { ConnectedFacilitySchedule } from "./ConnectedFacilitySchedule";
 import { ScheduleProvider } from "regular-calendar";
 import { I18nextProvider, initReactI18next } from "react-i18next";
@@ -74,11 +73,6 @@ describe("ConnectedFacilitySchedule", () => {
 			);
 			await Promise.resolve();
 		});
-
-		// Select group to trigger fetch
-		const user = userEvent.setup();
-		await user.click(screen.getByText("Select Group"));
-		await user.click(screen.getByText("Group 1"));
 
 		await waitFor(() => {
 			expect(fetchResourceAvailability).toHaveBeenCalled();

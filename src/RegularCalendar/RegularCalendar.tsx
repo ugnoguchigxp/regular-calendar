@@ -8,9 +8,7 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { type ComponentType, useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { DateDisplay as DateFormat } from "@/components/ui/DateDisplay";
-import { Icons } from "@/components/ui/Icons";
+import { CalendarDateNavigator } from "@/components/ui/CalendarDateNavigator";
 import { ViewSelector } from "@/components/ui/ViewSelector";
 import { useAppTranslation } from "@/utils/i18n";
 import { navigateDate } from "../utils/dateNavigation";
@@ -255,27 +253,11 @@ export function RegularCalendar({
 				{/* Header */}
 				<header className="border-b border-border px-[var(--ui-space-4)] py-[var(--ui-space-3)] flex items-center justify-between gap-[var(--ui-space-4)]">
 					<div className="flex items-center gap-[var(--ui-space-2)]">
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={() => handleDateNavigate("prev")}
-						>
-							<Icons.ChevronLeft className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
-						</Button>
-						<Button variant="outline" onClick={handleToday}>
-							{t("today_button")}
-						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={() => handleDateNavigate("next")}
-						>
-							<Icons.ChevronRight className="h-[var(--ui-space-4)] w-[var(--ui-space-4)]" />
-						</Button>
-
-						<span className="text-lg font-bold ml-[var(--ui-space-2)]">
-							<DateFormat date={currentDate} showSecondary showDayOfWeek />
-						</span>
+						<CalendarDateNavigator
+							currentDate={currentDate}
+							onNavigate={handleDateNavigate}
+							onToday={handleToday}
+						/>
 						{headerLeft}
 					</div>
 
