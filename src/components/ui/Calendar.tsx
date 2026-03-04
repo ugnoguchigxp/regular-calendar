@@ -41,6 +41,7 @@ export type CalendarProps = {
 	numberOfMonths?: number;
 	defaultMonth?: Date;
 	disableNavigation?: boolean;
+	highlightedDates?: Date[];
 	showOutsideDays?: boolean; // kept for API compat, always true in this impl
 };
 
@@ -54,6 +55,7 @@ export function Calendar({
 	numberOfMonths = 1,
 	defaultMonth,
 	disableNavigation = false,
+	highlightedDates,
 }: CalendarProps) {
 	const [currentMonth, setCurrentMonth] = React.useState(
 		defaultMonth ||
@@ -119,6 +121,11 @@ export function Calendar({
 		return false;
 	};
 
+	const isHighlighted = (date: Date) =>
+		highlightedDates?.some((highlightDate) =>
+			isSameDay(startOfDay(highlightDate), startOfDay(date)),
+		) ?? false;
+
 	const getDayClass = (date: Date, month: Date) => {
 		let isRangeStart = false;
 		let isRangeEnd = false;
@@ -152,6 +159,8 @@ export function Calendar({
 				"bg-primary text-primary-foreground rounded-l-none rounded-r-md",
 			// Single selection style
 			mode === "single" && isSelected(date) && "rounded-md",
+			isHighlighted(date) &&
+				"ring-2 ring-offset-1 ring-primary/50 dark:ring-primary/60",
 			!isSameMonth(date, month) && "text-muted-foreground opacity-50",
 			isDisabled(date) && "text-muted-foreground opacity-50 cursor-not-allowed",
 		);

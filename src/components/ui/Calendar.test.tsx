@@ -69,4 +69,24 @@ describe("Calendar", () => {
 			screen.queryByRole("button", { name: /Go to next month/i }),
 		).not.toBeInTheDocument();
 	});
+
+	it("applies highlighted style to highlightedDates", () => {
+		render(
+			<Calendar
+				mode="single"
+				locale="en-US"
+				defaultMonth={new Date("2024-01-01T00:00:00Z")}
+				highlightedDates={[new Date("2024-01-15T00:00:00Z")]}
+			/>,
+		);
+
+		const highlightedCandidates = screen.getAllByRole("button", {
+			name: /^15$/,
+		});
+		expect(
+			highlightedCandidates.some((button) =>
+				button.className.includes("ring-2"),
+			),
+		).toBe(true);
+	});
 });

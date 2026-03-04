@@ -20,6 +20,11 @@ export {
 	type CalendarProps,
 	type DateRange,
 } from "./components/ui/Calendar";
+export {
+	CalendarGrid,
+	type CalendarGridColumns,
+	type CalendarGridProps,
+} from "./components/ui/CalendarGrid";
 export { Checkbox } from "./components/ui/Checkbox";
 export { DateDisplay } from "./components/ui/DateDisplay";
 export * from "./components/ui/DatePicker";
