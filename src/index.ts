@@ -15,6 +15,11 @@ export * from "./components/ThemeProvider";
 // UI Components
 // UI Components
 export { Button, buttonVariants } from "./components/ui/Button";
+export {
+	Calendar,
+	type CalendarProps,
+	type DateRange,
+} from "./components/ui/Calendar";
 export { Checkbox } from "./components/ui/Checkbox";
 export { DateDisplay } from "./components/ui/DateDisplay";
 export * from "./components/ui/DatePicker";

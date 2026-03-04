@@ -40,6 +40,7 @@ export type CalendarProps = {
 		| { before?: Date; after?: Date }[];
 	numberOfMonths?: number;
 	defaultMonth?: Date;
+	disableNavigation?: boolean;
 	showOutsideDays?: boolean; // kept for API compat, always true in this impl
 };
 
@@ -50,8 +51,9 @@ export function Calendar({
 	selected,
 	onSelect,
 	disabled,
-	numberOfMonths: _numberOfMonths = 1, // Unused for now
+	numberOfMonths = 1,
 	defaultMonth,
+	disableNavigation = false,
 }: CalendarProps) {
 	const [currentMonth, setCurrentMonth] = React.useState(
 		defaultMonth ||
@@ -117,7 +119,7 @@ export function Calendar({
 		return false;
 	};
 
-	const getDayClass = (date: Date) => {
+	const getDayClass = (date: Date, month: Date) => {
 		let isRangeStart = false;
 		let isRangeEnd = false;
 		let isRangeMiddle = false;
@@ -150,7 +152,7 @@ export function Calendar({
 				"bg-primary text-primary-foreground rounded-l-none rounded-r-md",
 			// Single selection style
 			mode === "single" && isSelected(date) && "rounded-md",
-			!isSameMonth(date, currentMonth) && "text-muted-foreground opacity-50",
+			!isSameMonth(date, month) && "text-muted-foreground opacity-50",
 			isDisabled(date) && "text-muted-foreground opacity-50 cursor-not-allowed",
 		);
 	};
@@ -188,113 +190,142 @@ export function Calendar({
 	const prevMonth = () =>
 		setCurrentMonth((prev) => subMonths(new Date(prev), 1));
 
-	// --- Render ---
-	// Generate grid for currentMonth
-	const monthStart = startOfMonth(currentMonth);
-	const monthEnd = endOfMonth(monthStart);
-	// Start of week: Default to Sunday (0) or use prop if added later (currently just using default)
-	const startDate = startOfWeek(monthStart);
-	const endDate = endOfWeek(monthEnd);
-
-	const days = eachDayOfInterval({ start: startDate, end: endDate });
+	const visibleMonthCount = Math.max(1, numberOfMonths);
+	const visibleMonths = Array.from({ length: visibleMonthCount }, (_, index) =>
+		addMonths(startOfMonth(currentMonth), index),
+	);
 
 	return (
 		<div className={cn("p-ui flex flex-col gap-y-ui", className)}>
 			{/* Header */}
-			<div className="flex items-center justify-between gap-x-ui">
-				{/* Previous Button */}
-				<button
-					type="button"
-					onClick={prevMonth}
-					aria-label="Go to previous month"
-					className={cn(
-						buttonVariants({ variant: "outline" }),
-						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
-					)}
-				>
-					<Icons.ChevronLeft className="h-ui-icon w-ui-icon" strokeWidth={3} />
-				</button>
-
-				{/* Title */}
+			{disableNavigation ? (
 				<div className="font-medium text-ui">
-					{formatCalendarDate(currentMonth, locale, "header")}
+					{visibleMonths
+						.map((month) => formatCalendarDate(month, locale, "header"))
+						.join(" - ")}
 				</div>
+			) : (
+				<div className="flex items-center justify-between gap-x-ui">
+					{/* Previous Button */}
+					<button
+						type="button"
+						onClick={prevMonth}
+						aria-label="Go to previous month"
+						className={cn(
+							buttonVariants({ variant: "outline" }),
+							"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
+						)}
+					>
+						<Icons.ChevronLeft
+							className="h-ui-icon w-ui-icon"
+							strokeWidth={3}
+						/>
+					</button>
 
-				{/* Next Button */}
-				<button
-					type="button"
-					onClick={nextMonth}
-					aria-label="Go to next month"
-					className={cn(
-						buttonVariants({ variant: "outline" }),
-						"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
-					)}
-				>
-					<Icons.ChevronRight className="h-ui-icon w-ui-icon" strokeWidth={3} />
-				</button>
-			</div>
+					{/* Title */}
+					<div className="font-medium text-ui">
+						{visibleMonths
+							.map((month) => formatCalendarDate(month, locale, "header"))
+							.join(" - ")}
+					</div>
+
+					{/* Next Button */}
+					<button
+						type="button"
+						onClick={nextMonth}
+						aria-label="Go to next month"
+						className={cn(
+							buttonVariants({ variant: "outline" }),
+							"bg-transparent p-ui hover:bg-accent hover:text-accent-foreground",
+						)}
+					>
+						<Icons.ChevronRight
+							className="h-ui-icon w-ui-icon"
+							strokeWidth={3}
+						/>
+					</button>
+				</div>
+			)}
 
 			{/* Grid */}
-			<table className="w-full border-collapse space-y-[var(--ui-space-1)]">
-				<thead>
-					<tr>
-						{eachDayOfInterval({
-							start: startOfWeek(currentMonth),
-							end: endOfWeek(startOfWeek(currentMonth)),
-						}).map((day) => {
-							const dayOfWeek = day.getDay();
-							const isSunday = dayOfWeek === 0;
-							const isSaturday = dayOfWeek === 6;
+			<div className="flex flex-col gap-ui md:flex-row">
+				{visibleMonths.map((month) => {
+					const monthStart = startOfMonth(month);
+					const monthEnd = endOfMonth(monthStart);
+					const startDate = startOfWeek(monthStart);
+					const endDate = endOfWeek(monthEnd);
+					const days = eachDayOfInterval({ start: startDate, end: endDate });
 
-							return (
-								<th
-									key={day.getTime()}
-									className={cn(
-										"rounded-md font-normal text-[0.8rem]",
-										isSunday && "text-red-500",
-										isSaturday && "text-blue-500",
-										!isSunday && !isSaturday && "text-muted-foreground",
-									)}
-								>
-									<div className="flex justify-center items-center p-ui">
-										{formatCalendarDate(day, locale, "weekdayShort")}
-									</div>
-								</th>
-							);
-						})}
-					</tr>
-				</thead>
-				<tbody>
-					{/* Days - split into weeks */}
-					{Array.from({ length: Math.ceil(days.length / 7) }).map(
-						(_, weekIndex) => {
-							const weekDays = days.slice(weekIndex * 7, (weekIndex + 1) * 7);
-							return (
-								<tr
-									key={weekDays[0]?.getTime() || weekIndex}
-									className="w-full"
-								>
-									{weekDays.map((date) => (
-										<td
-											key={date.getTime()}
-											className="p-[var(--ui-space-0)] text-center relative focus-within:relative"
-										>
-											<button
-												type="button"
-												onClick={() => handleDateClick(date)}
-												className={getDayClass(date)}
-												disabled={isDisabled(date)}
+					return (
+						<table
+							key={month.getTime()}
+							className="w-full border-collapse space-y-[var(--ui-space-1)]"
+						>
+							<thead>
+								<tr>
+									{eachDayOfInterval({
+										start: startOfWeek(month),
+										end: endOfWeek(startOfWeek(month)),
+									}).map((day) => {
+										const dayOfWeek = day.getDay();
+										const isSunday = dayOfWeek === 0;
+										const isSaturday = dayOfWeek === 6;
+
+										return (
+											<th
+												key={day.getTime()}
+												className={cn(
+													"rounded-md font-normal text-[0.8rem]",
+													isSunday && "text-red-500",
+													isSaturday && "text-blue-500",
+													!isSunday && !isSaturday && "text-muted-foreground",
+												)}
 											>
-												{formatCalendarDate(date, locale, "day")}
-											</button>
-										</td>
-									))}
+												<div className="flex justify-center items-center p-ui">
+													{formatCalendarDate(day, locale, "weekdayShort")}
+												</div>
+											</th>
+										);
+									})}
 								</tr>
-							);
-						},
-					)}
-				</tbody>
-			</table>
+							</thead>
+							<tbody>
+								{/* Days - split into weeks */}
+								{Array.from({ length: Math.ceil(days.length / 7) }).map(
+									(_, weekIndex) => {
+										const weekDays = days.slice(
+											weekIndex * 7,
+											(weekIndex + 1) * 7,
+										);
+										return (
+											<tr
+												key={weekDays[0]?.getTime() || weekIndex}
+												className="w-full"
+											>
+												{weekDays.map((date) => (
+													<td
+														key={date.getTime()}
+														className="p-[var(--ui-space-0)] text-center relative focus-within:relative"
+													>
+														<button
+															type="button"
+															onClick={() => handleDateClick(date)}
+															className={getDayClass(date, month)}
+															disabled={isDisabled(date)}
+														>
+															{formatCalendarDate(date, locale, "day")}
+														</button>
+													</td>
+												))}
+											</tr>
+										);
+									},
+								)}
+							</tbody>
+						</table>
+					);
+				})}
+			</div>
 		</div>
 	);
 }

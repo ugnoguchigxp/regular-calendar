@@ -31,4 +31,42 @@ describe("Calendar", () => {
 			),
 		).toBeInTheDocument();
 	});
+
+	it("renders multiple months when numberOfMonths is set", () => {
+		render(
+			<Calendar
+				mode="single"
+				locale="en-US"
+				selected={new Date("2024-01-15T00:00:00Z")}
+				defaultMonth={new Date("2024-01-01T00:00:00Z")}
+				numberOfMonths={2}
+			/>,
+		);
+
+		expect(
+			screen.getByText((content) => content.includes("Jan 2024")),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText((content) => content.includes("Feb 2024")),
+		).toBeInTheDocument();
+	});
+
+	it("hides navigation controls when disableNavigation is true", () => {
+		render(
+			<Calendar
+				mode="single"
+				locale="en-US"
+				selected={new Date("2024-01-15T00:00:00Z")}
+				defaultMonth={new Date("2024-01-01T00:00:00Z")}
+				disableNavigation
+			/>,
+		);
+
+		expect(
+			screen.queryByRole("button", { name: /Go to previous month/i }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /Go to next month/i }),
+		).not.toBeInTheDocument();
+	});
 });
